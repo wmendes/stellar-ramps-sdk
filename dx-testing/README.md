@@ -8,6 +8,7 @@ Developer experience testing for the portable anchor library. Each round has an 
 |-----------|-----------|----------|:-------:|------------|
 | [react-etherfuse](react-etherfuse/) | React + Vite | Etherfuse | 8/10 | `erasableSyntaxOnly` incompatibility, barrel index conflicts with selective copying, wallet helpers not advertised as portable, no non-SvelteKit guidance |
 | [nextjs-blindpay](nextjs-blindpay/) | Next.js (App Router) | BlindPay | 9/10 | Composite customer ID is a leaky abstraction, `createCustomer()` stub behavior surprising, barrel index (confirmed), token config not portable (confirmed) |
+| [express-backend](express-backend/) | Express 5 + TypeScript | Etherfuse + BlindPay | 10/10 | No library issues. Express 5 param typing (`string \| string[]`) required a helper, but that's an Express issue. |
 
 ## Cross-Round Issue Tracker
 
@@ -16,12 +17,12 @@ Issues that appear across multiple rounds get tracked here to identify patterns.
 | Issue | Rounds Seen | Status |
 |-------|-------------|--------|
 | `erasableSyntaxOnly` — parameter properties in `AnchorError`/`WalletError` | react-etherfuse | **Fixed** (before round 2) |
-| Barrel `anchors/index.ts` breaks selective copying | react-etherfuse, nextjs-blindpay | Open |
+| Barrel `anchors/index.ts` breaks selective copying | react-etherfuse, nextjs-blindpay, express-backend | Open |
 | `wallet/` not called out as portable in docs | react-etherfuse | Open |
 | No usage guidance for non-SvelteKit consumers | react-etherfuse | Open |
 | Token config (`config/tokens.ts`) not portable (`$lib` paths) | react-etherfuse, nextjs-blindpay | Open |
 | Composite customer ID (`customerId:resourceId`) is a leaky abstraction | nextjs-blindpay | Open |
-| `createCustomer()` stub generates invalid receiver IDs (UUID instead of 15-char `re_` format) — causes 400 errors | nextjs-blindpay | Open |
+| `createCustomer()` stub generates invalid receiver IDs (UUID instead of 15-char `re_` format) — causes 400 errors | nextjs-blindpay | **Fixed** (empty ID instead of UUID) |
 
 ## How a Round Works
 
@@ -41,6 +42,6 @@ Issues that appear across multiple rounds get tracked here to identify patterns.
 ## Ideas for Future Rounds
 
 - ~~**Next.js + BlindPay**~~ — Done (round 2)
-- **Express/Node backend** — Tests server-side usage with real API keys. No browser, no wallet, no CORS. Validates that the library works as a backend dependency.
+- ~~**Express/Node backend**~~ — Done (round 3)
 - **SEP flow** — Tests the SEP modules (`sep/`) against `testanchor.stellar.org` from a plain TypeScript project. Exercises a completely different integration path.
 - **AlfredPay + form KYC** — Tests the `kycFlow: 'form'` path and email-based customer lookup (`getCustomerByEmail`).
