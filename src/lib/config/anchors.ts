@@ -18,6 +18,11 @@ export interface AnchorCapability {
     maxAmount?: string;
 }
 
+export interface DevOnboardingStep {
+    text: string;
+    link?: string;
+}
+
 export interface IntegrationStep {
     title: string;
     description: string;
@@ -36,6 +41,7 @@ export interface AnchorProfile {
     logo?: string;
     capabilities: AnchorCapabilities;
     regions: Record<string, AnchorCapability>; // keyed by region ID
+    devOnboarding?: DevOnboardingStep[];
     integrationFlow?: IntegrationFlow;
 }
 
@@ -67,6 +73,10 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 kycRequired: true,
             },
         },
+        devOnboarding: [
+            { text: 'Developers must sign up and create an organization to get API Keys', link: 'https://devnet.etherfuse.com/ramp' },
+            { text: 'KYB/KYC is required for developers prior to launching on Mainnet', },
+        ],
         integrationFlow: {
             onRamp: [
                 {
@@ -152,6 +162,10 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 kycRequired: true,
             },
         },
+        devOnboarding: [
+            { text: 'Sandbox API credentials can be used immediately. No signup required.' },
+            { text: 'Staging and Production environments require a fuller onboarding process.' },
+        ],
         integrationFlow: {
             onRamp: [
                 {
@@ -243,6 +257,10 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 kycRequired: true,
             },
         },
+        devOnboarding: [
+            { text: 'Development instances can be freely created and used.', link: 'https://app.blindpay.com/' },
+            { text: 'Production instances require developer onboarding and KYB/KYC' },
+        ],
         integrationFlow: {
             onRamp: [
                 {

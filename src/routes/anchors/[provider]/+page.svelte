@@ -187,6 +187,24 @@
     <section class="mb-8">
         <h2 class="mb-4 text-xl font-semibold text-gray-900">Integration Flow</h2>
         <p class="mb-2">These are the steps you (as a developer) can expect to implement as you work with {anchor.name}.</p>
+
+        {#if anchor.devOnboarding && anchor.devOnboarding.length > 0}
+            <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-5">
+                <h3 class="mb-2 text-sm font-semibold text-amber-800">Developer Onboarding</h3>
+                <ul class="space-y-1 text-sm text-amber-900">
+                    {#each anchor.devOnboarding as note}
+                        <li class="flex gap-2">
+                            <span class="mt-0.5 shrink-0 text-amber-500">&bull;</span>
+                            <span>{note.text}</span>
+                            {#if note.link}
+                                <span><a href={note.link} class="text-indigo-400 hover:text-indigo-300" target="_blank">Click here</a></span>
+                            {/if}
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+        {/if}
+
         <div class="grid gap-6 md:grid-cols-2">
             <div class="rounded-lg border border-gray-200 bg-white p-6">
                 <h3 class="mb-3 font-semibold text-green-700">On-Ramp (Fiat &rarr; Crypto)</h3>
