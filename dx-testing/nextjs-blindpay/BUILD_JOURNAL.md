@@ -19,13 +19,13 @@ Building a Next.js + TypeScript application that integrates with BlindPay using 
 4. **`src/lib/anchors/types.ts`** - The shared Anchor interface and all common types. This is the core contract. Key types: `Customer`, `Quote`, `OnRampTransaction`, `OffRampTransaction`, `AnchorCapabilities`, `AnchorError`, plus input types for all operations. Payment instructions use a discriminated union by rail type (currently only SPEI).
 
 5. **`src/lib/anchors/blindpay/client.ts`** - The `BlindPayClient` implementation. Key observations:
-   - Amounts are in cents internally, converted to/from decimal strings
-   - API paths include instance ID: `/v1/instances/{instance_id}/...`
-   - `createCustomer()` returns a local stub (not a real API call) -- real receiver creation is via `createReceiver()`
-   - `getQuote()` detects on-ramp vs off-ramp from currency direction
-   - Quote API expects composite `customerId:resourceId` format
-   - Off-ramp is 2-step: authorize (get XDR) then submit signed XDR
-   - Extra methods beyond the Anchor interface: `generateTosUrl`, `createReceiver`, `registerBlockchainWallet`, `getBlockchainWallets`, `submitSignedPayout`, `createPayinQuote`, `createPayoutQuote`
+    - Amounts are in cents internally, converted to/from decimal strings
+    - API paths include instance ID: `/v1/instances/{instance_id}/...`
+    - `createCustomer()` returns a local stub (not a real API call) -- real receiver creation is via `createReceiver()`
+    - `getQuote()` detects on-ramp vs off-ramp from currency direction
+    - Quote API expects composite `customerId:resourceId` format
+    - Off-ramp is 2-step: authorize (get XDR) then submit signed XDR
+    - Extra methods beyond the Anchor interface: `generateTosUrl`, `createReceiver`, `registerBlockchainWallet`, `getBlockchainWallets`, `submitSignedPayout`, `createPayinQuote`, `createPayoutQuote`
 
 6. **`src/lib/anchors/blindpay/types.ts`** - BlindPay API request/response types. `BlindPayConfig` requires `apiKey`, `instanceId`, `baseUrl`, and optional `network`. Detailed types for ToS, receiver, bank accounts, blockchain wallets, quotes, payins, payouts, and webhooks.
 
@@ -137,6 +137,7 @@ The `next build` command was blocked by the sandbox environment. However, since 
 ### Files Verified
 
 Total files in the project:
+
 - **8 portable library files** (copied verbatim from SvelteKit project)
 - **1 server-side factory** (`src/lib/anchors/blindpay/server.ts`)
 - **8 API route handlers** (customers, kyc, quotes, onramp, offramp, fiat-accounts, blockchain-wallets, payout-submit)

@@ -411,11 +411,7 @@
                     {/if}
                 </div>
             {:else if redirectKycStep === 'receiver_form' && tosId}
-                <BlindPayReceiverForm
-                    {provider}
-                    {tosId}
-                    onComplete={handleReceiverFormComplete}
-                />
+                <BlindPayReceiverForm {provider} {tosId} onComplete={handleReceiverFormComplete} />
             {:else if redirectKycStep === 'polling'}
                 <div
                     class="mx-auto max-w-lg rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm"
@@ -475,8 +471,8 @@
                 </div>
                 <h2 class="mt-4 text-lg font-semibold text-gray-900">Complete Verification</h2>
                 <p class="mt-2 text-sm text-gray-500">
-                    Complete the onboarding process in the new window, then come back here and
-                    check your status.
+                    Complete the onboarding process in the new window, then come back here and check
+                    your status.
                 </p>
 
                 {#if isLoadingIframeUrl}

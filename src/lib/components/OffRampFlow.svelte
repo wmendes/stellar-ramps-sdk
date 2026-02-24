@@ -104,9 +104,7 @@ Usage:
                 fromCurrency,
                 toCurrency: fiatCurrency,
                 amount,
-                customerId: customer
-                    ? getQuoteCustomerId(customer.id, capabilities)
-                    : undefined,
+                customerId: customer ? getQuoteCustomerId(customer.id, capabilities) : undefined,
                 stellarAddress: walletStore.publicKey ?? undefined,
             });
             step = 'quote';

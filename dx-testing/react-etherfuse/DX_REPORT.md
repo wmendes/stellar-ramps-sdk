@@ -21,6 +21,7 @@ The supervisor (a separate Claude instance) reviewed the output, read every comp
 **Stack:** Vite + React 18 + TypeScript (standard `react-ts` template)
 
 **What was built:**
+
 - Wallet connection hook wrapping the portable Freighter helpers
 - CETES yield position dashboard (balance, MXN value, projected returns at 5.78% APY)
 - On-ramp flow: amount entry, quote, SPEI payment instructions, polling
@@ -45,14 +46,14 @@ The gaps are real but small, and all are fixable without architectural changes.
 
 Six files were copied from the repo. Four required zero modifications:
 
-| File | Source | Changes |
-|------|--------|---------|
-| `anchors/etherfuse/client.ts` | `src/lib/anchors/etherfuse/client.ts` | None |
-| `anchors/etherfuse/types.ts` | `src/lib/anchors/etherfuse/types.ts` | None |
-| `wallet/freighter.ts` | `src/lib/wallet/freighter.ts` | None |
-| `wallet/stellar.ts` | `src/lib/wallet/stellar.ts` | None |
-| `anchors/types.ts` | `src/lib/anchors/types.ts` | Parameter property fix (see below) |
-| `wallet/types.ts` | `src/lib/wallet/types.ts` | Parameter property fix (see below) |
+| File                          | Source                                | Changes                            |
+| ----------------------------- | ------------------------------------- | ---------------------------------- |
+| `anchors/etherfuse/client.ts` | `src/lib/anchors/etherfuse/client.ts` | None                               |
+| `anchors/etherfuse/types.ts`  | `src/lib/anchors/etherfuse/types.ts`  | None                               |
+| `wallet/freighter.ts`         | `src/lib/wallet/freighter.ts`         | None                               |
+| `wallet/stellar.ts`           | `src/lib/wallet/stellar.ts`           | None                               |
+| `anchors/types.ts`            | `src/lib/anchors/types.ts`            | Parameter property fix (see below) |
+| `wallet/types.ts`             | `src/lib/wallet/types.ts`             | Parameter property fix (see below) |
 
 The relative import structure (`../types` from `etherfuse/client.ts`) means the files resolve correctly as long as you maintain the directory layout. Good design choice.
 
@@ -63,7 +64,7 @@ The subagent built its React components by programming against `Anchor` — not 
 ```typescript
 // The React components accept the interface, not the implementation
 interface OnRampFlowProps {
-    anchor: Anchor;  // not EtherfuseClient
+    anchor: Anchor; // not EtherfuseClient
     publicKey: string;
     customerId: string;
 }
@@ -168,6 +169,7 @@ The README says "copy the directories you need," but if you copy `anchors/` whol
 The subagent's solution was to skip `index.ts` entirely and import directly from `types.ts` and `etherfuse/`. This works, but the disconnect between "copy the directory" and "but skip this file" is a papercut.
 
 **Fix options:**
+
 - Remove the barrel `index.ts` entirely (consumers import from specific paths)
 - Make the README explicitly say "copy `types.ts` and the provider directories you need — skip `index.ts`"
 - Use dynamic imports or optional re-exports that don't break when modules are missing
@@ -196,6 +198,7 @@ The wallet helpers (`checkTrustline`, `addTrustline`, `buildPaymentTransaction`,
 The subagent had to recreate token configuration (`CETES_CONFIG`) from scratch because `config/tokens.ts` imports from `$lib/config/tokens` and isn't portable.
 
 **Fix:** Add a "Usage Outside SvelteKit" section with:
+
 - A 10-line Express/Next.js example showing client instantiation + proxy pattern
 - A note about CORS and why a backend proxy is needed
 - A note that `config/` is SvelteKit-specific (or make it portable)
@@ -236,6 +239,7 @@ Expand parameter properties in `AnchorError` and `WalletError`. Two files, ~10 l
 ### Priority 2: Improve copy instructions (do now)
 
 Update the "Installation / Copying" section in `anchors/README.md`:
+
 - Explicitly say to skip `index.ts` when copying selectively
 - Call out `wallet/` as portable
 - Add a "Usage Outside SvelteKit" section with a backend proxy example
@@ -243,6 +247,7 @@ Update the "Installation / Copying" section in `anchors/README.md`:
 ### Priority 3: Consider making token config portable (later)
 
 The `config/tokens.ts` file has useful data (asset codes, issuers) but uses `$lib` paths. Either:
+
 - Extract a framework-agnostic `tokens.ts` into the portable layer
 - Or document that token configuration is the consumer's responsibility
 
@@ -257,26 +262,26 @@ The `config/tokens.ts` file has useful data (asset codes, issuers) but uses `$li
 
 ### Portable library files used (from `src/lib/`)
 
-| File | Copied Verbatim | Notes |
-|------|:-:|-------|
-| `anchors/types.ts` | No | Parameter property fix in `AnchorError` |
-| `anchors/etherfuse/client.ts` | Yes | |
-| `anchors/etherfuse/types.ts` | Yes | |
-| `wallet/freighter.ts` | Yes | |
-| `wallet/stellar.ts` | Yes | |
-| `wallet/types.ts` | No | Parameter property fix in `WalletError` |
+| File                          | Copied Verbatim | Notes                                   |
+| ----------------------------- | :-------------: | --------------------------------------- |
+| `anchors/types.ts`            |       No        | Parameter property fix in `AnchorError` |
+| `anchors/etherfuse/client.ts` |       Yes       |                                         |
+| `anchors/etherfuse/types.ts`  |       Yes       |                                         |
+| `wallet/freighter.ts`         |       Yes       |                                         |
+| `wallet/stellar.ts`           |       Yes       |                                         |
+| `wallet/types.ts`             |       No        | Parameter property fix in `WalletError` |
 
 ### React application files created
 
-| File | Lines | Purpose |
-|------|------:|---------|
-| `src/App.tsx` | 187 | Shell: header, tabs, wallet connection |
-| `src/services/anchorService.ts` | 282 | Mock `Anchor` implementation + CETES config |
-| `src/hooks/useWallet.ts` | 123 | Freighter hook with mock fallback |
-| `src/components/WalletConnect.tsx` | 57 | Connect/disconnect UI |
-| `src/components/YieldDashboard.tsx` | 235 | Balance, value, APY, projected returns |
-| `src/components/OnRampFlow.tsx` | 357 | MXN -> CETES with SPEI instructions |
-| `src/components/OffRampFlow.tsx` | 407 | CETES -> MXN with deferred signing |
+| File                                | Lines | Purpose                                     |
+| ----------------------------------- | ----: | ------------------------------------------- |
+| `src/App.tsx`                       |   187 | Shell: header, tabs, wallet connection      |
+| `src/services/anchorService.ts`     |   282 | Mock `Anchor` implementation + CETES config |
+| `src/hooks/useWallet.ts`            |   123 | Freighter hook with mock fallback           |
+| `src/components/WalletConnect.tsx`  |    57 | Connect/disconnect UI                       |
+| `src/components/YieldDashboard.tsx` |   235 | Balance, value, APY, projected returns      |
+| `src/components/OnRampFlow.tsx`     |   357 | MXN -> CETES with SPEI instructions         |
+| `src/components/OffRampFlow.tsx`    |   407 | CETES -> MXN with deferred signing          |
 
 ### Not copied (SvelteKit-specific)
 

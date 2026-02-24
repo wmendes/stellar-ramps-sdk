@@ -55,7 +55,12 @@ Usage:
     );
 
     const isDisabled = $derived(
-        !amount || isGettingQuote || !isWalletConnected || !hasTrustline || exceedsMax || additionalDisabled,
+        !amount ||
+            isGettingQuote ||
+            !isWalletConnected ||
+            !hasTrustline ||
+            exceedsMax ||
+            additionalDisabled,
     );
 </script>
 

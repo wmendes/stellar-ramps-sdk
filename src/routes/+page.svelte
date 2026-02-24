@@ -35,8 +35,8 @@
             <div class="rounded-lg bg-gray-50 p-4">
                 <h3 class="font-semibold text-gray-900">Portable Anchor Library</h3>
                 <p class="mt-2 text-sm text-gray-600">
-                    Framework-agnostic TypeScript clients in <code
-                        class="rounded bg-gray-200 px-1">src/lib/anchors/</code
+                    Framework-agnostic TypeScript clients in <code class="rounded bg-gray-200 px-1"
+                        >src/lib/anchors/</code
                     >. No SvelteKit imports — copy into any project.
                 </p>
             </div>
@@ -105,8 +105,8 @@
                 </div>
                 <h3 class="mt-4 font-semibold text-gray-900">Copy the Library</h3>
                 <p class="mt-2 text-sm text-gray-500">
-                    Copy <code class="rounded bg-gray-100 px-1 text-xs">src/lib/anchors/</code> into
-                    your own TypeScript project.
+                    Copy <code class="rounded bg-gray-100 px-1 text-xs">src/lib/anchors/</code> into your
+                    own TypeScript project.
                 </p>
             </div>
 

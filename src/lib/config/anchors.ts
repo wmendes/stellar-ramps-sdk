@@ -74,8 +74,11 @@ export const ANCHORS: Record<string, AnchorProfile> = {
             },
         },
         devOnboarding: [
-            { text: 'Developers must sign up and create an organization to get API Keys', link: 'https://devnet.etherfuse.com/ramp' },
-            { text: 'KYB/KYC is required for developers prior to launching on Mainnet', },
+            {
+                text: 'Developers must sign up and create an organization to get API Keys',
+                link: 'https://devnet.etherfuse.com/ramp',
+            },
+            { text: 'KYB/KYC is required for developers prior to launching on Mainnet' },
         ],
         integrationFlow: {
             onRamp: [
@@ -85,8 +88,7 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 },
                 {
                     title: 'Complete KYC via Iframe',
-                    description:
-                        'Embed the onboarding URL in an iframe for identity verification.',
+                    description: 'Embed the onboarding URL in an iframe for identity verification.',
                 },
                 {
                     title: 'Get Quote',
@@ -98,13 +100,11 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 },
                 {
                     title: 'Transfer Fiat via Bank',
-                    description:
-                        'The user sends MXN via SPEI using the provided payment details.',
+                    description: 'The user sends MXN via SPEI using the provided payment details.',
                 },
                 {
                     title: 'Receive Tokens',
-                    description:
-                        'The anchor delivers CETES tokens to the user\'s Stellar wallet.',
+                    description: "The anchor delivers CETES tokens to the user's Stellar wallet.",
                 },
             ],
             offRamp: [
@@ -122,17 +122,15 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 },
                 {
                     title: 'Poll for Signable Transaction',
-                    description:
-                        'Wait for the burn transaction XDR to appear via polling.',
+                    description: 'Wait for the burn transaction XDR to appear via polling.',
                 },
                 {
                     title: 'Sign with Freighter',
-                    description:
-                        'Sign the burn transaction in Freighter and submit to Stellar.',
+                    description: 'Sign the burn transaction in Freighter and submit to Stellar.',
                 },
                 {
                     title: 'Receive Fiat',
-                    description: 'The anchor sends MXN to the user\'s bank via SPEI.',
+                    description: "The anchor sends MXN to the user's bank via SPEI.",
                 },
             ],
         },
@@ -170,8 +168,7 @@ export const ANCHORS: Record<string, AnchorProfile> = {
             onRamp: [
                 {
                     title: 'Create Customer',
-                    description:
-                        'Register a new customer or look up an existing one by email.',
+                    description: 'Register a new customer or look up an existing one by email.',
                 },
                 {
                     title: 'Submit KYC Form',
@@ -187,13 +184,11 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 },
                 {
                     title: 'Transfer Fiat via Bank',
-                    description:
-                        'The user sends MXN via SPEI using the provided payment details.',
+                    description: 'The user sends MXN via SPEI using the provided payment details.',
                 },
                 {
                     title: 'Receive USDC',
-                    description:
-                        'The anchor delivers USDC to the user\'s Stellar wallet.',
+                    description: "The anchor delivers USDC to the user's Stellar wallet.",
                 },
             ],
             offRamp: [
@@ -212,7 +207,7 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 {
                     title: 'Build Payment Transaction',
                     description:
-                        'Build a USDC payment transaction to the anchor\'s Stellar address.',
+                        "Build a USDC payment transaction to the anchor's Stellar address.",
                 },
                 {
                     title: 'Sign and Submit',
@@ -221,7 +216,7 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 },
                 {
                     title: 'Receive Fiat',
-                    description: 'The anchor sends MXN to the user\'s bank via SPEI.',
+                    description: "The anchor sends MXN to the user's bank via SPEI.",
                 },
             ],
         },
@@ -258,24 +253,25 @@ export const ANCHORS: Record<string, AnchorProfile> = {
             },
         },
         devOnboarding: [
-            { text: 'Development instances can be freely created and used.', link: 'https://app.blindpay.com/' },
+            {
+                text: 'Development instances can be freely created and used.',
+                link: 'https://app.blindpay.com/',
+            },
             { text: 'Production instances require developer onboarding and KYB/KYC' },
         ],
         integrationFlow: {
             onRamp: [
                 {
                     title: 'Accept Terms of Service',
-                    description: 'The user must accept the anchor\'s Terms of Service.',
+                    description: "The user must accept the anchor's Terms of Service.",
                 },
                 {
                     title: 'Create Receiver + KYC',
-                    description:
-                        'Register a receiver and complete KYC via redirect.',
+                    description: 'Register a receiver and complete KYC via redirect.',
                 },
                 {
                     title: 'Register Blockchain Wallet',
-                    description:
-                        'Register the user\'s Stellar wallet address with the anchor.',
+                    description: "Register the user's Stellar wallet address with the anchor.",
                 },
                 {
                     title: 'Get Quote',
@@ -287,29 +283,25 @@ export const ANCHORS: Record<string, AnchorProfile> = {
                 },
                 {
                     title: 'Transfer Fiat via Bank',
-                    description:
-                        'The user sends MXN via SPEI using the provided payment details.',
+                    description: 'The user sends MXN via SPEI using the provided payment details.',
                 },
                 {
                     title: 'Receive USDB',
-                    description:
-                        'The anchor delivers USDB to the user\'s Stellar wallet.',
+                    description: "The anchor delivers USDB to the user's Stellar wallet.",
                 },
             ],
             offRamp: [
                 {
                     title: 'Accept Terms of Service',
-                    description: 'The user must accept the anchor\'s Terms of Service.',
+                    description: "The user must accept the anchor's Terms of Service.",
                 },
                 {
                     title: 'Create Receiver + KYC',
-                    description:
-                        'Register a receiver and complete KYC via redirect.',
+                    description: 'Register a receiver and complete KYC via redirect.',
                 },
                 {
                     title: 'Register Bank Account',
-                    description:
-                        'Register the user\'s bank account details with the anchor.',
+                    description: "Register the user's bank account details with the anchor.",
                 },
                 {
                     title: 'Get Quote',

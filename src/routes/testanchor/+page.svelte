@@ -66,18 +66,20 @@
 
     // SEP-24 interactive transaction tracking
     let sep24Transaction = $state<Sep24Transaction | null>(null);
-    $inspect('sep24Transaction', sep24Transaction)
+    $inspect('sep24Transaction', sep24Transaction);
     let sep24PopupRef = $state<Window | null>(null);
 
     // Withdrawal payment state
     let isSendingPayment = $state(false);
-    let paymentResult = $state<{ success: boolean; stellarTxId?: string; error?: string } | null>(null);
+    let paymentResult = $state<{ success: boolean; stellarTxId?: string; error?: string } | null>(
+        null,
+    );
 
     // Whether the withdrawal is ready for the user to send a Stellar payment
     let withdrawalReady = $derived(
         sep24Transaction?.status === 'pending_user_transfer_start' &&
-        sep24Transaction?.withdraw_anchor_account &&
-        transferType === 'withdraw',
+            sep24Transaction?.withdraw_anchor_account &&
+            transferType === 'withdraw',
     );
 
     // postMessage listener — only active while the interactive popup is open.
@@ -85,7 +87,7 @@
     let anchorOrigin: string | null = null;
 
     function handlePostMessage(event: MessageEvent) {
-        console.log(`i have received a message from ${event.origin}`)
+        console.log(`i have received a message from ${event.origin}`);
         if (event.origin !== anchorOrigin) return;
 
         // Parse the message — could be a JSON string or a plain object
@@ -111,7 +113,7 @@
 
     function startListening(interactiveUrl: string) {
         anchorOrigin = new URL(interactiveUrl).origin;
-        console.log(`i am currently listening for events from ${anchorOrigin}`)
+        console.log(`i am currently listening for events from ${anchorOrigin}`);
         window.addEventListener('message', handlePostMessage);
     }
 
@@ -794,12 +796,18 @@
                                 <div class="mb-3 rounded-md border border-gray-200 bg-gray-50 p-3">
                                     <p class="text-sm">
                                         <span class="font-medium text-gray-700">Status:</span>
-                                        <span class="ml-1 font-medium {statusColor(sep24Transaction.status)}">
+                                        <span
+                                            class="ml-1 font-medium {statusColor(
+                                                sep24Transaction.status,
+                                            )}"
+                                        >
                                             {formatStatus(sep24Transaction.status)}
                                         </span>
                                     </p>
                                     {#if sep24Transaction.message}
-                                        <p class="mt-1 text-xs text-gray-600">{sep24Transaction.message}</p>
+                                        <p class="mt-1 text-xs text-gray-600">
+                                            {sep24Transaction.message}
+                                        </p>
                                     {/if}
                                     {#if sep24Transaction.amount_in}
                                         <p class="mt-1 text-xs text-gray-600">
@@ -823,15 +831,24 @@
                                     {/if}
                                     {#if sep24Transaction.withdraw_memo}
                                         <p class="text-xs text-gray-600">
-                                            <span class="font-medium">Memo ({sep24Transaction.withdraw_memo_type ?? 'text'}):</span>
+                                            <span class="font-medium"
+                                                >Memo ({sep24Transaction.withdraw_memo_type ??
+                                                    'text'}):</span
+                                            >
                                             <code class="ml-1 rounded bg-gray-100 px-1">
                                                 {sep24Transaction.withdraw_memo}
                                             </code>
                                         </p>
                                     {/if}
                                     <details class="mt-2">
-                                        <summary class="cursor-pointer text-xs text-gray-500">Full transaction</summary>
-                                        <pre class="mt-1 overflow-x-auto text-xs">{JSON.stringify(sep24Transaction, null, 2)}</pre>
+                                        <summary class="cursor-pointer text-xs text-gray-500"
+                                            >Full transaction</summary
+                                        >
+                                        <pre class="mt-1 overflow-x-auto text-xs">{JSON.stringify(
+                                                sep24Transaction,
+                                                null,
+                                                2,
+                                            )}</pre>
                                     </details>
                                 </div>
 
@@ -845,7 +862,8 @@
                                         {#if isSendingPayment}
                                             Signing & submitting...
                                         {:else}
-                                            Send {sep24Transaction.amount_in || transferAmount} {selectedAsset} to Anchor
+                                            Send {sep24Transaction.amount_in || transferAmount}
+                                            {selectedAsset} to Anchor
                                         {/if}
                                     </button>
                                 {/if}
@@ -853,8 +871,12 @@
                                 <!-- Payment result -->
                                 {#if paymentResult}
                                     {#if paymentResult.success}
-                                        <div class="mb-3 rounded-md border border-green-200 bg-green-50 p-3">
-                                            <p class="text-sm font-medium text-green-700">Payment submitted</p>
+                                        <div
+                                            class="mb-3 rounded-md border border-green-200 bg-green-50 p-3"
+                                        >
+                                            <p class="text-sm font-medium text-green-700">
+                                                Payment submitted
+                                            </p>
                                             {#if paymentResult.stellarTxId}
                                                 <p class="mt-1 text-xs text-green-600">
                                                     <a
@@ -869,9 +891,15 @@
                                             {/if}
                                         </div>
                                     {:else}
-                                        <div class="mb-3 rounded-md border border-red-200 bg-red-50 p-3">
-                                            <p class="text-sm font-medium text-red-700">Payment failed</p>
-                                            <p class="mt-1 text-xs text-red-600">{paymentResult.error}</p>
+                                        <div
+                                            class="mb-3 rounded-md border border-red-200 bg-red-50 p-3"
+                                        >
+                                            <p class="text-sm font-medium text-red-700">
+                                                Payment failed
+                                            </p>
+                                            <p class="mt-1 text-xs text-red-600">
+                                                {paymentResult.error}
+                                            </p>
                                         </div>
                                     {/if}
                                 {/if}
@@ -881,7 +909,9 @@
                                 onclick={openSep24Url}
                                 class="w-full rounded-lg border border-green-600 bg-white px-4 py-2 text-green-600 hover:bg-green-50"
                             >
-                                {sep24PopupRef && !sep24PopupRef.closed ? 'Refocus Interactive UI' : 'Open Interactive UI'}
+                                {sep24PopupRef && !sep24PopupRef.closed
+                                    ? 'Refocus Interactive UI'
+                                    : 'Open Interactive UI'}
                             </button>
                             <p class="mt-2 text-xs text-gray-500">
                                 URL: <a

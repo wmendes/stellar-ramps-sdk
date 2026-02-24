@@ -20,19 +20,20 @@ Read and analyzed the key files from the reference SvelteKit project:
 
 Copied into `_express-test/src/lib/`:
 
-| Source | Destination | Why |
-|--------|------------|-----|
-| `anchors/types.ts` | `lib/anchors/types.ts` | Shared interface -- required by all clients |
-| `anchors/etherfuse/client.ts` | `lib/anchors/etherfuse/client.ts` | Etherfuse client implementation |
-| `anchors/etherfuse/types.ts` | `lib/anchors/etherfuse/types.ts` | Etherfuse API types |
-| `anchors/etherfuse/index.ts` | `lib/anchors/etherfuse/index.ts` | Re-exports |
-| `anchors/blindpay/client.ts` | `lib/anchors/blindpay/client.ts` | BlindPay client implementation |
-| `anchors/blindpay/types.ts` | `lib/anchors/blindpay/types.ts` | BlindPay API types |
-| `anchors/blindpay/index.ts` | `lib/anchors/blindpay/index.ts` | Re-exports |
-| `wallet/stellar.ts` | `lib/wallet/stellar.ts` | Horizon utilities (server-compatible) |
-| `wallet/types.ts` | `lib/wallet/types.ts` | `StellarNetwork` type etc. |
+| Source                        | Destination                       | Why                                         |
+| ----------------------------- | --------------------------------- | ------------------------------------------- |
+| `anchors/types.ts`            | `lib/anchors/types.ts`            | Shared interface -- required by all clients |
+| `anchors/etherfuse/client.ts` | `lib/anchors/etherfuse/client.ts` | Etherfuse client implementation             |
+| `anchors/etherfuse/types.ts`  | `lib/anchors/etherfuse/types.ts`  | Etherfuse API types                         |
+| `anchors/etherfuse/index.ts`  | `lib/anchors/etherfuse/index.ts`  | Re-exports                                  |
+| `anchors/blindpay/client.ts`  | `lib/anchors/blindpay/client.ts`  | BlindPay client implementation              |
+| `anchors/blindpay/types.ts`   | `lib/anchors/blindpay/types.ts`   | BlindPay API types                          |
+| `anchors/blindpay/index.ts`   | `lib/anchors/blindpay/index.ts`   | Re-exports                                  |
+| `wallet/stellar.ts`           | `lib/wallet/stellar.ts`           | Horizon utilities (server-compatible)       |
+| `wallet/types.ts`             | `lib/wallet/types.ts`             | `StellarNetwork` type etc.                  |
 
 **Not copied:**
+
 - `anchors/alfredpay/` -- Decided to focus on two providers (Etherfuse + BlindPay) for a cleaner demo.
 - `anchors/sep/` -- SEP protocol modules not needed for custom anchor API clients.
 - `anchors/testanchor/` -- Test anchor client not relevant.
@@ -56,27 +57,28 @@ Express equivalent of `$lib/server/anchorFactory.ts`. Key differences:
 
 Built a full Express router that mirrors the SvelteKit CORS proxy pattern:
 
-| Method | Endpoint | Operation |
-|--------|----------|-----------|
-| GET | `/:provider/capabilities` | Provider capabilities |
-| POST | `/:provider/customers` | Create customer |
-| GET | `/:provider/customers?email=` | Lookup by email |
-| GET | `/:provider/customers/:customerId` | Get customer by ID |
-| GET | `/:provider/kyc/:customerId` | Get KYC URL |
-| GET | `/:provider/kyc/:customerId/status` | Get KYC status |
-| POST | `/:provider/quotes` | Get quote |
-| POST | `/:provider/onramp` | Create on-ramp |
-| GET | `/:provider/onramp/:id` | Get on-ramp status |
-| POST | `/:provider/offramp` | Create off-ramp |
-| GET | `/:provider/offramp/:id` | Get off-ramp status |
-| POST | `/:provider/fiat-accounts` | Register fiat account |
-| GET | `/:provider/fiat-accounts?customerId=` | List fiat accounts |
-| POST | `/:provider/blockchain-wallets` | Register wallet (BlindPay) |
-| GET | `/:provider/blockchain-wallets?receiverId=` | List wallets (BlindPay) |
-| POST | `/:provider/payout-submit` | Submit payout (BlindPay) |
-| POST | `/:provider/sandbox/simulate-fiat-received` | Sandbox sim (Etherfuse) |
+| Method | Endpoint                                    | Operation                  |
+| ------ | ------------------------------------------- | -------------------------- |
+| GET    | `/:provider/capabilities`                   | Provider capabilities      |
+| POST   | `/:provider/customers`                      | Create customer            |
+| GET    | `/:provider/customers?email=`               | Lookup by email            |
+| GET    | `/:provider/customers/:customerId`          | Get customer by ID         |
+| GET    | `/:provider/kyc/:customerId`                | Get KYC URL                |
+| GET    | `/:provider/kyc/:customerId/status`         | Get KYC status             |
+| POST   | `/:provider/quotes`                         | Get quote                  |
+| POST   | `/:provider/onramp`                         | Create on-ramp             |
+| GET    | `/:provider/onramp/:id`                     | Get on-ramp status         |
+| POST   | `/:provider/offramp`                        | Create off-ramp            |
+| GET    | `/:provider/offramp/:id`                    | Get off-ramp status        |
+| POST   | `/:provider/fiat-accounts`                  | Register fiat account      |
+| GET    | `/:provider/fiat-accounts?customerId=`      | List fiat accounts         |
+| POST   | `/:provider/blockchain-wallets`             | Register wallet (BlindPay) |
+| GET    | `/:provider/blockchain-wallets?receiverId=` | List wallets (BlindPay)    |
+| POST   | `/:provider/payout-submit`                  | Submit payout (BlindPay)   |
+| POST   | `/:provider/sandbox/simulate-fiat-received` | Sandbox sim (Etherfuse)    |
 
 Plus global endpoints:
+
 - `GET /health` -- Health check
 - `GET /api/providers` -- List all providers + capabilities
 
@@ -86,11 +88,11 @@ Express error middleware that handles `AnchorError` instances:
 
 ```json
 {
-  "error": {
-    "code": "QUOTE_EXPIRED",
-    "message": "Quote has expired",
-    "statusCode": 400
-  }
+    "error": {
+        "code": "QUOTE_EXPIRED",
+        "message": "Quote has expired",
+        "statusCode": 400
+    }
 }
 ```
 
@@ -120,6 +122,7 @@ $ npx tsc --noEmit
 ### 1. Can the anchor clients be instantiated in Node.js?
 
 **Yes, completely.** No browser APIs are needed. Both `EtherfuseClient` and `BlindPayClient` instantiate cleanly with just config objects. They use:
+
 - `fetch()` -- available globally in Node.js 18+
 - `crypto.randomUUID()` -- available globally in Node.js 19+ (and via `crypto` module in 18+)
 - Standard `JSON.stringify/parse`, `Date`, `URLSearchParams`
@@ -141,6 +144,7 @@ The caveat is Express 5's `req.params` typing as `string | string[]`. This requi
 ### 5. Are there any Node.js-specific issues?
 
 **None found.** The library is clean for Node.js 18+:
+
 - `fetch()` is globally available
 - `crypto.randomUUID()` is globally available
 - No DOM APIs or browser-specific code

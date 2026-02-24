@@ -58,7 +58,15 @@ export async function buildPaymentTransaction(options: {
     memoType?: 'text' | 'id' | 'hash';
     network: StellarNetwork;
 }): Promise<string> {
-    const { sourcePublicKey, destinationPublicKey, asset, amount, memo, memoType = 'text', network } = options;
+    const {
+        sourcePublicKey,
+        destinationPublicKey,
+        asset,
+        amount,
+        memo,
+        memoType = 'text',
+        network,
+    } = options;
 
     const server = getHorizonServer(network);
     const networkPassphrase = getNetworkPassphrase(network);

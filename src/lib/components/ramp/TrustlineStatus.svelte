@@ -104,7 +104,8 @@ Usage:
             {:else if hasTrustline}
                 {#if showBalance}
                     <span class="font-medium">
-                        {formatAmount(balance)} {displayCurrency(balanceCurrency)}
+                        {formatAmount(balance)}
+                        {displayCurrency(balanceCurrency)}
                     </span>
                 {:else}
                     <span class="text-sm font-medium text-green-600">Ready</span>

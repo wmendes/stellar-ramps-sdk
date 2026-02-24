@@ -3,6 +3,7 @@
 ## 1. Initial Exploration: Reading the Reference Repo
 
 **Files read:**
+
 - `/README.md` — Top-level overview of the SvelteKit project
 - `/src/lib/anchors/types.ts` — The shared `Anchor` interface and all common types
 - `/src/lib/anchors/index.ts` — Re-exports for the anchor library
@@ -18,12 +19,14 @@
 **What I learned:**
 
 The README's claim that `/src/lib/anchors/` is "portable" and "framework-agnostic" appears to be **true**. I verified:
+
 - No SvelteKit `$env` imports anywhere in `/src/lib/anchors/`
 - No Svelte-specific imports (no `$app`, no `.svelte` files)
 - The only external dependency is `@stellar/stellar-sdk` (used in SEP modules)
 - The Etherfuse client itself only uses `fetch`, `crypto.randomUUID()`, and `JSON.parse/stringify` — truly vanilla TypeScript
 
 The `index.ts` at the anchors root re-exports all three anchor clients plus the SEP modules. For my React project, I only need:
+
 - `types.ts` (the shared Anchor interface)
 - `etherfuse/client.ts` and `etherfuse/types.ts`
 
@@ -32,12 +35,14 @@ The wallet helpers in `/src/lib/wallet/` are **also framework-agnostic** — the
 **One thing NOT in the portable library:** The `anchorFactory.ts` is SvelteKit-specific (imports `$env/static/private`). I'll need to create my own factory or just instantiate the client directly. This is expected and documented.
 
 **Confusion/concerns:**
+
 - The `anchors/index.ts` imports `AlfredPayClient` and `BlindPayClient` too, plus the SEP modules and `TestAnchorClient`. If I copy the entire `anchors/` directory, I'd need ALL of those implementations. The README says "copy the directories you need" but the barrel `index.ts` re-exports everything. I'll just copy what I need (types.ts + etherfuse/) and skip the barrel index.
 - `crypto.randomUUID()` is used in the Etherfuse client. This is available in modern browsers and Node.js 19+, so no issue for a Vite React app.
 
 ## 2. Decision: What to Copy
 
 I will:
+
 1. Copy `anchors/types.ts` as `src/anchors/types.ts`
 2. Copy `anchors/etherfuse/client.ts` as `src/anchors/etherfuse/client.ts`
 3. Copy `anchors/etherfuse/types.ts` as `src/anchors/etherfuse/types.ts`
@@ -46,6 +51,7 @@ I will:
 6. Copy wallet helpers from `wallet/` — `freighter.ts`, `stellar.ts`, `types.ts` — into `src/wallet/`
 
 I'll also need to create:
+
 - A service layer that wraps the Etherfuse client for the React frontend
 - React components for wallet connection, yield dashboard, on-ramp, and off-ramp
 - CSS styling
@@ -57,6 +63,7 @@ Copying the files now. Let's see if they work out of the box...
 **Result: Immediate success.** I copied the files verbatim and ran `npx tsc --noEmit`. Zero errors. The portability claim is legitimate for the Etherfuse client and shared types.
 
 Files copied:
+
 - `src/anchors/types.ts` — verbatim copy, no changes needed
 - `src/anchors/etherfuse/client.ts` — verbatim copy, no changes needed
 - `src/anchors/etherfuse/types.ts` — verbatim copy, no changes needed
@@ -75,11 +82,13 @@ The only file I created fresh was `src/anchors/etherfuse/index.ts` (a 2-line re-
 Since the Etherfuse client is designed to run server-side (it needs an API key), and this React app has no backend, I need to decide how to handle this.
 
 **Options considered:**
+
 1. Instantiate `EtherfuseClient` directly in the browser with a dummy API key — shows the types and flow work, but API calls would fail (CORS + auth)
 2. Create a mock service layer that simulates the Etherfuse flow with realistic data — shows the UI works and types are correct
 3. Create a "real" service layer that would work with a backend proxy, plus a mock mode for demo
 
 **Decision:** I'll go with option 3. I'll create:
+
 - `src/services/anchorService.ts` — Creates an `EtherfuseClient` instance and wraps its methods. In "mock" mode, it returns realistic simulated data. In "real" mode, it proxies through a backend (the URL would need to be configured).
 - This demonstrates that the Etherfuse client integrates cleanly into a React service layer, and the types flow through correctly.
 
@@ -141,18 +150,22 @@ export class AnchorError extends Error {
 Created these files:
 
 **Service layer:**
+
 - `src/services/anchorService.ts` — Mock implementation of the `Anchor` interface for demo, plus CETES config constants. The mock returns realistic data shapes that match what `EtherfuseClient` would return. Also re-exports `EtherfuseClient` to demonstrate the real client is importable.
 
 **React hooks:**
+
 - `src/hooks/useWallet.ts` — React hook wrapping the portable Freighter wallet helpers. Falls back to a mock wallet if Freighter isn't installed.
 
 **React components:**
+
 - `src/components/WalletConnect.tsx` — Wallet connection UI with mock mode indicator
 - `src/components/YieldDashboard.tsx` — CETES position dashboard showing balance, token price, MXN value, APY, and projected returns. Uses `checkTrustline()` and `getStellarAsset()` from the portable wallet/stellar helpers.
 - `src/components/OnRampFlow.tsx` — Full on-ramp flow (amount -> quote -> SPEI payment instructions -> polling). Uses the `Anchor` interface directly — no Etherfuse-specific code.
 - `src/components/OffRampFlow.tsx` — Full off-ramp flow with the Etherfuse deferred signing pattern (amount -> quote -> poll for signableTransaction -> wallet signing -> poll for completion). Uses `anchor.capabilities.deferredOffRampSigning` to branch the flow.
 
 **Key design decisions:**
+
 - Components accept `Anchor` (the interface), not `EtherfuseClient` (the implementation). This means they'd work with any anchor provider.
 - The off-ramp component checks `anchor.capabilities.deferredOffRampSigning` at runtime to decide whether to poll for the signable transaction or use it immediately. This mirrors what the SvelteKit app's `OffRampFlow.svelte` does.
 - The yield dashboard uses the portable `checkTrustline()` helper from `wallet/stellar.ts` for real Horizon queries, but falls back to mock data when Freighter isn't installed.
@@ -194,16 +207,19 @@ Created these files:
 ## Appendix: File Manifest
 
 ### Files copied verbatim from the reference repo (zero changes):
+
 - `src/anchors/etherfuse/client.ts` — EtherfuseClient implementation
 - `src/anchors/etherfuse/types.ts` — Etherfuse-specific API types
 - `src/wallet/freighter.ts` — Freighter wallet connection helpers
 - `src/wallet/stellar.ts` — Horizon SDK utilities
 
 ### Files copied with minor adaptation (parameter property fix only):
+
 - `src/anchors/types.ts` — Shared Anchor interface + types (expanded `AnchorError` parameter properties)
 - `src/wallet/types.ts` — Wallet types (expanded `WalletError` parameter properties)
 
 ### Files created for the React application:
+
 - `src/anchors/etherfuse/index.ts` — Re-exports (2 lines)
 - `src/services/anchorService.ts` — Mock anchor service + CETES config
 - `src/hooks/useWallet.ts` — React wallet connection hook
@@ -216,6 +232,7 @@ Created these files:
 - `BUILD_JOURNAL.md` — This file
 
 ### Files untouched from the Vite React scaffold:
+
 - `src/main.tsx` — React entry point
 - `src/index.css` — Base styles
 - `package.json`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `vite.config.ts`, etc.

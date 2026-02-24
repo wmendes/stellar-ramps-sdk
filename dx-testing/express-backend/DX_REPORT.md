@@ -15,6 +15,7 @@ The full prompt given to the subagent is in Appendix A.
 **Stack:** Express 5 + TypeScript + tsx (for running TS directly)
 
 **What was built:**
+
 - Anchor factory reading config from `process.env` (Express equivalent of `anchorFactory.ts`)
 - 17 REST endpoints covering the full `Anchor` interface for both Etherfuse and BlindPay
 - `AnchorError`-aware error handling middleware with structured JSON responses
@@ -38,23 +39,24 @@ This is the cleanest round yet — the only "issue" encountered (Express 5's str
 
 ### 1. Zero-modification copy (9 files verbatim)
 
-| File | Source | Changes |
-|------|--------|---------|
-| `anchors/types.ts` | `src/lib/anchors/types.ts` | None |
-| `anchors/etherfuse/client.ts` | `src/lib/anchors/etherfuse/client.ts` | None |
-| `anchors/etherfuse/types.ts` | `src/lib/anchors/etherfuse/types.ts` | None |
-| `anchors/etherfuse/index.ts` | `src/lib/anchors/etherfuse/index.ts` | None |
-| `anchors/blindpay/client.ts` | `src/lib/anchors/blindpay/client.ts` | None |
-| `anchors/blindpay/types.ts` | `src/lib/anchors/blindpay/types.ts` | None |
-| `anchors/blindpay/index.ts` | `src/lib/anchors/blindpay/index.ts` | None |
-| `wallet/stellar.ts` | `src/lib/wallet/stellar.ts` | None |
-| `wallet/types.ts` | `src/lib/wallet/types.ts` | None |
+| File                          | Source                                | Changes |
+| ----------------------------- | ------------------------------------- | ------- |
+| `anchors/types.ts`            | `src/lib/anchors/types.ts`            | None    |
+| `anchors/etherfuse/client.ts` | `src/lib/anchors/etherfuse/client.ts` | None    |
+| `anchors/etherfuse/types.ts`  | `src/lib/anchors/etherfuse/types.ts`  | None    |
+| `anchors/etherfuse/index.ts`  | `src/lib/anchors/etherfuse/index.ts`  | None    |
+| `anchors/blindpay/client.ts`  | `src/lib/anchors/blindpay/client.ts`  | None    |
+| `anchors/blindpay/types.ts`   | `src/lib/anchors/blindpay/types.ts`   | None    |
+| `anchors/blindpay/index.ts`   | `src/lib/anchors/blindpay/index.ts`   | None    |
+| `wallet/stellar.ts`           | `src/lib/wallet/stellar.ts`           | None    |
+| `wallet/types.ts`             | `src/lib/wallet/types.ts`             | None    |
 
 Three consecutive rounds with zero modifications.
 
 ### 2. No browser API dependencies
 
 The anchor clients use only:
+
 - `fetch()` — globally available in Node.js 18+
 - `crypto.randomUUID()` — globally available in Node.js 19+
 - `JSON.stringify/parse`, `Date`, `URLSearchParams` — standard APIs
@@ -72,7 +74,7 @@ The error handler middleware correctly distinguishes `AnchorError` from generic 
 ```typescript
 if (err instanceof AnchorError) {
     res.status(err.statusCode).json({
-        error: { code: err.code, message: err.message, statusCode: err.statusCode }
+        error: { code: err.code, message: err.message, statusCode: err.statusCode },
     });
 }
 ```
@@ -111,20 +113,21 @@ The only friction was Express 5's stricter `req.params` typing (`string | string
 
 ## Comparison Across All Rounds
 
-| Dimension | Round 1: React + Etherfuse | Round 2: Next.js + BlindPay | Round 3: Express Backend |
-|-----------|:-:|:-:|:-:|
-| Files needing modification | 2 | 0 | 0 |
-| Library issues found | 2 | 2 new, 2 confirmed | 0 new, 1 confirmed |
-| Verdict | 8/10 | 9/10 | 10/10 |
-| Browser APIs needed | Yes (Freighter) | Yes (Freighter) | No |
-| Backend proxy tested | No | Yes (Next.js routes) | Yes (Express routes) |
-| Multi-provider | No (Etherfuse only) | No (BlindPay only) | Yes (both) |
-| `AnchorError` instanceof | Not tested | Not tested | Validated |
-| Factory pattern ported | No (mock service) | Yes (server.ts) | Yes (anchorFactory.ts) |
+| Dimension                  | Round 1: React + Etherfuse | Round 2: Next.js + BlindPay | Round 3: Express Backend |
+| -------------------------- | :------------------------: | :-------------------------: | :----------------------: |
+| Files needing modification |             2              |              0              |            0             |
+| Library issues found       |             2              |     2 new, 2 confirmed      |    0 new, 1 confirmed    |
+| Verdict                    |            8/10            |            9/10             |          10/10           |
+| Browser APIs needed        |      Yes (Freighter)       |       Yes (Freighter)       |            No            |
+| Backend proxy tested       |             No             |    Yes (Next.js routes)     |   Yes (Express routes)   |
+| Multi-provider             |    No (Etherfuse only)     |     No (BlindPay only)      |        Yes (both)        |
+| `AnchorError` instanceof   |         Not tested         |         Not tested          |        Validated         |
+| Factory pattern ported     |     No (mock service)      |       Yes (server.ts)       |  Yes (anchorFactory.ts)  |
 
 ### Trend
 
 The library's portability is improving with each round:
+
 - Round 1 found real issues (`erasableSyntaxOnly`, barrel index)
 - Round 2 found abstraction leaks (composite customer ID, stub behavior)
 - Round 3 found nothing — the library is clean for server-side use
@@ -136,6 +139,7 @@ The library's portability is improving with each round:
 No new recommendations from this round. The library works as a pure backend dependency without issues.
 
 **Carry forward from previous rounds:**
+
 - Fix composite customer ID leakiness (round 2)
 - Improve copy instructions (barrel index, wallet callout)
 - Consider making token config portable
@@ -146,28 +150,28 @@ No new recommendations from this round. The library works as a pure backend depe
 
 ### Portable library files used (from `src/lib/`)
 
-| File | Copied Verbatim |
-|------|:-:|
-| `anchors/types.ts` | Yes |
-| `anchors/etherfuse/client.ts` | Yes |
-| `anchors/etherfuse/types.ts` | Yes |
-| `anchors/etherfuse/index.ts` | Yes |
-| `anchors/blindpay/client.ts` | Yes |
-| `anchors/blindpay/types.ts` | Yes |
-| `anchors/blindpay/index.ts` | Yes |
-| `wallet/stellar.ts` | Yes |
-| `wallet/types.ts` | Yes |
+| File                          | Copied Verbatim |
+| ----------------------------- | :-------------: |
+| `anchors/types.ts`            |       Yes       |
+| `anchors/etherfuse/client.ts` |       Yes       |
+| `anchors/etherfuse/types.ts`  |       Yes       |
+| `anchors/etherfuse/index.ts`  |       Yes       |
+| `anchors/blindpay/client.ts`  |       Yes       |
+| `anchors/blindpay/types.ts`   |       Yes       |
+| `anchors/blindpay/index.ts`   |       Yes       |
+| `wallet/stellar.ts`           |       Yes       |
+| `wallet/types.ts`             |       Yes       |
 
 ### Express application files created
 
-| File | Lines | Purpose |
-|------|------:|---------|
-| `src/index.ts` | 101 | Express app entry point, middleware, health check |
-| `src/lib/anchorFactory.ts` | 61 | Multi-provider factory with `process.env` config |
-| `src/routes/anchor.ts` | 601 | 17 REST endpoints covering full Anchor interface |
-| `src/middleware/errorHandler.ts` | 44 | `AnchorError`-aware error middleware |
-| `src/lib/anchors/index.ts` | ~10 | Custom barrel (Etherfuse + BlindPay only) |
-| `src/lib/wallet/index.ts` | ~5 | Wallet barrel (no Freighter) |
+| File                             | Lines | Purpose                                           |
+| -------------------------------- | ----: | ------------------------------------------------- |
+| `src/index.ts`                   |   101 | Express app entry point, middleware, health check |
+| `src/lib/anchorFactory.ts`       |    61 | Multi-provider factory with `process.env` config  |
+| `src/routes/anchor.ts`           |   601 | 17 REST endpoints covering full Anchor interface  |
+| `src/middleware/errorHandler.ts` |    44 | `AnchorError`-aware error middleware              |
+| `src/lib/anchors/index.ts`       |   ~10 | Custom barrel (Etherfuse + BlindPay only)         |
+| `src/lib/wallet/index.ts`        |    ~5 | Wallet barrel (no Freighter)                      |
 
 ---
 
@@ -182,6 +186,7 @@ The following prompt was given to the subagent verbatim:
 > **Your Goal**
 >
 > Build a working Express + TypeScript API server that:
+>
 > 1. Instantiates anchor clients (Etherfuse and/or BlindPay) with configurable API keys
 > 2. Exposes REST endpoints that proxy to the anchor clients
 > 3. Demonstrates the full on-ramp and off-ramp flows via API
@@ -193,18 +198,15 @@ The following prompt was given to the subagent verbatim:
 > **How to Work**
 >
 > 1. Start by reading the documentation and source code in the reference SvelteKit repo. Key files:
->    - `README.md` and `CLAUDE.md` — project overview
->    - `src/lib/anchors/README.md` — anchor library documentation
->    - `src/lib/anchors/types.ts` — shared Anchor interface and all common types
->    - `src/lib/anchors/etherfuse/client.ts` and `types.ts`
->    - `src/lib/anchors/blindpay/client.ts` and `types.ts`
->    - `src/lib/server/anchorFactory.ts` — the SvelteKit factory pattern
->    - `src/lib/wallet/stellar.ts` — Stellar SDK utilities
->
+>     - `README.md` and `CLAUDE.md` — project overview
+>     - `src/lib/anchors/README.md` — anchor library documentation
+>     - `src/lib/anchors/types.ts` — shared Anchor interface and all common types
+>     - `src/lib/anchors/etherfuse/client.ts` and `types.ts`
+>     - `src/lib/anchors/blindpay/client.ts` and `types.ts`
+>     - `src/lib/server/anchorFactory.ts` — the SvelteKit factory pattern
+>     - `src/lib/wallet/stellar.ts` — Stellar SDK utilities
 > 2. Decide what to copy into `_express-test/src/`. Maintain the relative directory structure.
->
 > 3. Build the Express app. TypeScript, Express, and `@stellar/stellar-sdk` are installed. Use `tsx` to run.
->
 > 4. Document everything in `_express-test/BUILD_JOURNAL.md`.
 >
 > **What to Build**

@@ -15,6 +15,7 @@ The full prompt given to the subagent is in Appendix A.
 **Stack:** Next.js 16 (App Router) + React + TypeScript + Tailwind CSS
 
 **What was built:**
+
 - 8 API route handlers proxying to `BlindPayClient` (with mock fallback when API calls fail)
 - Server-side anchor factory (`server.ts`) — the Next.js equivalent of `anchorFactory.ts`
 - Client-side API helper module calling the proxy routes
@@ -39,16 +40,16 @@ Up from 8/10 in the React round. The `erasableSyntaxOnly` fix eliminated the onl
 
 Every portable library file copied without changes:
 
-| File | Source | Changes |
-|------|--------|---------|
-| `anchors/types.ts` | `src/lib/anchors/types.ts` | None |
-| `anchors/blindpay/client.ts` | `src/lib/anchors/blindpay/client.ts` | None |
-| `anchors/blindpay/types.ts` | `src/lib/anchors/blindpay/types.ts` | None |
-| `anchors/blindpay/index.ts` | `src/lib/anchors/blindpay/index.ts` | None |
-| `wallet/freighter.ts` | `src/lib/wallet/freighter.ts` | None |
-| `wallet/stellar.ts` | `src/lib/wallet/stellar.ts` | None |
-| `wallet/types.ts` | `src/lib/wallet/types.ts` | None |
-| `wallet/index.ts` | `src/lib/wallet/index.ts` | None |
+| File                         | Source                               | Changes |
+| ---------------------------- | ------------------------------------ | ------- |
+| `anchors/types.ts`           | `src/lib/anchors/types.ts`           | None    |
+| `anchors/blindpay/client.ts` | `src/lib/anchors/blindpay/client.ts` | None    |
+| `anchors/blindpay/types.ts`  | `src/lib/anchors/blindpay/types.ts`  | None    |
+| `anchors/blindpay/index.ts`  | `src/lib/anchors/blindpay/index.ts`  | None    |
+| `wallet/freighter.ts`        | `src/lib/wallet/freighter.ts`        | None    |
+| `wallet/stellar.ts`          | `src/lib/wallet/stellar.ts`          | None    |
+| `wallet/types.ts`            | `src/lib/wallet/types.ts`            | None    |
+| `wallet/index.ts`            | `src/lib/wallet/index.ts`            | None    |
 
 This is the target state for portability. The `erasableSyntaxOnly` fix (from round 1 findings) directly caused this improvement — `AnchorError` and `WalletError` now use explicit field declarations.
 
@@ -103,6 +104,7 @@ const compositeId = `${customer.id}:${accountId}`;
 This is BlindPay-specific logic leaking into generic application code. A developer who doesn't read the BlindPay README would have no idea this format is expected.
 
 **Possible fixes:**
+
 - Add a helper function in the portable library: `BlindPayClient.buildQuoteCustomerId(customerId, resourceId)`
 - Add a `resourceId` field to `GetQuoteInput` and have `BlindPayClient.getQuote()` handle the concatenation internally
 - At minimum, add JSDoc on `GetQuoteInput.customerId` noting that some providers expect composite formats
@@ -125,6 +127,7 @@ The stub ID is the wrong format and the wrong length. This means any app using r
 The root cause is that BlindPay's customer creation is actually done via `createReceiver()` (a BlindPay-specific method not on the `Anchor` interface). The `createCustomer()` stub exists to satisfy the `Anchor` interface contract, but it generates IDs that are incompatible with BlindPay's API.
 
 **Fix options:**
+
 - Have `createCustomer()` call `createReceiver()` internally and return the real receiver ID
 - Or document clearly that `createCustomer()` is a no-op on BlindPay and the consumer must call `createReceiver()` through the KYC flow first to get a valid receiver ID
 - At minimum, if the stub must exist, generate an ID in the correct format (15 chars, `re_` prefix)
@@ -145,30 +148,33 @@ The subagent read `config/tokens.ts` to find the USDB issuer address but couldn'
 
 ## Comparison with Round 1 (React + Etherfuse)
 
-| Dimension | React + Etherfuse | Next.js + BlindPay |
-|-----------|:-:|:-:|
-| Files needing modification | 2 | 0 |
-| `erasableSyntaxOnly` issue | Yes | No (fixed) |
-| Backend proxy layer | No (client-side mock only) | Yes (8 API routes) |
-| BlindPay capability flags exercised | 0 | 5 |
-| Composite customer ID | N/A | Yes (friction point) |
-| Deferred signing | Yes (Etherfuse) | N/A (BlindPay uses payout submission) |
-| Bank-before-quote flow | No | Yes |
-| Wallet registration flow | No | Yes |
-| Barrel index skipped | Yes | Yes |
-| Token config hardcoded | Yes | Yes |
+| Dimension                           |     React + Etherfuse      |          Next.js + BlindPay           |
+| ----------------------------------- | :------------------------: | :-----------------------------------: |
+| Files needing modification          |             2              |                   0                   |
+| `erasableSyntaxOnly` issue          |            Yes             |              No (fixed)               |
+| Backend proxy layer                 | No (client-side mock only) |          Yes (8 API routes)           |
+| BlindPay capability flags exercised |             0              |                   5                   |
+| Composite customer ID               |            N/A             |         Yes (friction point)          |
+| Deferred signing                    |      Yes (Etherfuse)       | N/A (BlindPay uses payout submission) |
+| Bank-before-quote flow              |             No             |                  Yes                  |
+| Wallet registration flow            |             No             |                  Yes                  |
+| Barrel index skipped                |            Yes             |                  Yes                  |
+| Token config hardcoded              |            Yes             |                  Yes                  |
 
 ### New findings this round
+
 - Composite customer ID is a leaky abstraction
 - `createCustomer()` stub behavior is surprising
 - The API route proxy pattern maps naturally from SvelteKit to Next.js
 - Mock fallback in API routes is a useful development pattern
 
 ### Confirmed from round 1
+
 - Barrel `index.ts` conflicts with selective copying
 - Token config is not portable (`$lib` paths)
 
 ### Resolved since round 1
+
 - `erasableSyntaxOnly` incompatibility (fixed before this round)
 
 ---
@@ -178,6 +184,7 @@ The subagent read `config/tokens.ts` to find the USDB issuer address but couldn'
 ### Priority 1: Address composite customer ID leakiness
 
 Either:
+
 - Have `BlindPayClient.getQuote()` accept `resourceId` as a separate parameter and build the composite internally
 - Or add clear JSDoc on `GetQuoteInput.customerId` explaining the composite format convention
 
@@ -196,35 +203,35 @@ Note that some providers may return a local stub rather than making a real API c
 
 ### Portable library files used (from `src/lib/`)
 
-| File | Copied Verbatim |
-|------|:-:|
-| `anchors/types.ts` | Yes |
-| `anchors/blindpay/client.ts` | Yes |
-| `anchors/blindpay/types.ts` | Yes |
-| `anchors/blindpay/index.ts` | Yes |
-| `wallet/freighter.ts` | Yes |
-| `wallet/stellar.ts` | Yes |
-| `wallet/types.ts` | Yes |
-| `wallet/index.ts` | Yes |
+| File                         | Copied Verbatim |
+| ---------------------------- | :-------------: |
+| `anchors/types.ts`           |       Yes       |
+| `anchors/blindpay/client.ts` |       Yes       |
+| `anchors/blindpay/types.ts`  |       Yes       |
+| `anchors/blindpay/index.ts`  |       Yes       |
+| `wallet/freighter.ts`        |       Yes       |
+| `wallet/stellar.ts`          |       Yes       |
+| `wallet/types.ts`            |       Yes       |
+| `wallet/index.ts`            |       Yes       |
 
 ### Next.js application files created
 
-| File | Lines | Purpose |
-|------|------:|---------|
-| `src/lib/anchors/blindpay/server.ts` | 31 | Server-side BlindPayClient factory |
-| `src/lib/api/anchor.ts` | 195 | Client-side API helpers |
-| `src/app/api/anchor/blindpay/customers/route.ts` | 77 | Customer creation/lookup |
-| `src/app/api/anchor/blindpay/kyc/route.ts` | 58 | KYC status + redirect URL |
-| `src/app/api/anchor/blindpay/quotes/route.ts` | 66 | Quote generation |
-| `src/app/api/anchor/blindpay/onramp/route.ts` | 105 | On-ramp creation + polling |
-| `src/app/api/anchor/blindpay/offramp/route.ts` | 108 | Off-ramp creation + polling |
-| `src/app/api/anchor/blindpay/fiat-accounts/route.ts` | 76 | Bank account management |
-| `src/app/api/anchor/blindpay/blockchain-wallets/route.ts` | 48 | Wallet registration |
-| `src/app/api/anchor/blindpay/payout-submit/route.ts` | 59 | Signed payout submission |
-| `src/components/WalletConnect.tsx` | 102 | Wallet connection UI |
-| `src/components/OnRampFlow.tsx` | 416 | MXN -> USDB with wallet registration |
-| `src/components/OffRampFlow.tsx` | 557 | USDB -> MXN with bank-before-quote |
-| `src/app/page.tsx` | 242 | Main page with tabs + customer management |
+| File                                                      | Lines | Purpose                                   |
+| --------------------------------------------------------- | ----: | ----------------------------------------- |
+| `src/lib/anchors/blindpay/server.ts`                      |    31 | Server-side BlindPayClient factory        |
+| `src/lib/api/anchor.ts`                                   |   195 | Client-side API helpers                   |
+| `src/app/api/anchor/blindpay/customers/route.ts`          |    77 | Customer creation/lookup                  |
+| `src/app/api/anchor/blindpay/kyc/route.ts`                |    58 | KYC status + redirect URL                 |
+| `src/app/api/anchor/blindpay/quotes/route.ts`             |    66 | Quote generation                          |
+| `src/app/api/anchor/blindpay/onramp/route.ts`             |   105 | On-ramp creation + polling                |
+| `src/app/api/anchor/blindpay/offramp/route.ts`            |   108 | Off-ramp creation + polling               |
+| `src/app/api/anchor/blindpay/fiat-accounts/route.ts`      |    76 | Bank account management                   |
+| `src/app/api/anchor/blindpay/blockchain-wallets/route.ts` |    48 | Wallet registration                       |
+| `src/app/api/anchor/blindpay/payout-submit/route.ts`      |    59 | Signed payout submission                  |
+| `src/components/WalletConnect.tsx`                        |   102 | Wallet connection UI                      |
+| `src/components/OnRampFlow.tsx`                           |   416 | MXN -> USDB with wallet registration      |
+| `src/components/OffRampFlow.tsx`                          |   557 | USDB -> MXN with bank-before-quote        |
+| `src/app/page.tsx`                                        |   242 | Main page with tabs + customer management |
 
 ---
 
@@ -243,27 +250,24 @@ The following prompt was given to the subagent verbatim:
 > **How to Work**
 >
 > 1. Start by reading the documentation and source code in the reference SvelteKit repo. The key files are:
->    - `README.md` (top-level) and `CLAUDE.md` — project overview
->    - `src/lib/anchors/README.md` — anchor library documentation
->    - `src/lib/anchors/types.ts` — the shared `Anchor` interface and all common types
->    - `src/lib/anchors/blindpay/client.ts` — the `BlindPayClient` implementation
->    - `src/lib/anchors/blindpay/types.ts` — BlindPay API types
->    - `src/lib/anchors/blindpay/README.md` — BlindPay integration documentation
->    - `src/lib/wallet/freighter.ts`, `src/lib/wallet/stellar.ts`, `src/lib/wallet/types.ts` — portable wallet helpers
->    - `src/lib/components/OnRampFlow.svelte` and `src/lib/components/OffRampFlow.svelte` — reference UI implementations
->    - `src/lib/config/tokens.ts` — token definitions
->
+>     - `README.md` (top-level) and `CLAUDE.md` — project overview
+>     - `src/lib/anchors/README.md` — anchor library documentation
+>     - `src/lib/anchors/types.ts` — the shared `Anchor` interface and all common types
+>     - `src/lib/anchors/blindpay/client.ts` — the `BlindPayClient` implementation
+>     - `src/lib/anchors/blindpay/types.ts` — BlindPay API types
+>     - `src/lib/anchors/blindpay/README.md` — BlindPay integration documentation
+>     - `src/lib/wallet/freighter.ts`, `src/lib/wallet/stellar.ts`, `src/lib/wallet/types.ts` — portable wallet helpers
+>     - `src/lib/components/OnRampFlow.svelte` and `src/lib/components/OffRampFlow.svelte` — reference UI implementations
+>     - `src/lib/config/tokens.ts` — token definitions
 > 2. Decide what to copy into the Next.js project at `_nextjs-test/`. Copy portable library files into `_nextjs-test/src/`. Maintain the relative directory structure so internal imports resolve.
->
 > 3. Build the application. The Next.js project is already scaffolded at `_nextjs-test/` with TypeScript, Tailwind, App Router, and `src/` directory. Stellar dependencies are installed.
->
 > 4. Build Next.js API route handlers (in `src/app/api/`) that instantiate `BlindPayClient` with dummy config and proxy requests. Use mock/dummy API keys — nothing will hit a real server, but the route structure and client instantiation should be real.
->
 > 5. Document everything in `_nextjs-test/BUILD_JOURNAL.md`.
 >
 > **BlindPay-Specific Context**
 >
 > BlindPay has significantly different capabilities from Etherfuse:
+>
 > - `kycFlow: 'redirect'` — KYC is handled by redirecting to BlindPay's hosted page
 > - `requiresBankBeforeQuote: true` — Off-ramp requires bank account selection BEFORE getting a quote
 > - `requiresBlockchainWalletRegistration: true` — On-ramp requires wallet registration

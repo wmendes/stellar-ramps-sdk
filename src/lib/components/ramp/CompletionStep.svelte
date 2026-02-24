@@ -32,9 +32,7 @@ Usage:
 
     let { title, message, transaction, quote, network, onReset }: Props = $props();
 
-    function hasFiatAccount(
-        tx: OnRampTransaction | OffRampTransaction,
-    ): tx is OffRampTransaction {
+    function hasFiatAccount(tx: OnRampTransaction | OffRampTransaction): tx is OffRampTransaction {
         return 'fiatAccount' in tx;
     }
 </script>
@@ -42,11 +40,7 @@ Usage:
 <div class="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm">
     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
         <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"
             ></path>
         </svg>
     </div>

@@ -5,7 +5,7 @@
  * on-ramp, off-ramp, and quote display components.
  */
 
-import { getAllTokenSymbols } from "$lib/config/tokens";
+import { getAllTokenSymbols } from '$lib/config/tokens';
 
 /** Strip the issuer from a `CODE:ISSUER` asset string. */
 export function displayCurrency(currency: string | undefined): string {

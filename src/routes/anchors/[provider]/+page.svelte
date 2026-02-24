@@ -14,7 +14,10 @@
     const devBoxItems = $derived.by(() => {
         if (!anchor) return [];
         const items: { text: string; link?: string }[] = [
-            { text: `View ${anchor.name} client source code`, link: `https://github.com/ElliotFriend/regional-starter-pack/blob/main/src/lib/anchors/${anchor.id}` },
+            {
+                text: `View ${anchor.name} client source code`,
+                link: `https://github.com/ElliotFriend/regional-starter-pack/blob/main/src/lib/anchors/${anchor.id}`,
+            },
             { text: `${anchor.name} API documentation`, link: anchor.links.documentation },
         ];
         if (anchor.capabilities.sandbox) {
@@ -37,7 +40,7 @@
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-xs font-medium capitalize text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
+                class="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-xs font-medium text-gray-700 capitalize ring-1 ring-gray-300 hover:bg-gray-50"
             >
                 {label}
             </a>
@@ -49,9 +52,8 @@
 <div class="mb-8 rounded-lg bg-indigo-50 p-6">
     <h2 class="text-lg font-semibold text-indigo-900">Try {anchor.name}</h2>
     <p class="mt-1 text-sm text-indigo-700">
-        Experience the on-ramp and off-ramp flows with {anchor.name}'s integration. Check
-        out the process your users might go through as they interact with {anchor.name} from within
-        your application.
+        Experience the on-ramp and off-ramp flows with {anchor.name}'s integration. Check out the
+        process your users might go through as they interact with {anchor.name} from within your application.
     </p>
     <div class="mt-4 flex gap-3">
         <a
@@ -186,7 +188,9 @@
 {#if anchor.integrationFlow}
     <section class="mb-8">
         <h2 class="mb-4 text-xl font-semibold text-gray-900">Integration Flow</h2>
-        <p class="mb-2">These are the steps you (as a developer) can expect to implement as you work with {anchor.name}.</p>
+        <p class="mb-2">
+            These are the steps you (as a developer) can expect to implement as you work with {anchor.name}.
+        </p>
 
         {#if anchor.devOnboarding && anchor.devOnboarding.length > 0}
             <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-5">
@@ -197,7 +201,13 @@
                             <span class="mt-0.5 shrink-0 text-amber-500">&bull;</span>
                             <span>{note.text}</span>
                             {#if note.link}
-                                <span><a href={note.link} class="text-indigo-400 hover:text-indigo-300" target="_blank">Click here</a></span>
+                                <span
+                                    ><a
+                                        href={note.link}
+                                        class="text-indigo-400 hover:text-indigo-300"
+                                        target="_blank">Click here</a
+                                    ></span
+                                >
                             {/if}
                         </li>
                     {/each}
@@ -211,7 +221,10 @@
                 <ol class="space-y-3">
                     {#each anchor.integrationFlow.onRamp as step, i}
                         <li class="flex gap-3">
-                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700">{i + 1}</span>
+                            <span
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700"
+                                >{i + 1}</span
+                            >
                             <div>
                                 <p class="font-medium text-gray-900">{step.title}</p>
                                 <p class="text-sm text-gray-500">{step.description}</p>
@@ -225,7 +238,10 @@
                 <ol class="space-y-3">
                     {#each anchor.integrationFlow.offRamp as step, i}
                         <li class="flex gap-3">
-                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">{i + 1}</span>
+                            <span
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700"
+                                >{i + 1}</span
+                            >
                             <div>
                                 <p class="font-medium text-gray-900">{step.title}</p>
                                 <p class="text-sm text-gray-500">{step.description}</p>

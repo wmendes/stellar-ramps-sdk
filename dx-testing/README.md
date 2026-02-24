@@ -4,25 +4,25 @@ Developer experience testing for the portable anchor library. Each round has an 
 
 ## Rounds
 
-| Directory | Framework | Provider | Verdict | Key Issues |
-|-----------|-----------|----------|:-------:|------------|
-| [react-etherfuse](react-etherfuse/) | React + Vite | Etherfuse | 8/10 | `erasableSyntaxOnly` incompatibility, barrel index conflicts with selective copying, wallet helpers not advertised as portable, no non-SvelteKit guidance |
-| [nextjs-blindpay](nextjs-blindpay/) | Next.js (App Router) | BlindPay | 9/10 | Composite customer ID is a leaky abstraction, `createCustomer()` stub behavior surprising, barrel index (confirmed), token config not portable (confirmed) |
-| [express-backend](express-backend/) | Express 5 + TypeScript | Etherfuse + BlindPay | 10/10 | No library issues. Express 5 param typing (`string \| string[]`) required a helper, but that's an Express issue. |
+| Directory                           | Framework              | Provider             | Verdict | Key Issues                                                                                                                                                 |
+| ----------------------------------- | ---------------------- | -------------------- | :-----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [react-etherfuse](react-etherfuse/) | React + Vite           | Etherfuse            |  8/10   | `erasableSyntaxOnly` incompatibility, barrel index conflicts with selective copying, wallet helpers not advertised as portable, no non-SvelteKit guidance  |
+| [nextjs-blindpay](nextjs-blindpay/) | Next.js (App Router)   | BlindPay             |  9/10   | Composite customer ID is a leaky abstraction, `createCustomer()` stub behavior surprising, barrel index (confirmed), token config not portable (confirmed) |
+| [express-backend](express-backend/) | Express 5 + TypeScript | Etherfuse + BlindPay |  10/10  | No library issues. Express 5 param typing (`string \| string[]`) required a helper, but that's an Express issue.                                           |
 
 ## Cross-Round Issue Tracker
 
 Issues that appear across multiple rounds get tracked here to identify patterns.
 
-| Issue | Rounds Seen | Status |
-|-------|-------------|--------|
-| `erasableSyntaxOnly` — parameter properties in `AnchorError`/`WalletError` | react-etherfuse | **Fixed** (before round 2) |
-| Barrel `anchors/index.ts` breaks selective copying | react-etherfuse, nextjs-blindpay, express-backend | Open |
-| `wallet/` not called out as portable in docs | react-etherfuse | Open |
-| No usage guidance for non-SvelteKit consumers | react-etherfuse | Open |
-| Token config (`config/tokens.ts`) not portable (`$lib` paths) | react-etherfuse, nextjs-blindpay | Open |
-| Composite customer ID (`customerId:resourceId`) is a leaky abstraction | nextjs-blindpay | Open |
-| `createCustomer()` stub generates invalid receiver IDs (UUID instead of 15-char `re_` format) — causes 400 errors | nextjs-blindpay | **Fixed** (empty ID instead of UUID) |
+| Issue                                                                                                             | Rounds Seen                                       | Status                               |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------ |
+| `erasableSyntaxOnly` — parameter properties in `AnchorError`/`WalletError`                                        | react-etherfuse                                   | **Fixed** (before round 2)           |
+| Barrel `anchors/index.ts` breaks selective copying                                                                | react-etherfuse, nextjs-blindpay, express-backend | Open                                 |
+| `wallet/` not called out as portable in docs                                                                      | react-etherfuse                                   | Open                                 |
+| No usage guidance for non-SvelteKit consumers                                                                     | react-etherfuse                                   | Open                                 |
+| Token config (`config/tokens.ts`) not portable (`$lib` paths)                                                     | react-etherfuse, nextjs-blindpay                  | Open                                 |
+| Composite customer ID (`customerId:resourceId`) is a leaky abstraction                                            | nextjs-blindpay                                   | Open                                 |
+| `createCustomer()` stub generates invalid receiver IDs (UUID instead of 15-char `re_` format) — causes 400 errors | nextjs-blindpay                                   | **Fixed** (empty ID instead of UUID) |
 
 ## How a Round Works
 
@@ -35,8 +35,8 @@ Issues that appear across multiple rounds get tracked here to identify patterns.
 
 ## Blocked / Waiting
 
-| Provider | Issue | What Works | What's Blocked | Status |
-|----------|-------|------------|----------------|--------|
+| Provider | Issue                                                 | What Works                                                              | What's Blocked                                                                                                                                                                                       | Status                  |
+| -------- | ----------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | BlindPay | USDB testnet token issuer is wrong on BlindPay's side | Customer creation, KYC (ToS + receiver), blockchain wallet registration | On-ramp: the transaction returned by their `/v1/instances/{instance_id}/create-asset-trustline` endpoint fails because the USDB issuer doesn't match testnet. Can't proceed past trustline creation. | Waiting on BlindPay fix |
 
 ## Ideas for Future Rounds
