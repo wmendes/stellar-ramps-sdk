@@ -1,10 +1,20 @@
 <script lang="ts">
     import { createTestAnchorClient } from '$lib/anchors/testanchor';
     import { walletStore } from '$lib/stores/wallet.svelte';
+    import {
+        buildPaymentTransaction,
+        submitTransaction,
+        getStellarAsset,
+        getNetworkPassphrase,
+    } from '$lib/wallet/stellar';
+    import { onDestroy } from 'svelte';
     import type {
         Sep6DepositResponse,
         Sep6WithdrawResponse,
         Sep24InteractiveResponse,
+        Sep24Info,
+        Sep24Transaction,
+        TransactionStatus,
     } from '$lib/anchors/sep/types';
 
     // Create client instance
@@ -37,10 +47,80 @@
     let transferAmount = $state('10');
     let transferType = $state<'deposit' | 'withdraw'>('deposit');
 
+    // SEP-24 asset limits (fetched on init)
+    let sep24InfoData = $state<Sep24Info | null>(null);
+
+    // Derived limits for current asset + transfer type
+    let currentLimits = $derived.by(() => {
+        if (!sep24InfoData) return null;
+        const assets = transferType === 'deposit' ? sep24InfoData.deposit : sep24InfoData.withdraw;
+        const info = assets?.[selectedAsset];
+        if (!info?.enabled) return null;
+        return { min: info.min_amount, max: info.max_amount };
+    });
+
     // Results
     let sep6Result = $state<Sep6DepositResponse | Sep6WithdrawResponse | null>(null);
     let sep24Result = $state<Sep24InteractiveResponse | null>(null);
     let operationLoading = $state<'sep6' | 'sep24' | null>(null);
+
+    // SEP-24 interactive transaction tracking
+    let sep24Transaction = $state<Sep24Transaction | null>(null);
+    $inspect('sep24Transaction', sep24Transaction)
+    let sep24PopupRef = $state<Window | null>(null);
+
+    // Withdrawal payment state
+    let isSendingPayment = $state(false);
+    let paymentResult = $state<{ success: boolean; stellarTxId?: string; error?: string } | null>(null);
+
+    // Whether the withdrawal is ready for the user to send a Stellar payment
+    let withdrawalReady = $derived(
+        sep24Transaction?.status === 'pending_user_transfer_start' &&
+        sep24Transaction?.withdraw_anchor_account &&
+        transferType === 'withdraw',
+    );
+
+    // postMessage listener — only active while the interactive popup is open.
+    // Scoped to the anchor's origin so we ignore messages from other sources.
+    let anchorOrigin: string | null = null;
+
+    function handlePostMessage(event: MessageEvent) {
+        console.log(`i have received a message from ${event.origin}`)
+        if (event.origin !== anchorOrigin) return;
+
+        // Parse the message — could be a JSON string or a plain object
+        let data = event.data;
+        if (typeof data === 'string') {
+            try {
+                data = JSON.parse(data);
+            } catch {
+                return;
+            }
+        }
+
+        // SEP-24 wraps the transaction in a { transaction: {...} } envelope
+        const tx = data?.transaction;
+        if (!tx?.id || !tx?.status) return;
+
+        // Only accept updates for the transaction we initiated
+        if (sep24Result && tx.id !== sep24Result.id) return;
+
+        console.log('SEP-24 postMessage received:', tx.status, tx);
+        sep24Transaction = tx;
+    }
+
+    function startListening(interactiveUrl: string) {
+        anchorOrigin = new URL(interactiveUrl).origin;
+        console.log(`i am currently listening for events from ${anchorOrigin}`)
+        window.addEventListener('message', handlePostMessage);
+    }
+
+    function stopListening() {
+        window.removeEventListener('message', handlePostMessage);
+        anchorOrigin = null;
+    }
+
+    onDestroy(stopListening);
 
     // Initialize the client
     async function initialize() {
@@ -62,6 +142,13 @@
                 })),
             };
             initialized = true;
+
+            // Auto-fetch SEP-24 info for asset limits
+            try {
+                sep24InfoData = await client.getSep24Info();
+            } catch {
+                // Non-critical — limits just won't be shown
+            }
         } catch (e) {
             error = e instanceof Error ? e.message : 'Failed to initialize';
         } finally {
@@ -113,7 +200,9 @@
         loading = true;
         error = null;
         try {
-            sep24Info = await client.getSep24Info();
+            const info = await client.getSep24Info();
+            sep24Info = info;
+            sep24InfoData = info;
         } catch (e) {
             error = e instanceof Error ? e.message : 'Failed to fetch SEP-24 info';
         } finally {
@@ -134,6 +223,25 @@
         }
     }
 
+    // Validate amount against current limits
+    function validateAmount(): boolean {
+        if (!currentLimits) return true;
+        const amount = parseFloat(transferAmount);
+        if (isNaN(amount)) {
+            error = 'Please enter a valid amount';
+            return false;
+        }
+        if (currentLimits.max != null && amount > currentLimits.max) {
+            error = `Amount exceeds maximum of ${currentLimits.max} ${selectedAsset} for ${transferType}`;
+            return false;
+        }
+        if (currentLimits.min != null && amount < currentLimits.min) {
+            error = `Amount is below minimum of ${currentLimits.min} ${selectedAsset} for ${transferType}`;
+            return false;
+        }
+        return true;
+    }
+
     // SEP-6 Transfer (via server proxy to avoid CORS)
     async function handleSep6Transfer() {
         if (!walletStore.publicKey) {
@@ -146,6 +254,8 @@
             error = 'Please authenticate first';
             return;
         }
+
+        if (!validateAmount()) return;
 
         operationLoading = 'sep6';
         error = null;
@@ -192,9 +302,12 @@
             return;
         }
 
+        if (!validateAmount()) return;
+
         operationLoading = 'sep24';
         error = null;
         sep24Result = null;
+        sep24Transaction = null;
 
         try {
             const response = await fetch('/api/testanchor/sep24', {
@@ -222,18 +335,128 @@
         }
     }
 
-    // Open SEP-24 interactive URL
+    // Open SEP-24 interactive URL in a popup
     function openSep24Url() {
         if (sep24Result?.url) {
-            window.open(sep24Result.url, '_blank', 'width=500,height=800');
+            // Append callback=postMessage so the anchor's interactive
+            // page posts status updates back to window.opener via postMessage
+            const url = new URL(sep24Result.url);
+            url.searchParams.set('callback', 'postMessage');
+
+            // Start listening for postMessages scoped to this anchor's origin
+            startListening(sep24Result.url);
+
+            const width = 500;
+            const height = 800;
+            const left = window.screenX + (window.innerWidth - width) / 2;
+            const top = window.screenY + (window.innerHeight - height) / 2;
+            sep24PopupRef = window.open(
+                url.toString(),
+                'stellar-anchor',
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`,
+            );
+        }
+    }
+
+    // Send the Stellar payment for a SEP-24 withdrawal
+    async function sendWithdrawalPayment() {
+        if (!sep24Transaction || !walletStore.publicKey) return;
+
+        const { withdraw_anchor_account, withdraw_memo, withdraw_memo_type, amount_in } =
+            sep24Transaction;
+
+        if (!withdraw_anchor_account) {
+            error = 'No anchor account in transaction — cannot send payment';
+            return;
+        }
+
+        // Resolve the asset issuer from the toml currencies
+        const currency = tomlInfo?.currencies?.find((c) => c.code === selectedAsset);
+        if (!currency?.issuer) {
+            error = `Cannot find issuer for ${selectedAsset} — check stellar.toml`;
+            return;
+        }
+
+        const amount = amount_in || transferAmount;
+        const asset = getStellarAsset(selectedAsset, currency.issuer);
+
+        isSendingPayment = true;
+        paymentResult = null;
+        error = null;
+
+        try {
+            // Build the payment transaction
+            const xdr = await buildPaymentTransaction({
+                sourcePublicKey: walletStore.publicKey,
+                destinationPublicKey: withdraw_anchor_account,
+                asset,
+                amount,
+                memo: withdraw_memo,
+                memoType: (withdraw_memo_type as 'text' | 'id' | 'hash') ?? 'text',
+                network: 'testnet',
+            });
+
+            // Sign with Freighter
+            const { signTransaction } = await import('@stellar/freighter-api');
+            const networkPassphrase = getNetworkPassphrase('testnet');
+            const result = await signTransaction(xdr, { networkPassphrase });
+
+            // Submit to the network
+            const submitResult = await submitTransaction(result.signedTxXdr, 'testnet');
+
+            if ('hash' in submitResult) {
+                paymentResult = { success: true, stellarTxId: submitResult.hash };
+            } else {
+                paymentResult = { success: true };
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            paymentResult = { success: false, error: msg };
+            error = `Payment failed: ${msg}`;
+        } finally {
+            isSendingPayment = false;
         }
     }
 
     // Clear results
     function clearResults() {
+        stopListening();
         sep6Result = null;
         sep24Result = null;
+        sep24Transaction = null;
+        sep24PopupRef = null;
+        paymentResult = null;
         error = null;
+    }
+
+    // Human-readable status labels
+    function formatStatus(status: TransactionStatus): string {
+        const labels: Record<string, string> = {
+            incomplete: 'Incomplete',
+            pending_user_transfer_start: 'Waiting for your transfer',
+            pending_user_transfer_complete: 'Transfer received, processing',
+            pending_external: 'Waiting on external system',
+            pending_anchor: 'Anchor processing',
+            pending_stellar: 'Submitting to Stellar',
+            pending_trust: 'Waiting for trustline',
+            pending_user: 'Action required',
+            pending_customer_info_update: 'KYC update needed',
+            pending_transaction_info_update: 'Transaction info needed',
+            completed: 'Completed',
+            refunded: 'Refunded',
+            expired: 'Expired',
+            error: 'Error',
+            no_market: 'No market',
+        };
+        return labels[status] ?? status;
+    }
+
+    function statusColor(status: TransactionStatus): string {
+        if (status === 'completed') return 'text-green-600';
+        if (status === 'error' || status === 'expired' || status === 'no_market')
+            return 'text-red-600';
+        if (status === 'refunded') return 'text-amber-600';
+        return 'text-blue-600';
     }
 </script>
 
@@ -461,11 +684,23 @@
                             id="amount"
                             type="number"
                             bind:value={transferAmount}
-                            min="0"
+                            min={currentLimits?.min ?? 0}
+                            max={currentLimits?.max}
                             step="any"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-violet-500 focus:ring-violet-500"
                             placeholder="10"
                         />
+                        {#if currentLimits}
+                            <p class="mt-1 text-xs text-gray-500">
+                                {#if currentLimits.min != null && currentLimits.max != null}
+                                    Range: {currentLimits.min} – {currentLimits.max} {selectedAsset}
+                                {:else if currentLimits.max != null}
+                                    Max: {currentLimits.max} {selectedAsset}
+                                {:else if currentLimits.min != null}
+                                    Min: {currentLimits.min} {selectedAsset}
+                                {/if}
+                            </p>
+                        {/if}
                     </div>
                 </div>
             </div>
@@ -554,11 +789,99 @@
                                 <span class="font-medium">Transaction ID:</span>
                                 <code class="ml-1 rounded bg-gray-100 px-1">{sep24Result.id}</code>
                             </p>
+
+                            {#if sep24Transaction}
+                                <div class="mb-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Status:</span>
+                                        <span class="ml-1 font-medium {statusColor(sep24Transaction.status)}">
+                                            {formatStatus(sep24Transaction.status)}
+                                        </span>
+                                    </p>
+                                    {#if sep24Transaction.message}
+                                        <p class="mt-1 text-xs text-gray-600">{sep24Transaction.message}</p>
+                                    {/if}
+                                    {#if sep24Transaction.amount_in}
+                                        <p class="mt-1 text-xs text-gray-600">
+                                            Amount in: {sep24Transaction.amount_in}
+                                            {sep24Transaction.amount_in_asset ?? ''}
+                                        </p>
+                                    {/if}
+                                    {#if sep24Transaction.amount_out}
+                                        <p class="text-xs text-gray-600">
+                                            Amount out: {sep24Transaction.amount_out}
+                                            {sep24Transaction.amount_out_asset ?? ''}
+                                        </p>
+                                    {/if}
+                                    {#if sep24Transaction.withdraw_anchor_account}
+                                        <p class="mt-1 text-xs text-gray-600">
+                                            <span class="font-medium">Send to:</span>
+                                            <code class="ml-1 rounded bg-gray-100 px-1">
+                                                {sep24Transaction.withdraw_anchor_account}
+                                            </code>
+                                        </p>
+                                    {/if}
+                                    {#if sep24Transaction.withdraw_memo}
+                                        <p class="text-xs text-gray-600">
+                                            <span class="font-medium">Memo ({sep24Transaction.withdraw_memo_type ?? 'text'}):</span>
+                                            <code class="ml-1 rounded bg-gray-100 px-1">
+                                                {sep24Transaction.withdraw_memo}
+                                            </code>
+                                        </p>
+                                    {/if}
+                                    <details class="mt-2">
+                                        <summary class="cursor-pointer text-xs text-gray-500">Full transaction</summary>
+                                        <pre class="mt-1 overflow-x-auto text-xs">{JSON.stringify(sep24Transaction, null, 2)}</pre>
+                                    </details>
+                                </div>
+
+                                <!-- Withdrawal: Send Payment button -->
+                                {#if withdrawalReady && !paymentResult?.success}
+                                    <button
+                                        onclick={sendWithdrawalPayment}
+                                        disabled={isSendingPayment}
+                                        class="mb-3 w-full rounded-lg bg-violet-600 px-4 py-2 font-medium text-white hover:bg-violet-700 disabled:opacity-50"
+                                    >
+                                        {#if isSendingPayment}
+                                            Signing & submitting...
+                                        {:else}
+                                            Send {sep24Transaction.amount_in || transferAmount} {selectedAsset} to Anchor
+                                        {/if}
+                                    </button>
+                                {/if}
+
+                                <!-- Payment result -->
+                                {#if paymentResult}
+                                    {#if paymentResult.success}
+                                        <div class="mb-3 rounded-md border border-green-200 bg-green-50 p-3">
+                                            <p class="text-sm font-medium text-green-700">Payment submitted</p>
+                                            {#if paymentResult.stellarTxId}
+                                                <p class="mt-1 text-xs text-green-600">
+                                                    <a
+                                                        href="https://stellar.expert/explorer/testnet/tx/{paymentResult.stellarTxId}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        class="underline hover:no-underline"
+                                                    >
+                                                        View on Stellar Expert
+                                                    </a>
+                                                </p>
+                                            {/if}
+                                        </div>
+                                    {:else}
+                                        <div class="mb-3 rounded-md border border-red-200 bg-red-50 p-3">
+                                            <p class="text-sm font-medium text-red-700">Payment failed</p>
+                                            <p class="mt-1 text-xs text-red-600">{paymentResult.error}</p>
+                                        </div>
+                                    {/if}
+                                {/if}
+                            {/if}
+
                             <button
                                 onclick={openSep24Url}
-                                class="mt-2 w-full rounded-lg border border-green-600 bg-white px-4 py-2 text-green-600 hover:bg-green-50"
+                                class="w-full rounded-lg border border-green-600 bg-white px-4 py-2 text-green-600 hover:bg-green-50"
                             >
-                                Open Interactive UI
+                                {sep24PopupRef && !sep24PopupRef.closed ? 'Refocus Interactive UI' : 'Open Interactive UI'}
                             </button>
                             <p class="mt-2 text-xs text-gray-500">
                                 URL: <a

@@ -55,9 +55,10 @@ export async function buildPaymentTransaction(options: {
     asset: Asset;
     amount: string;
     memo?: string;
+    memoType?: 'text' | 'id' | 'hash';
     network: StellarNetwork;
 }): Promise<string> {
-    const { sourcePublicKey, destinationPublicKey, asset, amount, memo, network } = options;
+    const { sourcePublicKey, destinationPublicKey, asset, amount, memo, memoType = 'text', network } = options;
 
     const server = getHorizonServer(network);
     const networkPassphrase = getNetworkPassphrase(network);
@@ -80,7 +81,16 @@ export async function buildPaymentTransaction(options: {
         .setTimeout(300); // 5 minutes
 
     if (memo) {
-        builder = builder.addMemo(Memo.text(memo));
+        switch (memoType) {
+            case 'id':
+                builder = builder.addMemo(Memo.id(memo));
+                break;
+            case 'hash':
+                builder = builder.addMemo(Memo.hash(memo));
+                break;
+            default:
+                builder = builder.addMemo(Memo.text(memo));
+        }
     }
 
     const transaction = builder.build();

@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 throw error(400, { message: `Unknown action: ${action}` });
         }
 
-        // Ensure amount is a string (SEP-24 requirement)
+        // Build JSON body with string values
         const normalizedParams: Record<string, string> = {};
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== null) {
