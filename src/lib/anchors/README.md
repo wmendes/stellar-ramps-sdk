@@ -51,7 +51,11 @@ All three provider clients implement this interface from `types.ts`:
 ```typescript
 interface Anchor {
     readonly name: string;
+    readonly displayName: string;
     readonly capabilities: AnchorCapabilities;
+    readonly supportedTokens: readonly TokenInfo[];
+    readonly supportedCurrencies: readonly string[];
+    readonly supportedRails: readonly string[];
 
     // Customer management
     createCustomer(input: CreateCustomerInput): Promise<Customer>;
@@ -77,6 +81,8 @@ interface Anchor {
 }
 ```
 
+Each client declares its own `displayName`, `supportedTokens` (with Stellar issuers), `supportedCurrencies` (ISO codes), and `supportedRails` (rail identifiers). This means the portable library is fully self-contained — no external token or config registry required.
+
 ---
 
 ## Anchor Providers
@@ -85,7 +91,7 @@ interface Anchor {
 
 Mexico focus. Iframe-based KYC. On-ramp and off-ramp via SPEI. Uses CETES token.
 
-**Capabilities:** `kycFlow: 'iframe'`, `kycUrl`, `requiresOffRampSigning`, `deferredOffRampSigning`, `sandbox`, `displayName: 'Etherfuse'`
+**Capabilities:** `kycFlow: 'iframe'`, `kycUrl`, `requiresOffRampSigning`, `deferredOffRampSigning`, `sandbox`
 
 ```typescript
 import { EtherfuseClient } from 'path/to/anchors/etherfuse';
@@ -134,7 +140,7 @@ See [`etherfuse/README.md`](etherfuse/README.md) for complete documentation.
 
 Latin America focus. Form-based KYC. On-ramp and off-ramp via SPEI. Uses USDC. Supports email-based customer lookup.
 
-**Capabilities:** `kycFlow: 'form'`, `emailLookup`, `kycUrl`, `sandbox`, `displayName: 'Alfred Pay'`
+**Capabilities:** `kycFlow: 'form'`, `emailLookup`, `kycUrl`, `sandbox`
 
 ```typescript
 import { AlfredPayClient } from 'path/to/anchors/alfredpay';
@@ -179,7 +185,7 @@ See [`alfredpay/README.md`](alfredpay/README.md) for complete documentation incl
 
 Global coverage. Redirect-based KYC. Uses USDB token. Requires separate blockchain wallet registration. Off-ramp uses a payout submission step rather than direct Stellar transaction signing.
 
-**Capabilities:** `kycFlow: 'redirect'`, `kycUrl`, `requiresTos`, `requiresOffRampSigning`, `requiresBankBeforeQuote`, `requiresBlockchainWalletRegistration`, `requiresAnchorPayoutSubmission`, `sandbox`, `displayName: 'BlindPay'`
+**Capabilities:** `kycFlow: 'redirect'`, `kycUrl`, `requiresTos`, `requiresOffRampSigning`, `requiresBankBeforeQuote`, `requiresBlockchainWalletRegistration`, `requiresAnchorPayoutSubmission`, `sandbox`
 
 ```typescript
 import { BlindPayClient } from 'path/to/anchors/blindpay';
@@ -244,6 +250,7 @@ Create a new directory and implement the `Anchor` interface:
 import type {
     Anchor,
     AnchorCapabilities,
+    TokenInfo,
     Customer,
     Quote,
     CreateCustomerInput /* ... */,
@@ -252,16 +259,26 @@ import { AnchorError } from 'path/to/anchors/types';
 
 export class MyAnchorClient implements Anchor {
     readonly name = 'myanchor';
+    readonly displayName = 'My Anchor';
     readonly capabilities: AnchorCapabilities = {
         kycUrl: true,
         kycFlow: 'iframe', // 'form' | 'iframe' | 'redirect'
         sandbox: true, // enable sandbox simulation UI
-        displayName: 'My Anchor', // shown in UI labels
         // deferredOffRampSigning: false,
         // requiresBankBeforeQuote: false,
         // requiresBlockchainWalletRegistration: false,
         // requiresAnchorPayoutSubmission: false,
     };
+    readonly supportedTokens: readonly TokenInfo[] = [
+        {
+            symbol: 'USDC',
+            name: 'USD Coin',
+            issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+            description: 'A fully-reserved stablecoin pegged 1:1 to the US Dollar',
+        },
+    ];
+    readonly supportedCurrencies: readonly string[] = ['MXN'];
+    readonly supportedRails: readonly string[] = ['spei'];
 
     constructor(private config: { apiKey: string; baseUrl: string }) {}
 

@@ -53,7 +53,11 @@ All custom clients implement this interface from `types.ts`:
 ```typescript
 interface Anchor {
     readonly name: string;
+    readonly displayName: string;
     readonly capabilities: AnchorCapabilities;
+    readonly supportedTokens: readonly TokenInfo[];
+    readonly supportedCurrencies: readonly string[];
+    readonly supportedRails: readonly string[];
     createCustomer(input: CreateCustomerInput): Promise<Customer>;
     getCustomer(customerId: string): Promise<Customer | null>;
     getCustomerByEmail?(email: string, country?: string): Promise<Customer | null>;
@@ -68,6 +72,8 @@ interface Anchor {
     getKycStatus(customerId: string, publicKey?: string): Promise<KycStatus>;
 }
 ```
+
+Each client declares `displayName`, `supportedTokens` (with Stellar issuers), `supportedCurrencies`, and `supportedRails` — making the portable library fully self-contained.
 
 ### Anchor Providers
 

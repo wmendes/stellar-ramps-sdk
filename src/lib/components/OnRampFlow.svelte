@@ -34,6 +34,7 @@ Usage:
         toCurrency?: string;
         fiatCurrency?: string;
         capabilities?: AnchorCapabilities;
+        tokenIssuer?: string;
     }
 
     let {
@@ -41,6 +42,7 @@ Usage:
         toCurrency = 'USDC',
         fiatCurrency = 'MXN',
         capabilities,
+        tokenIssuer,
     }: Props = $props();
 
     // Local state for this flow
@@ -66,7 +68,7 @@ Usage:
 
     const network = (PUBLIC_STELLAR_NETWORK || 'testnet') as StellarNetwork;
 
-    const stellarAsset = $derived(resolveStellarAsset(toCurrency, PUBLIC_USDC_ISSUER));
+    const stellarAsset = $derived(resolveStellarAsset(toCurrency, tokenIssuer, PUBLIC_USDC_ISSUER));
 
     async function getQuote() {
         if (!amount || isNaN(parseFloat(amount))) return;

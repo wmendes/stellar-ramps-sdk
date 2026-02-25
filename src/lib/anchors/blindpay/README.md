@@ -17,6 +17,7 @@ Server-side TypeScript client for the [BlindPay](https://blindpay.com) anchor AP
 `BlindPayClient` declares the following `AnchorCapabilities` flags. UI components use these flags instead of provider-name checks to determine behavior.
 
 ```typescript
+readonly displayName = 'BlindPay';
 readonly capabilities: AnchorCapabilities = {
     kycUrl: true,                             // Supports URL-based KYC (redirect to ToS)
     requiresTos: true,                        // Requires separate ToS acceptance step
@@ -26,8 +27,12 @@ readonly capabilities: AnchorCapabilities = {
     requiresBlockchainWalletRegistration: true, // On-ramp requires wallet registration step
     requiresAnchorPayoutSubmission: true,     // Signed XDR submitted back to BlindPay, not Stellar
     sandbox: true,                            // Sandbox simulation available
-    displayName: 'BlindPay',                  // Human-readable name for UI labels
 };
+readonly supportedTokens: readonly TokenInfo[] = [
+    { symbol: 'USDB', name: 'BlindPay USD', issuer: 'GBWXJPZL5ADAH7T5BP3DBW2V2DFT3URN2VXN2MG26OM4CTOJSDDSPYAN', description: '...' },
+];
+readonly supportedCurrencies: readonly string[] = ['MXN'];
+readonly supportedRails: readonly string[] = ['spei'];
 ```
 
 | Flag                                   | Effect                                                                                                         |
@@ -38,7 +43,6 @@ readonly capabilities: AnchorCapabilities = {
 | `requiresBlockchainWalletRegistration` | On-ramp flow registers a blockchain wallet after customer creation, before quoting                             |
 | `requiresAnchorPayoutSubmission`       | After signing the off-ramp XDR, the signed transaction is submitted back to BlindPay (not directly to Stellar) |
 | `sandbox`                              | Sandbox controls are shown in the UI (payins auto-complete after 30s on dev instances)                         |
-| `displayName`                          | Used in UI labels like "View on BlindPay"                                                                      |
 
 ## Key Differences from Other Anchors
 

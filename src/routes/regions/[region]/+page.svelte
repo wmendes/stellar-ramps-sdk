@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { getToken } from '$lib/config/tokens';
     import type { PageProps } from './$types';
 
     // we use `$props()` in SvelteKit to "grab" the various data that's been
-    // loaded from any relevant `+layout.ts` or `+page.ts` files in the
-    // directory structure.
+    // loaded from any relevant `+layout.server.ts` or `+page.server.ts` files
+    // in the directory structure.
     const { data }: PageProps = $props();
     // pull out the pieces of data as `$derived()` state.
     const { region, tokens, anchors } = $derived(data);
@@ -48,15 +47,12 @@
         <section class="mb-8">
             <h2 class="mb-4 text-xl font-semibold text-gray-900">Available Digital Assets</h2>
             <div class="grid gap-4 sm:grid-cols-3">
-                {#each [...tokens] as tokenSymbol}
-                    {@const token = getToken(tokenSymbol)}
-                    {#if token}
-                        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                            <h3 class="font-semibold text-gray-900">{token.symbol}</h3>
-                            <p class="text-sm text-gray-500">{token.name}</p>
-                            <p class="mt-2 text-xs text-gray-400">{token.description}</p>
-                        </div>
-                    {/if}
+                {#each tokens as token}
+                    <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                        <h3 class="font-semibold text-gray-900">{token.symbol}</h3>
+                        <p class="text-sm text-gray-500">{token.name}</p>
+                        <p class="mt-2 text-xs text-gray-400">{token.description}</p>
+                    </div>
                 {/each}
             </div>
         </section>

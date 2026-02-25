@@ -40,6 +40,8 @@ Usage:
         fromCurrency?: string;
         fiatCurrency?: string;
         capabilities?: AnchorCapabilities;
+        tokenIssuer?: string;
+        displayName?: string;
     }
 
     let {
@@ -47,6 +49,8 @@ Usage:
         fromCurrency = 'USDC',
         fiatCurrency = 'MXN',
         capabilities,
+        tokenIssuer,
+        displayName,
     }: Props = $props();
 
     // Local state for this flow
@@ -82,7 +86,7 @@ Usage:
 
     const network = (PUBLIC_STELLAR_NETWORK || 'testnet') as StellarNetwork;
 
-    const stellarAsset = $derived(resolveStellarAsset(fromCurrency, PUBLIC_USDC_ISSUER));
+    const stellarAsset = $derived(resolveStellarAsset(fromCurrency, tokenIssuer, PUBLIC_USDC_ISSUER));
 
     async function getQuote_() {
         if (!amount || isNaN(parseFloat(amount))) return;
@@ -620,7 +624,7 @@ Usage:
                             rel="noopener noreferrer"
                             class="mt-2 inline-block text-sm text-indigo-600 hover:text-indigo-800"
                         >
-                            View on {capabilities?.displayName || 'Anchor'}
+                            View on {displayName || 'Anchor'}
                         </a>
                     {/if}
                 </div>

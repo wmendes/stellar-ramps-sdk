@@ -209,6 +209,19 @@ export interface CreateOffRampInput {
 }
 
 // =============================================================================
+// Token metadata
+// =============================================================================
+
+/** Describes a digital asset token supported by an anchor. */
+export interface TokenInfo {
+    symbol: string;
+    name: string;
+    /** Stellar asset issuer public key. Absent for native XLM. */
+    issuer?: string;
+    description: string;
+}
+
+// =============================================================================
 // Anchor Capabilities
 // =============================================================================
 
@@ -238,8 +251,6 @@ export interface AnchorCapabilities {
     requiresAnchorPayoutSubmission?: boolean;
     /** Whether the anchor has sandbox simulation support. */
     sandbox?: boolean;
-    /** Human-readable display name (for UI labels like "View on {name}"). */
-    displayName?: string;
 }
 
 // =============================================================================
@@ -251,7 +262,11 @@ export interface AnchorCapabilities {
  */
 export interface Anchor {
     readonly name: string;
+    readonly displayName: string;
     readonly capabilities: AnchorCapabilities;
+    readonly supportedTokens: readonly TokenInfo[];
+    readonly supportedCurrencies: readonly string[];
+    readonly supportedRails: readonly string[];
 
     createCustomer(input: CreateCustomerInput): Promise<Customer>;
     getCustomer(customerId: string): Promise<Customer | null>;

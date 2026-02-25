@@ -8,8 +8,7 @@ This is a SvelteKit application for building fiat on/off ramps on the Stellar ne
 src/
 ├── lib/
 │   ├── anchors/              # PORTABLE: Framework-agnostic anchor integrations
-│   │   ├── types.ts          # Shared Anchor interface + common types
-│   │   ├── index.ts          # Re-exports (no SvelteKit imports)
+│   │   ├── types.ts          # Shared Anchor interface + common types (includes TokenInfo)
 │   │   ├── etherfuse/        # Etherfuse integration (Mexico)
 │   │   │   ├── client.ts     # EtherfuseClient implements Anchor
 │   │   │   ├── types.ts      # Etherfuse API types
@@ -58,7 +57,6 @@ src/
 │   ├── config/
 │   │   ├── anchors.ts        # Anchor profiles + AnchorCapability type
 │   │   ├── regions.ts        # Region definitions + cross-lookup helpers
-│   │   ├── tokens.ts         # Token definitions
 │   │   └── rails.ts          # Payment rail definitions
 │   │
 │   ├── constants.ts          # App constants (providers, statuses)
@@ -108,7 +106,11 @@ All three anchor clients implement the shared `Anchor` interface:
 ```typescript
 interface Anchor {
     readonly name: string;
+    readonly displayName: string;
     readonly capabilities: AnchorCapabilities;
+    readonly supportedTokens: readonly TokenInfo[];
+    readonly supportedCurrencies: readonly string[];
+    readonly supportedRails: readonly string[];
     createCustomer(input): Promise<Customer>;
     getCustomer(id): Promise<Customer | null>;
     getCustomerByEmail?(email, country?): Promise<Customer | null>;
@@ -124,6 +126,8 @@ interface Anchor {
 }
 ```
 
+Each client also declares `displayName`, `supportedTokens` (with Stellar issuers from `TokenInfo`), `supportedCurrencies` (ISO codes), and `supportedRails` (rail identifiers). This makes the portable library self-contained — no external token or config registry required.
+
 ### AnchorCapabilities
 
 The `AnchorCapabilities` interface (in `anchors/types.ts`) carries both runtime and UI capability flags. Flow components use these flags instead of provider-name checks:
@@ -134,7 +138,6 @@ The `AnchorCapabilities` interface (in `anchors/types.ts`) carries both runtime 
 - `requiresBlockchainWalletRegistration`: on-ramp requires wallet registration step
 - `requiresAnchorPayoutSubmission`: off-ramp uses anchor payout endpoint instead of direct Stellar submission
 - `sandbox`: anchor supports sandbox simulation
-- `displayName`: human-readable name for UI labels
 
 ### Anchor Providers
 
@@ -190,11 +193,10 @@ The off-ramp flow differs by provider:
 
 ### Configuration (`/config/`)
 
-Config is split across four files with no barrel `index.ts`:
+Config is split across three files with no barrel `index.ts`. Token data (issuers, names) lives on the `Anchor` client classes, not in config.
 
-- **`tokens.ts`** — `Token` type, `TOKENS` data, `getToken()` helper
 - **`rails.ts`** — `PaymentRail` type, `PAYMENT_RAILS` data, `getPaymentRail()` helper
-- **`anchors.ts`** — `AnchorProfile` type (config-side, distinct from the runtime `Anchor` interface), `ANCHORS` data, `getAnchor()`, `getAllAnchors()`
+- **`anchors.ts`** — `AnchorProfile` type (config-side UI metadata: descriptions, integration flows, dev onboarding — distinct from the runtime `Anchor` interface), `ANCHORS` data, `getAnchor()`, `getAllAnchors()`
 - **`regions.ts`** — `Region` type, `REGIONS` data, `getRegion()`, `getAllRegions()`, `getAnchorsForRegion()`, `getRegionsForAnchor()`
 
 The anchor order in all lists is: Etherfuse, AlfredPay, BlindPay. Fiat currency is derived from region config (`region.currency`) and passed as a prop to flow components — not hardcoded.
@@ -215,12 +217,12 @@ For SEP-compliant anchors (test anchor demo):
 ### Adding a New Anchor Integration
 
 1. Create directory: `/src/lib/anchors/[anchor-name]/`
-2. Create `client.ts` implementing the `Anchor` interface from `../types.ts` — set all relevant `AnchorCapabilities` flags
+2. Create `client.ts` implementing the `Anchor` interface from `../types.ts` — set `displayName`, `supportedTokens` (with issuers), `supportedCurrencies`, `supportedRails`, and all relevant `AnchorCapabilities` flags
 3. Create `types.ts` for anchor-specific API types
-4. Create `index.ts` exporting the client and types
+4. Create `index.ts` exporting the client class and types
 5. Add the provider to `src/lib/server/anchorFactory.ts` (import client, add env vars, add to switch case, add to `AnchorProvider` type)
 6. Add to `src/lib/constants.ts` (`PROVIDER` object)
-7. Add to `src/lib/config/anchors.ts` (`ANCHORS` record with matching `AnchorCapabilities`)
+7. Add to `src/lib/config/anchors.ts` (`ANCHORS` record — UI metadata only: description, links, integration flow)
 8. Add to `src/lib/config/regions.ts` (region `anchors` arrays)
 9. Add CORS proxy API routes in `/routes/api/` if needed
 10. Document in `/src/lib/anchors/[anchor-name]/README.md`

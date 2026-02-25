@@ -1,15 +1,14 @@
 <script lang="ts">
     import { getPaymentRail } from '$lib/config/rails';
-    import { getToken } from '$lib/config/tokens';
     import DevBox from '$lib/components/ui/DevBox.svelte';
     import type { PageProps } from './$types';
 
     // we use `$props()` in SvelteKit to "grab" the various data that's been
-    // loaded from any relevant `+layout.ts` or `+page.ts` files in the
-    // directory structure.
+    // loaded from any relevant `+layout.server.ts` or `+page.server.ts` files
+    // in the directory structure.
     const { data }: PageProps = $props();
     // pull out the pieces of data as `$derived()` state.
-    const { anchor, regions, tokens } = $derived(data);
+    const { anchor, regions, supportedTokens, capabilities } = $derived(data);
 
     const devBoxItems = $derived.by(() => {
         if (!anchor) return [];
@@ -20,11 +19,11 @@
             },
             { text: `${anchor.name} API documentation`, link: anchor.links.documentation },
         ];
-        if (anchor.capabilities.sandbox) {
+        if (capabilities?.sandbox) {
             items.push({ text: 'Sandbox environment available for testing' });
         }
-        if (anchor.capabilities.kycFlow) {
-            items.push({ text: `KYC flow: ${anchor.capabilities.kycFlow}` });
+        if (capabilities?.kycFlow) {
+            items.push({ text: `KYC flow: ${capabilities.kycFlow}` });
         }
         return items;
     });
@@ -107,14 +106,11 @@
 <section class="mb-8">
     <h2 class="mb-4 text-xl font-semibold text-gray-900">Supported Digital Assets</h2>
     <div class="grid gap-4 sm:grid-cols-3">
-        {#each [...tokens] as tokenSymbol}
-            {@const token = getToken(tokenSymbol)}
-            {#if token}
-                <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                    <h3 class="font-semibold text-gray-900">{token.symbol}</h3>
-                    <p class="text-sm text-gray-500">{token.name}</p>
-                </div>
-            {/if}
+        {#each supportedTokens as token}
+            <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <h3 class="font-semibold text-gray-900">{token.symbol}</h3>
+                <p class="text-sm text-gray-500">{token.name}</p>
+            </div>
         {/each}
     </div>
 </section>

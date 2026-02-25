@@ -21,6 +21,7 @@
 import type {
     Anchor,
     AnchorCapabilities,
+    TokenInfo,
     Customer,
     Quote,
     OnRampTransaction,
@@ -63,14 +64,25 @@ import type {
  */
 export class EtherfuseClient implements Anchor {
     readonly name = 'etherfuse';
+    readonly displayName = 'Etherfuse';
     readonly capabilities: AnchorCapabilities = {
         kycUrl: true,
         requiresOffRampSigning: true,
         kycFlow: 'iframe',
         deferredOffRampSigning: true,
         sandbox: true,
-        displayName: 'Etherfuse',
     };
+    readonly supportedTokens: readonly TokenInfo[] = [
+        {
+            symbol: 'CETES',
+            name: 'Etherfuse CETES',
+            issuer: 'GC3CW7EDYRTWQ635VDIGY6S4ZUF5L6TQ7AA4MWS7LEQDBLUSZXV7UPS4',
+            description:
+                "Etherfuse CETES, officially known as Mexican Federal Treasury Certificates, are Mexico's oldest short-term debt securities issued by the Ministry of Finance.",
+        },
+    ];
+    readonly supportedCurrencies: readonly string[] = ['MXN'];
+    readonly supportedRails: readonly string[] = ['spei'];
     private readonly config: EtherfuseConfig;
     private readonly blockchain: string;
 

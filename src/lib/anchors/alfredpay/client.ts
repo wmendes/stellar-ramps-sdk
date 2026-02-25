@@ -22,6 +22,7 @@
 import type {
     Anchor,
     AnchorCapabilities,
+    TokenInfo,
     Customer,
     Quote,
     OnRampTransaction,
@@ -66,13 +67,23 @@ import type {
  */
 export class AlfredPayClient implements Anchor {
     readonly name = 'alfredpay';
+    readonly displayName = 'Alfred Pay';
     readonly capabilities: AnchorCapabilities = {
         emailLookup: true,
         kycUrl: true,
         kycFlow: 'form',
         sandbox: true,
-        displayName: 'Alfred Pay',
     };
+    readonly supportedTokens: readonly TokenInfo[] = [
+        {
+            symbol: 'USDC',
+            name: 'USD Coin',
+            issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+            description: 'A fully-reserved stablecoin pegged 1:1 to the US Dollar',
+        },
+    ];
+    readonly supportedCurrencies: readonly string[] = ['MXN'];
+    readonly supportedRails: readonly string[] = ['spei'];
     private readonly config: AlfredPayConfig;
 
     /** @param config - API credentials and base URL. */

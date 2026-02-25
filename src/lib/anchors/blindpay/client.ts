@@ -16,6 +16,7 @@
 import type {
     Anchor,
     AnchorCapabilities,
+    TokenInfo,
     Customer,
     Quote,
     OnRampTransaction,
@@ -59,6 +60,7 @@ import type {
  */
 export class BlindPayClient implements Anchor {
     readonly name = 'blindpay';
+    readonly displayName = 'BlindPay';
     readonly capabilities: AnchorCapabilities = {
         kycUrl: true,
         requiresTos: true,
@@ -68,8 +70,18 @@ export class BlindPayClient implements Anchor {
         requiresBlockchainWalletRegistration: true,
         requiresAnchorPayoutSubmission: true,
         sandbox: true,
-        displayName: 'BlindPay',
     };
+    readonly supportedTokens: readonly TokenInfo[] = [
+        {
+            symbol: 'USDB',
+            name: 'BlindPay USD',
+            issuer: 'GBWXJPZL5ADAH7T5BP3DBW2V2DFT3URN2VXN2MG26OM4CTOJSDDSPYAN',
+            description:
+                'USDB is a fake ERC20 stablecoin powered by BlindPay to simulate payouts on development instances.',
+        },
+    ];
+    readonly supportedCurrencies: readonly string[] = ['MXN'];
+    readonly supportedRails: readonly string[] = ['spei'];
     private readonly config: BlindPayConfig;
     private readonly network: string;
 

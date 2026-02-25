@@ -4,13 +4,11 @@
 
     import type { PageProps } from './$types';
     const { data }: PageProps = $props();
-    const { anchor, fiatCurrency } = $derived(data);
+    const { anchor, fiatCurrency, primaryToken, capabilities, supportedTokens } = $derived(data);
 
-    // Derive the target token from the anchor's first region config
-    const toCurrency = $derived.by(() => {
-        const firstRegion = Object.values(anchor.regions)[0];
-        return firstRegion?.tokens[0] ?? 'USDC';
-    });
+    const tokenIssuer = $derived(
+        supportedTokens.find((t) => t.symbol === primaryToken)?.issuer,
+    );
 </script>
 
 <RampPage
@@ -18,12 +16,13 @@
     title="On-Ramp with {anchor.name}"
     description="Transfer local currency via bank transfer and receive digital assets directly to your Stellar wallet."
     connectMessage="Connect your Freighter wallet to get started."
-    capabilities={anchor.capabilities}
+    {capabilities}
 >
     <OnRampFlow
         provider={anchor.id}
-        {toCurrency}
+        toCurrency={primaryToken}
         {fiatCurrency}
-        capabilities={anchor.capabilities}
+        {capabilities}
+        {tokenIssuer}
     />
 </RampPage>
