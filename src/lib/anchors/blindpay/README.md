@@ -348,3 +348,16 @@ Use first name `"Fail"` when creating receivers to simulate KYC rejection.
 ## Anchor Interface
 
 `BlindPayClient` implements the `Anchor` interface defined in `../types.ts`. This means it can be swapped with any other anchor implementation (SEP-compliant or custom) without changing application code. Its `AnchorCapabilities` flags drive the UI behavior — see the [Capabilities](#capabilities) section above. See the parent `anchors/` directory for the full interface definition.
+
+## Claude Code Skill
+
+A BlindPay skill is installed for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) in this repository under `.claude/skills/blindpay/`. It provides comprehensive BlindPay API documentation covering:
+
+- Payin and payout flows (fiat-to-stablecoin and stablecoin-to-fiat)
+- Receiver creation, KYC, and Terms of Service acceptance
+- Bank account and blockchain wallet registration
+- Quote creation and expiration
+- Webhook events
+- Development vs production environments and testing scenarios
+
+The skill is activated automatically when Claude Code detects work related to the BlindPay integration. It includes full reference docs stored under `.claude/skills/blindpay/references/` covering all BlindPay API endpoints and guides.
