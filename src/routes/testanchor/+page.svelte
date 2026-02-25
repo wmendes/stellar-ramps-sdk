@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { createTestAnchorClient } from '$lib/anchors/testanchor';
     import { walletStore } from '$lib/stores/wallet.svelte';
     import {
         buildPaymentTransaction,
@@ -7,57 +6,53 @@
         getStellarAsset,
         getNetworkPassphrase,
     } from '$lib/wallet/stellar';
-    import { onDestroy } from 'svelte';
     import type {
         Sep6DepositResponse,
         Sep6WithdrawResponse,
         Sep24InteractiveResponse,
-        Sep24Info,
         Sep24Transaction,
         TransactionStatus,
+        Sep6Info,
+        Sep24Info,
+        Sep38Info,
     } from '$lib/anchors/sep/types';
+    import type { PageProps } from './$types';
+    import { browser } from '$app/environment';
+    import { onDestroy } from 'svelte';
 
-    // Create client instance
-    const client = createTestAnchorClient();
+    const { data }: PageProps = $props();
+
+    // Pre-loaded from +page.ts load function
+    const client = $derived(data.client)
+    const initialized = $derived(!!data.tomlInfo);
+    const tomlInfo = $derived(data.tomlInfo);
 
     // State
-    let initialized = $state(false);
     let authenticated = $state(false);
     let loading = $state(false);
     let error = $state<string | null>(null);
 
-    // Data
-    let tomlInfo = $state<{
-        sep10?: string;
-        sep6?: string;
-        sep12?: string;
-        sep24?: string;
-        sep31?: string;
-        sep38?: string;
-        signingKey?: string;
-        currencies?: Array<{ code: string; issuer?: string }>;
-    } | null>(null);
-
-    let sep6Info = $state<unknown>(null);
-    let sep24Info = $state<unknown>(null);
-    let sep38Info = $state<unknown>(null);
+    let selectedSepTab = $state<'sep6' | 'sep24' | 'sep38'>('sep24');
+    const sepTabs = [
+        { id: 'sep6' as const, label: 'SEP-6', subtitle: 'Programmatic' },
+        { id: 'sep24' as const, label: 'SEP-24', subtitle: 'Interactive' },
+        { id: 'sep38' as const, label: 'SEP-38', subtitle: 'Quotes' },
+    ];
 
     // Transfer form state
     let selectedAsset = $state('SRT');
     let transferAmount = $state('10');
     let transferType = $state<'deposit' | 'withdraw'>('deposit');
 
-    // SEP-24 asset limits (fetched on init)
-    let sep24InfoData = $state<Sep24Info | null>(null);
-
-    // Derived limits for current asset + transfer type
-    let currentLimits = $derived.by(() => {
-        if (!sep24InfoData) return null;
-        const assets = transferType === 'deposit' ? sep24InfoData.deposit : sep24InfoData.withdraw;
+    // Get limits for current asset + transfer type (from SEP-24 details)
+    async function getCurrentLimits() {
+        const sep24Info = await data.sep24Info
+        if (!sep24Info) return null;
+        const assets = transferType === 'deposit' ? sep24Info.deposit : sep24Info.withdraw;
         const info = assets?.[selectedAsset];
         if (!info?.enabled) return null;
         return { min: info.min_amount, max: info.max_amount };
-    });
+    };
 
     // Results
     let sep6Result = $state<Sep6DepositResponse | Sep6WithdrawResponse | null>(null);
@@ -66,7 +61,7 @@
 
     // SEP-24 interactive transaction tracking
     let sep24Transaction = $state<Sep24Transaction | null>(null);
-    $inspect('sep24Transaction', sep24Transaction);
+    // $inspect('sep24Transaction', sep24Transaction);
     let sep24PopupRef = $state<Window | null>(null);
 
     // Withdrawal payment state
@@ -87,7 +82,6 @@
     let anchorOrigin: string | null = null;
 
     function handlePostMessage(event: MessageEvent) {
-        console.log(`i have received a message from ${event.origin}`);
         if (event.origin !== anchorOrigin) return;
 
         // Parse the message — could be a JSON string or a plain object
@@ -107,56 +101,24 @@
         // Only accept updates for the transaction we initiated
         if (sep24Result && tx.id !== sep24Result.id) return;
 
-        console.log('SEP-24 postMessage received:', tx.status, tx);
         sep24Transaction = tx;
     }
 
     function startListening(interactiveUrl: string) {
-        anchorOrigin = new URL(interactiveUrl).origin;
-        console.log(`i am currently listening for events from ${anchorOrigin}`);
-        window.addEventListener('message', handlePostMessage);
+        if (browser) {
+            anchorOrigin = new URL(interactiveUrl).origin;
+            window.addEventListener('message', handlePostMessage);
+        }
     }
 
     function stopListening() {
-        window.removeEventListener('message', handlePostMessage);
-        anchorOrigin = null;
-    }
-
-    onDestroy(stopListening);
-
-    // Initialize the client
-    async function initialize() {
-        loading = true;
-        error = null;
-        try {
-            const toml = await client.initialize();
-            tomlInfo = {
-                sep10: toml.WEB_AUTH_ENDPOINT,
-                sep6: toml.TRANSFER_SERVER,
-                sep12: toml.KYC_SERVER,
-                sep24: toml.TRANSFER_SERVER_SEP0024,
-                sep31: toml.DIRECT_PAYMENT_SERVER,
-                sep38: toml.ANCHOR_QUOTE_SERVER,
-                signingKey: toml.SIGNING_KEY,
-                currencies: toml.CURRENCIES?.filter((c) => c.code).map((c) => ({
-                    code: c.code!,
-                    issuer: c.issuer,
-                })),
-            };
-            initialized = true;
-
-            // Auto-fetch SEP-24 info for asset limits
-            try {
-                sep24InfoData = await client.getSep24Info();
-            } catch {
-                // Non-critical — limits just won't be shown
-            }
-        } catch (e) {
-            error = e instanceof Error ? e.message : 'Failed to initialize';
-        } finally {
-            loading = false;
+        if (browser) {
+            window.removeEventListener('message', handlePostMessage);
+            anchorOrigin = null;
         }
     }
+
+    onDestroy(stopListening)
 
     // Authenticate with the anchor
     async function authenticate() {
@@ -184,49 +146,9 @@
         }
     }
 
-    // Fetch SEP-6 info
-    async function fetchSep6Info() {
-        loading = true;
-        error = null;
-        try {
-            sep6Info = await client.getSep6Info();
-        } catch (e) {
-            error = e instanceof Error ? e.message : 'Failed to fetch SEP-6 info';
-        } finally {
-            loading = false;
-        }
-    }
-
-    // Fetch SEP-24 info
-    async function fetchSep24Info() {
-        loading = true;
-        error = null;
-        try {
-            const info = await client.getSep24Info();
-            sep24Info = info;
-            sep24InfoData = info;
-        } catch (e) {
-            error = e instanceof Error ? e.message : 'Failed to fetch SEP-24 info';
-        } finally {
-            loading = false;
-        }
-    }
-
-    // Fetch SEP-38 info
-    async function fetchSep38Info() {
-        loading = true;
-        error = null;
-        try {
-            sep38Info = await client.getQuoteInfo();
-        } catch (e) {
-            error = e instanceof Error ? e.message : 'Failed to fetch SEP-38 info';
-        } finally {
-            loading = false;
-        }
-    }
-
     // Validate amount against current limits
-    function validateAmount(): boolean {
+    async function validateAmount(): Promise<boolean> {
+        const currentLimits = await getCurrentLimits();
         if (!currentLimits) return true;
         const amount = parseFloat(transferAmount);
         if (isNaN(amount)) {
@@ -257,7 +179,7 @@
             return;
         }
 
-        if (!validateAmount()) return;
+        if (!(await validateAmount())) return;
 
         operationLoading = 'sep6';
         error = null;
@@ -304,7 +226,7 @@
             return;
         }
 
-        if (!validateAmount()) return;
+        if (!(await validateAmount())) return;
 
         operationLoading = 'sep24';
         error = null;
@@ -502,17 +424,14 @@
     <section class="rounded-lg border border-gray-200 bg-white p-6">
         <h2 class="mb-4 text-xl font-semibold text-gray-900">1. Initialize (SEP-1)</h2>
         <p class="mb-4 text-gray-600">
-            Fetch the stellar.toml file to discover the anchor's capabilities and endpoints.
+            The anchor's stellar.toml is fetched automatically to discover capabilities and
+            endpoints.
         </p>
 
         {#if !initialized}
-            <button
-                onclick={initialize}
-                disabled={loading}
-                class="rounded-lg bg-violet-600 px-4 py-2 text-white hover:bg-violet-700 disabled:opacity-50"
-            >
-                {loading ? 'Loading...' : 'Fetch stellar.toml'}
-            </button>
+            <p class="text-sm text-gray-500">
+                Failed to load anchor configuration. Please refresh the page to try again.
+            </p>
         {:else if tomlInfo}
             <div class="space-y-3 text-sm">
                 <div class="flex items-center gap-2 text-green-600">
@@ -678,32 +597,34 @@
                     </div>
 
                     <!-- Amount -->
-                    <div>
-                        <label for="amount" class="mb-2 block text-sm font-medium text-gray-700"
-                            >Amount</label
-                        >
-                        <input
-                            id="amount"
-                            type="number"
-                            bind:value={transferAmount}
-                            min={currentLimits?.min ?? 0}
-                            max={currentLimits?.max}
-                            step="any"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-violet-500 focus:ring-violet-500"
-                            placeholder="10"
-                        />
-                        {#if currentLimits}
-                            <p class="mt-1 text-xs text-gray-500">
-                                {#if currentLimits.min != null && currentLimits.max != null}
-                                    Range: {currentLimits.min} – {currentLimits.max} {selectedAsset}
-                                {:else if currentLimits.max != null}
-                                    Max: {currentLimits.max} {selectedAsset}
-                                {:else if currentLimits.min != null}
-                                    Min: {currentLimits.min} {selectedAsset}
-                                {/if}
-                            </p>
-                        {/if}
-                    </div>
+                    {#await getCurrentLimits() then currentLimits}
+                        <div>
+                            <label for="amount" class="mb-2 block text-sm font-medium text-gray-700"
+                                >Amount</label
+                            >
+                            <input
+                                id="amount"
+                                type="number"
+                                bind:value={transferAmount}
+                                min={currentLimits?.min ?? 0}
+                                max={currentLimits?.max}
+                                step="any"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-violet-500 focus:ring-violet-500"
+                                placeholder="10"
+                            />
+                            {#if currentLimits}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    {#if currentLimits.min != null && currentLimits.max != null}
+                                        Range: {currentLimits.min} – {currentLimits.max} {selectedAsset}
+                                    {:else if currentLimits.max != null}
+                                        Max: {currentLimits.max} {selectedAsset}
+                                    {:else if currentLimits.min != null}
+                                        Min: {currentLimits.min} {selectedAsset}
+                                    {/if}
+                                </p>
+                            {/if}
+                        </div>
+                    {/await}
                 </div>
             </div>
 
@@ -934,70 +855,49 @@
     <section class="rounded-lg border border-gray-200 bg-white p-6">
         <h2 class="mb-4 text-xl font-semibold text-gray-900">4. Explore SEP Info</h2>
         <p class="mb-4 text-gray-600">
-            Fetch detailed information about the anchor's capabilities.
+            Detailed information about the anchor's capabilities, loaded automatically.
         </p>
 
         {#if !initialized}
             <p class="text-sm text-gray-500">Initialize first to explore SEPs.</p>
         {:else}
-            <div class="flex flex-wrap gap-3">
-                <button
-                    onclick={fetchSep6Info}
-                    disabled={loading}
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                    Get SEP-6 Info
-                </button>
-                <button
-                    onclick={fetchSep24Info}
-                    disabled={loading}
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                    Get SEP-24 Info
-                </button>
-                <button
-                    onclick={fetchSep38Info}
-                    disabled={loading}
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                    Get SEP-38 Info
-                </button>
+            <!-- Tab bar -->
+            <div class="flex border-b border-gray-200" role="tablist">
+                {#each sepTabs as tab (tab.id)}
+                    <button
+                        role="tab"
+                        aria-selected={selectedSepTab === tab.id}
+                        onclick={() => (selectedSepTab = tab.id)}
+                        class="relative px-4 py-2.5 text-sm font-medium transition-colors
+                            {selectedSepTab === tab.id
+                            ? 'text-violet-700'
+                            : 'text-gray-500 hover:text-gray-700'}"
+                    >
+                        {tab.label}
+                        <span class="ml-1 text-xs font-normal text-gray-400">{tab.subtitle}</span>
+                        {#if selectedSepTab === tab.id}
+                            <span class="absolute inset-x-0 -bottom-px h-0.5 bg-violet-600"></span>
+                        {/if}
+                    </button>
+                {/each}
             </div>
 
-            {#if sep6Info || sep24Info || sep38Info}
-                <div class="mt-4 space-y-4">
-                    {#if sep6Info}
-                        <div class="rounded-lg bg-gray-50 p-4">
-                            <h3 class="mb-2 font-medium text-gray-900">SEP-6 Info:</h3>
-                            <pre class="overflow-x-auto text-xs">{JSON.stringify(
-                                    sep6Info,
-                                    null,
-                                    2,
-                                )}</pre>
-                        </div>
-                    {/if}
-                    {#if sep24Info}
-                        <div class="rounded-lg bg-gray-50 p-4">
-                            <h3 class="mb-2 font-medium text-gray-900">SEP-24 Info:</h3>
-                            <pre class="overflow-x-auto text-xs">{JSON.stringify(
-                                    sep24Info,
-                                    null,
-                                    2,
-                                )}</pre>
-                        </div>
-                    {/if}
-                    {#if sep38Info}
-                        <div class="rounded-lg bg-gray-50 p-4">
-                            <h3 class="mb-2 font-medium text-gray-900">SEP-38 Info:</h3>
-                            <pre class="overflow-x-auto text-xs">{JSON.stringify(
-                                    sep38Info,
-                                    null,
-                                    2,
-                                )}</pre>
-                        </div>
-                    {/if}
-                </div>
-            {/if}
+            <!-- Tab content -->
+            <div class="mt-4">
+                {#if selectedSepTab === 'sep6'}
+                    {#await data.sep6Info then sep6Info}
+                        {@render renderSepInfo(sep6Info)}
+                    {/await}
+                {:else if selectedSepTab === 'sep24'}
+                    {#await data.sep24Info then sep24Info}
+                        {@render renderSepInfo(sep24Info)}
+                    {/await}
+                {:else if selectedSepTab === 'sep38'}
+                    {#await data.sep38Info then sep38Info}
+                        {@render renderSepInfo(sep38Info)}
+                    {/await}
+                {/if}
+            </div>
         {/if}
     </section>
 
@@ -1019,3 +919,15 @@
         </ul>
     </section>
 </div>
+
+{#snippet renderSepInfo(sepInfo: Sep6Info | Sep24Info | Sep38Info | null)}
+    {#if sepInfo}
+        <pre class="max-h-96 overflow-auto rounded-lg bg-gray-50 p-4 text-xs">{JSON.stringify(
+                sepInfo,
+                null,
+                2,
+            )}</pre>
+    {:else}
+        <p class="text-sm text-gray-500">SEP info unavailable</p>
+    {/if}
+{/snippet}
