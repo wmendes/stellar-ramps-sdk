@@ -22,7 +22,6 @@ Usage:
     import QuoteStep from '$lib/components/ramp/QuoteStep.svelte';
     import CompletionStep from '$lib/components/ramp/CompletionStep.svelte';
     import { resolveStellarAsset } from '$lib/utils/stellar-asset';
-    import { getQuoteCustomerId } from '$lib/utils/quote';
     import { PUBLIC_USDC_ISSUER, PUBLIC_STELLAR_NETWORK } from '$env/static/public';
     import type { StellarNetwork } from '$lib/wallet/types';
     import { getStatusColor } from '$lib/utils/status';
@@ -81,9 +80,8 @@ Usage:
                 fromCurrency: fiatCurrency,
                 toCurrency,
                 amount,
-                customerId: customer
-                    ? getQuoteCustomerId(customer.id, capabilities, customer.blockchainWalletId)
-                    : undefined,
+                customerId: customer?.id,
+                resourceId: customer?.blockchainWalletId,
                 stellarAddress: walletStore.publicKey ?? undefined,
             });
             step = 'quote';
@@ -103,9 +101,8 @@ Usage:
                 fromCurrency: fiatCurrency,
                 toCurrency,
                 amount,
-                customerId: customer
-                    ? getQuoteCustomerId(customer.id, capabilities, customer.blockchainWalletId)
-                    : undefined,
+                customerId: customer?.id,
+                resourceId: customer?.blockchainWalletId,
                 stellarAddress: walletStore.publicKey ?? undefined,
             });
         } catch (err) {

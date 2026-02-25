@@ -181,6 +181,8 @@ export interface GetQuoteInput {
     customerId?: string;
     /** Wallet address — used by some providers to resolve asset identifiers. */
     stellarAddress?: string;
+    /** Resource ID — bank account or blockchain wallet ID needed by some providers for quotes. */
+    resourceId?: string;
 }
 
 export interface CreateOnRampInput {
@@ -234,8 +236,6 @@ export interface AnchorCapabilities {
     deferredOffRampSigning?: boolean;
     /** Whether the anchor uses a separate payout submission endpoint instead of direct Stellar submission. */
     requiresAnchorPayoutSubmission?: boolean;
-    /** Whether the anchor uses a composite `customerId:resourceId` format for quotes. */
-    compositeQuoteCustomerId?: boolean;
     /** Whether the anchor has sandbox simulation support. */
     sandbox?: boolean;
     /** Human-readable display name (for UI labels like "View on {name}"). */

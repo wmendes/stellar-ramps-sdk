@@ -10,7 +10,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAnchor, isValidProvider } from '$lib/server/anchorFactory';
-import { AnchorError } from '$lib/anchors';
+import { AnchorError } from '$lib/anchors/types';
 import { BlindPayClient } from '$lib/anchors/blindpay/client';
 
 export const POST: RequestHandler = async ({ params, request }) => {

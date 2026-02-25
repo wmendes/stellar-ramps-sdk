@@ -25,7 +25,6 @@ readonly capabilities: AnchorCapabilities = {
     requiresBankBeforeQuote: true,            // Off-ramp requires bank account before quoting
     requiresBlockchainWalletRegistration: true, // On-ramp requires wallet registration step
     requiresAnchorPayoutSubmission: true,     // Signed XDR submitted back to BlindPay, not Stellar
-    compositeQuoteCustomerId: true,           // Quote API expects "customerId:resourceId" format
     sandbox: true,                            // Sandbox simulation available
     displayName: 'BlindPay',                  // Human-readable name for UI labels
 };
@@ -37,7 +36,6 @@ readonly capabilities: AnchorCapabilities = {
 | `requiresTos`                          | A ToS acceptance step is shown before customer creation                                                        |
 | `requiresBankBeforeQuote`              | Off-ramp flow collects bank account details before requesting a quote                                          |
 | `requiresBlockchainWalletRegistration` | On-ramp flow registers a blockchain wallet after customer creation, before quoting                             |
-| `compositeQuoteCustomerId`             | The quote step builds a `customerId:resourceId` composite string for the API                                   |
 | `requiresAnchorPayoutSubmission`       | After signing the off-ramp XDR, the signed transaction is submitted back to BlindPay (not directly to Stellar) |
 | `sandbox`                              | Sandbox controls are shown in the UI (payins auto-complete after 30s on dev instances)                         |
 | `displayName`                          | Used in UI labels like "View on BlindPay"                                                                      |
@@ -212,7 +210,7 @@ const accounts = await blindpay.getFiatAccounts(receiverId);
 
 The `getQuote()` method detects direction from currencies: if `fromCurrency` is fiat, it creates a payin quote (on-ramp); otherwise a payout quote (off-ramp).
 
-The `customerId` field must be a colon-delimited string: `receiverId:resourceId` where `resourceId` is the blockchain wallet ID (for payins) or bank account ID (for payouts).
+Pass `resourceId` with the blockchain wallet ID (for payins) or bank account ID (for payouts).
 
 ```typescript
 // On-ramp quote (MXN -> USDB)
@@ -220,7 +218,8 @@ const payinQuote = await blindpay.getQuote({
     fromCurrency: 'MXN',
     toCurrency: 'USDB',
     fromAmount: '1000',
-    customerId: `${receiverId}:${walletId}`, // receiverId:blockchainWalletId
+    customerId: receiverId,
+    resourceId: walletId, // blockchainWalletId
 });
 
 // Off-ramp quote (USDB -> MXN)
@@ -228,7 +227,8 @@ const payoutQuote = await blindpay.getQuote({
     fromCurrency: 'USDB',
     toCurrency: 'MXN',
     fromAmount: '100',
-    customerId: `${receiverId}:${bankAccountId}`, // receiverId:bankAccountId
+    customerId: receiverId,
+    resourceId: bankAccountId, // bankAccountId
 });
 
 // quote.id, quote.toAmount, quote.exchangeRate, quote.fee, quote.expiresAt

@@ -6,7 +6,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAnchor, isValidProvider } from '$lib/server/anchorFactory';
-import { AnchorError } from '$lib/anchors';
+import { AnchorError } from '$lib/anchors/types';
 
 export const POST: RequestHandler = async ({ params, request }) => {
     const { provider } = params;
@@ -17,7 +17,15 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
     try {
         const body = await request.json();
-        const { fromCurrency, toCurrency, fromAmount, toAmount, customerId, stellarAddress } = body;
+        const {
+            fromCurrency,
+            toCurrency,
+            fromAmount,
+            toAmount,
+            customerId,
+            stellarAddress,
+            resourceId,
+        } = body;
 
         if (!fromCurrency || !toCurrency) {
             throw error(400, { message: 'fromCurrency and toCurrency are required' });
@@ -35,6 +43,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
             toAmount,
             customerId,
             stellarAddress,
+            resourceId,
         });
 
         return json(quote);

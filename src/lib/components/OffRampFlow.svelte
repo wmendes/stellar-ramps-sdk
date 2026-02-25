@@ -24,7 +24,6 @@ Usage:
     import CompletionStep from '$lib/components/ramp/CompletionStep.svelte';
     import FiatAccountStep from '$lib/components/ramp/FiatAccountStep.svelte';
     import { resolveStellarAsset } from '$lib/utils/stellar-asset';
-    import { getQuoteCustomerId } from '$lib/utils/quote';
     import { displayCurrency, formatAmount } from '$lib/utils/currency';
     import { signWithFreighter } from '$lib/wallet/freighter';
     import { buildPaymentTransaction, submitTransaction } from '$lib/wallet/stellar';
@@ -104,7 +103,7 @@ Usage:
                 fromCurrency,
                 toCurrency: fiatCurrency,
                 amount,
-                customerId: customer ? getQuoteCustomerId(customer.id, capabilities) : undefined,
+                customerId: customer?.id,
                 stellarAddress: walletStore.publicKey ?? undefined,
             });
             step = 'quote';
@@ -124,9 +123,8 @@ Usage:
                 fromCurrency,
                 toCurrency: fiatCurrency,
                 amount,
-                customerId: customer
-                    ? getQuoteCustomerId(customer.id, capabilities, selectedAccountId ?? undefined)
-                    : undefined,
+                customerId: customer?.id,
+                resourceId: selectedAccountId ?? undefined,
                 stellarAddress: walletStore.publicKey ?? undefined,
             });
         } catch (err) {
@@ -165,7 +163,8 @@ Usage:
                 fromCurrency,
                 toCurrency: fiatCurrency,
                 amount,
-                customerId: getQuoteCustomerId(customer.id, capabilities, selectedAccountId!),
+                customerId: customer.id,
+                resourceId: selectedAccountId!,
                 stellarAddress: walletStore.publicKey ?? undefined,
             });
 

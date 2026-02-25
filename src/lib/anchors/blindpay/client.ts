@@ -67,7 +67,6 @@ export class BlindPayClient implements Anchor {
         requiresBankBeforeQuote: true,
         requiresBlockchainWalletRegistration: true,
         requiresAnchorPayoutSubmission: true,
-        compositeQuoteCustomerId: true,
         sandbox: true,
         displayName: 'BlindPay',
     };
@@ -301,16 +300,12 @@ export class BlindPayClient implements Anchor {
      * Detects direction from currencies: if fromCurrency is fiat (MXN),
      * creates a payin quote (on-ramp); otherwise creates a payout quote (off-ramp).
      *
-     * Note: This method requires additional context (blockchain_wallet_id for payins
-     * or bank_account_id for payouts) which must be passed via the customerId field
-     * as a colon-delimited string: `receiverId:resourceId`.
+     * Requires `resourceId` in the input: a blockchain_wallet_id for payins
+     * or a bank_account_id for payouts.
      */
     async getQuote(input: GetQuoteInput): Promise<Quote> {
         const fiatCurrencies = ['MXN', 'USD', 'BRL', 'ARS', 'COP'];
         const isOnRamp = fiatCurrencies.includes(input.fromCurrency.toUpperCase());
-
-        // Parse customerId — expecting "receiverId:resourceId" format
-        const [, resourceId] = (input.customerId || '').split(':');
 
         if (isOnRamp) {
             // Payin quote: fiat → crypto
@@ -318,7 +313,7 @@ export class BlindPayClient implements Anchor {
                 'POST',
                 this.instancePath('/payin-quotes'),
                 {
-                    blockchain_wallet_id: resourceId || '',
+                    blockchain_wallet_id: input.resourceId || '',
                     currency_type: 'sender',
                     cover_fees: false,
                     request_amount: this.toCents(input.fromAmount || input.toAmount || '0'),
@@ -351,7 +346,7 @@ export class BlindPayClient implements Anchor {
                 'POST',
                 this.instancePath('/quotes'),
                 {
-                    bank_account_id: resourceId || '',
+                    bank_account_id: input.resourceId || '',
                     currency_type: 'sender',
                     cover_fees: false,
                     request_amount: this.toCents(input.fromAmount || input.toAmount || '0'),

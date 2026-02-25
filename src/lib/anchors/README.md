@@ -179,7 +179,7 @@ See [`alfredpay/README.md`](alfredpay/README.md) for complete documentation incl
 
 Global coverage. Redirect-based KYC. Uses USDB token. Requires separate blockchain wallet registration. Off-ramp uses a payout submission step rather than direct Stellar transaction signing.
 
-**Capabilities:** `kycFlow: 'redirect'`, `kycUrl`, `requiresTos`, `requiresOffRampSigning`, `requiresBankBeforeQuote`, `requiresBlockchainWalletRegistration`, `requiresAnchorPayoutSubmission`, `compositeQuoteCustomerId`, `sandbox`, `displayName: 'BlindPay'`
+**Capabilities:** `kycFlow: 'redirect'`, `kycUrl`, `requiresTos`, `requiresOffRampSigning`, `requiresBankBeforeQuote`, `requiresBlockchainWalletRegistration`, `requiresAnchorPayoutSubmission`, `sandbox`, `displayName: 'BlindPay'`
 
 ```typescript
 import { BlindPayClient } from 'path/to/anchors/blindpay';
@@ -261,7 +261,6 @@ export class MyAnchorClient implements Anchor {
         // requiresBankBeforeQuote: false,
         // requiresBlockchainWalletRegistration: false,
         // requiresAnchorPayoutSubmission: false,
-        // compositeQuoteCustomerId: false,
     };
 
     constructor(private config: { apiKey: string; baseUrl: string }) {}

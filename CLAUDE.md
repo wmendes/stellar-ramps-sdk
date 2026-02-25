@@ -133,7 +133,6 @@ The `AnchorCapabilities` interface (in `anchors/types.ts`) carries both runtime 
 - `requiresBankBeforeQuote`: off-ramp requires bank account selection before quoting
 - `requiresBlockchainWalletRegistration`: on-ramp requires wallet registration step
 - `requiresAnchorPayoutSubmission`: off-ramp uses anchor payout endpoint instead of direct Stellar submission
-- `compositeQuoteCustomerId`: quote API expects `customerId:resourceId` format
 - `sandbox`: anchor supports sandbox simulation
 - `displayName`: human-readable name for UI labels
 

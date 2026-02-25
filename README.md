@@ -6,7 +6,7 @@ A SvelteKit application and portable library for building fiat on/off ramps on t
 
 This demo is a fully functional application that you can test out and interact with and (usually) even get some Testnet tokens from the onramp simulations! But, it's also a tool and a resource.
 
-**The [`/src/lib/anchors/`](./src/lib/anchors/) directory contains a portable, drop-in anchor integration that should work out-of-the-box!** Copy that directory (or just parts of it) into any TypeScript project you're building, and your project can interact with any of the anchors. Super easy. Barely an inconvenience!
+**The [`/src/lib/anchors/`](./src/lib/anchors/) and [`/src/lib/wallet/`](./src/lib/wallet/) directories are portable, framework-agnostic TypeScript libraries that should work out-of-the-box!** Copy them (or just the parts you need) into any TypeScript project, and your project can interact with any of the anchors and the Stellar network. Super easy. Barely an inconvenience!
 
 ## What's Inside
 
@@ -19,10 +19,11 @@ src/lib/anchors/          <- PORTABLE: Copy into any TypeScript project
   sep/                    <- SEP protocol implementations
   testanchor/             <- Reference client for testanchor.stellar.org
 
-src/lib/server/           <- SvelteKit-specific server code
-  anchorFactory.ts        <- Anchor factory (reads env vars, instantiates clients)
+src/lib/wallet/           <- PORTABLE: Freighter wallet + Stellar helpers
 
-src/lib/wallet/           <- Freighter wallet + Stellar helpers
+src/lib/server/           <- SvelteKit-specific server code
+  anchorFactory.ts        <- Anchor factory (reads $env, instantiates clients)
+
 src/lib/stores/           <- Svelte 5 reactive state (runes)
 src/lib/components/       <- On/off ramp UI components
 src/lib/config/           <- Anchors, regions, tokens, and payment rail configuration
@@ -145,6 +146,33 @@ const response = await sep24.deposit(toml.TRANSFER_SERVER_SEP0024!, token, {
 
 window.open(response.url, '_blank');
 ```
+
+### Usage Outside SvelteKit
+
+The `anchors/` and `wallet/` directories have no framework dependencies -- they rely only on `@stellar/stellar-sdk` (and `@stellar/freighter-api` for the wallet). Copy the provider directories you need and instantiate clients directly with `process.env` or your framework's env mechanism:
+
+```typescript
+// Express / Node.js example
+import express from 'express';
+import { EtherfuseClient } from './lib/anchors/etherfuse';
+
+const anchor = new EtherfuseClient({
+    apiKey: process.env.ETHERFUSE_API_KEY!,
+    baseUrl: process.env.ETHERFUSE_BASE_URL!,
+});
+
+const app = express();
+app.use(express.json());
+
+app.post('/api/quotes', async (req, res) => {
+    const quote = await anchor.getQuote(req.body);
+    res.json(quote);
+});
+```
+
+You only need to copy the provider(s) you use plus `types.ts`. For example, to use just BlindPay, copy `anchors/types.ts` and `anchors/blindpay/`. The providers don't reference each other.
+
+If your app runs in the browser, anchor API calls will hit CORS restrictions. Proxy them through your backend the same way this SvelteKit app does with its `/api/anchor/[provider]/` routes.
 
 ---
 

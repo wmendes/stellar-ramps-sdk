@@ -142,6 +142,7 @@ export interface GetQuoteOptions {
     direction?: 'from' | 'to';
     customerId?: string;
     stellarAddress?: string;
+    resourceId?: string;
 }
 
 /**
@@ -159,6 +160,7 @@ export async function getQuote(
         direction = 'from',
         customerId,
         stellarAddress,
+        resourceId,
     } = options;
 
     const body: Record<string, string> = { fromCurrency, toCurrency };
@@ -172,6 +174,9 @@ export async function getQuote(
     }
     if (stellarAddress) {
         body.stellarAddress = stellarAddress;
+    }
+    if (resourceId) {
+        body.resourceId = resourceId;
     }
 
     return postJson<Quote>(fetch, `/api/anchor/${provider}/quotes`, body);

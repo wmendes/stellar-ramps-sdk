@@ -260,7 +260,6 @@ export const ANCHORS: Record<string, AnchorProfile> = {
             requiresBankBeforeQuote: true,
             requiresBlockchainWalletRegistration: true,
             requiresAnchorPayoutSubmission: true,
-            compositeQuoteCustomerId: true,
             sandbox: true,
             displayName: 'BlindPay',
         },
