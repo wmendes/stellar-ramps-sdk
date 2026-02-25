@@ -15,16 +15,16 @@ import {
     getSep38Endpoint,
     getSigningKey,
     type StellarTomlRecord,
-} from '$lib/anchors/sep/sep1';
+} from '../sep/sep1';
 
 import {
     authenticate,
     isTokenExpired,
     decodeToken,
     type Sep10SignerFn,
-} from '$lib/anchors/sep/sep10';
+} from '../sep/sep10';
 
-import { sep6, sep12, sep24, sep31, sep38 } from '$lib/anchors/sep';
+import { sep6, sep12, sep24, sep31, sep38 } from '../sep';
 
 import type {
     Sep6Info,
@@ -49,7 +49,7 @@ import type {
     Sep38PriceResponse,
     Sep38QuoteRequest,
     Sep38QuoteResponse,
-} from '$lib/anchors/sep/types';
+} from '../sep/types';
 
 export interface TestAnchorConfig {
     domain?: string;
