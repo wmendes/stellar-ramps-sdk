@@ -283,9 +283,9 @@ This repository includes configuration for [Claude Code](https://docs.anthropic.
 
 Configured in `.mcp.json` and loaded automatically when Claude Code starts a session in this repo.
 
-| Server       | URL                              | Description                                                                  |
-| ------------ | -------------------------------- | ---------------------------------------------------------------------------- |
-| **Svelte**   | `https://mcp.svelte.dev/mcp`    | Official Svelte MCP server. Provides Svelte 5 and SvelteKit documentation, code autofixing, and playground links. |
+| Server        | URL                              | Description                                                                                                                     |
+| ------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Svelte**    | `https://mcp.svelte.dev/mcp`     | Official Svelte MCP server. Provides Svelte 5 and SvelteKit documentation, code autofixing, and playground links.               |
 | **Etherfuse** | `https://docs.etherfuse.com/mcp` | Etherfuse FX API documentation search. Provides API references, code examples, and integration guides for the Etherfuse anchor. |
 
 To enable a new MCP server, add it to `.mcp.json`:
@@ -305,8 +305,8 @@ To enable a new MCP server, add it to `.mcp.json`:
 
 Skills are project-scoped prompt extensions that give Claude Code domain knowledge for specific integrations.
 
-| Skill        | Description                                                                                   |
-| ------------ | --------------------------------------------------------------------------------------------- |
+| Skill        | Description                                                                                                                                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **BlindPay** | Provides BlindPay API documentation covering payins, payouts, receivers, KYC, bank accounts, blockchain wallets, and webhooks. Includes reference docs for all endpoints and guides for development vs production environments. |
 
 Skills are stored under `.claude/skills/` and activated automatically when Claude Code detects relevant context (e.g., working on BlindPay integration files).

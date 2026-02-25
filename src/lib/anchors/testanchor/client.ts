@@ -17,12 +17,7 @@ import {
     type StellarTomlRecord,
 } from '../sep/sep1';
 
-import {
-    authenticate,
-    isTokenExpired,
-    decodeToken,
-    type Sep10SignerFn,
-} from '../sep/sep10';
+import { authenticate, isTokenExpired, decodeToken, type Sep10SignerFn } from '../sep/sep10';
 
 import { sep6, sep12, sep24, sep31, sep38 } from '../sep';
 
