@@ -64,9 +64,6 @@ export const ANCHORS: Record<string, AnchorProfile> = {
         },
         knownIssues: [
             {
-                text: 'An API error currently exists where a customer\'s "Terms and Conditions" are not automatically flipped to "accepted". User creation and KYC flow works, but this blocks onramp transactions for your users from being created successfully. Etherfuse knows this, and is working on a fix.',
-            },
-            {
                 text: 'If you try to create your customers through API calls, submitting the various "agreements" via POST requests to Etherfuse currently fails with a 406 error. This blocks customer KYC via these API methods. The Onboarding URL approach still works (up to the issue noted above).',
             },
         ],
