@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
     try {
         const body = await request.json();
-        const { customerId, bankName, clabe, beneficiary } = body;
+        const { customerId, publicKey, bankName, clabe, beneficiary } = body;
 
         if (!customerId || !clabe || !beneficiary) {
             throw error(400, { message: 'customerId, clabe, and beneficiary are required' });
@@ -27,6 +27,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
         const anchor = getAnchor(provider);
         const result = await anchor.registerFiatAccount({
             customerId,
+            publicKey: publicKey || undefined,
             account: {
                 type: 'spei',
                 clabe,

@@ -37,6 +37,7 @@ import type {
     TransactionStatus,
 } from '../types';
 import { AnchorError } from '../types';
+import { StrKey } from '@stellar/stellar-sdk';
 import type {
     EtherfuseConfig,
     EtherfuseOnboardingResponse,
@@ -49,6 +50,7 @@ import type {
     EtherfuseBankAccountResponse,
     EtherfuseBankAccountListResponse,
     EtherfuseAssetsResponse,
+    EtherfuseAgreementResponse,
     EtherfuseErrorResponse,
     EtherfuseOrderStatus,
     EtherfuseKycIdentityRequest,
@@ -211,6 +213,7 @@ export class EtherfuseClient implements Anchor {
             not_started: 'not_started',
             proposed: 'pending',
             approved: 'approved',
+            approved_chain_deploying: 'approved',
             rejected: 'rejected',
         };
         return statusMap[status] || 'not_started';
@@ -311,6 +314,14 @@ export class EtherfuseClient implements Anchor {
             );
         }
 
+        if (!StrKey.isValidEd25519PublicKey(input.publicKey)) {
+            throw new AnchorError(
+                `Invalid Stellar public key: ${input.publicKey}`,
+                'INVALID_PUBLIC_KEY',
+                400,
+            );
+        }
+
         const customerId = crypto.randomUUID();
         const bankAccountId = crypto.randomUUID();
         const publicKey = input.publicKey;
@@ -319,7 +330,6 @@ export class EtherfuseClient implements Anchor {
             await this.request<EtherfuseOnboardingResponse>('POST', '/ramp/onboarding-url', {
                 customerId,
                 bankAccountId,
-                email: input.email,
                 publicKey,
                 blockchain: this.blockchain,
             });
@@ -389,7 +399,7 @@ export class EtherfuseClient implements Anchor {
             );
             return {
                 id: response.customerId,
-                email: response.email,
+                email: '', // Etherfuse customer API does not return email
                 kycStatus: 'not_started', // KYC status requires separate call with pubkey
                 createdAt: response.createdAt,
                 updatedAt: response.updatedAt,
@@ -527,17 +537,28 @@ export class EtherfuseClient implements Anchor {
      * @throws {AnchorError} On API failure.
      */
     async registerFiatAccount(input: RegisterFiatAccountInput): Promise<RegisteredFiatAccount> {
-        const bankAccountId = crypto.randomUUID();
+        if (!input.publicKey) {
+            throw new AnchorError(
+                'publicKey is required to register a bank account with Etherfuse',
+                'MISSING_PUBLIC_KEY',
+                400,
+            );
+        }
+
+        // The Etherfuse bank-account endpoint requires a presigned URL for auth.
+        // Generate one via the onboarding endpoint.
+        const presignedUrl = await this.getKycUrl(input.customerId, input.publicKey);
 
         const response = await this.request<EtherfuseBankAccountResponse>(
             'POST',
             '/ramp/bank-account',
             {
-                bankAccountId,
-                customerId: input.customerId,
-                bankName: input.account.bankName || '',
-                clabe: input.account.clabe,
-                beneficiary: input.account.beneficiary,
+                presignedUrl,
+                account: {
+                    clabe: input.account.clabe,
+                    beneficiary: input.account.beneficiary,
+                    bankName: input.account.bankName || undefined,
+                },
             },
         );
 
@@ -561,7 +582,7 @@ export class EtherfuseClient implements Anchor {
             const response = await this.request<EtherfuseBankAccountListResponse>(
                 'POST',
                 `/ramp/customer/${customerId}/bank-accounts`,
-                {},
+                { pageSize: 100, pageNumber: 0 },
             );
 
             return response.items.map((account) => ({
@@ -736,38 +757,32 @@ export class EtherfuseClient implements Anchor {
      * @throws {AnchorError} On API failure.
      */
     async getAssets(
-        blockchain?: string,
-        currency?: string,
-        wallet?: string,
+        blockchain: string,
+        currency: string,
+        wallet: string,
     ): Promise<EtherfuseAssetsResponse> {
-        const params = new URLSearchParams();
-        if (blockchain) params.set('blockchain', blockchain);
-        if (currency) params.set('currency', currency);
-        if (wallet) params.set('wallet', wallet);
-
-        const query = params.toString();
-        const endpoint = `/ramp/assets${query ? `?${query}` : ''}`;
-
-        return this.request<EtherfuseAssetsResponse>('GET', endpoint);
+        const params = new URLSearchParams({ blockchain, currency, wallet });
+        return this.request<EtherfuseAssetsResponse>('GET', `/ramp/assets?${params.toString()}`);
     }
 
     /**
      * Submit programmatic KYC identity data for a customer.
      *
+     * The request body includes the public key and structured identity data
+     * (name, date of birth, address, ID numbers).
+     *
      * @param customerId - The customer's unique identifier.
-     * @param publicKey - Stellar public key associated with the customer.
-     * @param identity - Personal information fields.
-     * @returns The API response.
+     * @param identity - KYC identity submission (includes `pubkey` and nested `identity` data).
+     * @returns The API response with `status` and `message`.
      * @throws {AnchorError} On API failure.
      */
     async submitKycIdentity(
         customerId: string,
-        publicKey: string,
         identity: EtherfuseKycIdentityRequest,
     ): Promise<unknown> {
         return this.request(
             'POST',
-            `/ramp/customer/${customerId}/kyc/${publicKey}/identity`,
+            `/ramp/customer/${customerId}/kyc`,
             identity,
         );
     }
@@ -775,54 +790,84 @@ export class EtherfuseClient implements Anchor {
     /**
      * Upload KYC identity documents for a customer.
      *
-     * Documents should be Base64-encoded images.
+     * Images should be Base64-encoded data URLs (e.g. `"data:image/jpeg;base64,..."`).
+     * Call once for ID documents (`documentType: "document"`) and once for
+     * selfies (`documentType: "selfie"`).
      *
      * @param customerId - The customer's unique identifier.
-     * @param publicKey - Stellar public key associated with the customer.
-     * @param documents - Array of document submissions.
-     * @returns The API response.
+     * @param document - Document upload request (includes `pubkey`, `documentType`, and `images`).
+     * @returns The API response with `status` and `message`.
      * @throws {AnchorError} On API failure.
      */
     async submitKycDocuments(
         customerId: string,
-        publicKey: string,
-        documents: EtherfuseKycDocumentRequest[],
+        document: EtherfuseKycDocumentRequest,
     ): Promise<unknown> {
-        return this.request('POST', `/ramp/customer/${customerId}/kyc/${publicKey}/documents`, {
-            documents,
-        });
+        return this.request(
+            'POST',
+            `/ramp/customer/${customerId}/kyc/documents`,
+            document,
+        );
+    }
+
+    /**
+     * Accept the electronic signature consent agreement.
+     *
+     * @param presignedUrl - The presigned URL from the onboarding response.
+     * @returns The agreement response.
+     * @throws {AnchorError} On API failure.
+     */
+    async acceptElectronicSignature(presignedUrl: string): Promise<EtherfuseAgreementResponse> {
+        return this.request<EtherfuseAgreementResponse>(
+            'POST',
+            '/ramp/agreements/electronic-signature',
+            { presignedUrl },
+        );
+    }
+
+    /**
+     * Accept the terms and conditions agreement.
+     *
+     * @param presignedUrl - The presigned URL from the onboarding response.
+     * @returns The agreement response.
+     * @throws {AnchorError} On API failure.
+     */
+    async acceptTermsAndConditions(presignedUrl: string): Promise<EtherfuseAgreementResponse> {
+        return this.request<EtherfuseAgreementResponse>(
+            'POST',
+            '/ramp/agreements/terms-and-conditions',
+            { presignedUrl },
+        );
+    }
+
+    /**
+     * Accept the customer agreement.
+     *
+     * @param presignedUrl - The presigned URL from the onboarding response.
+     * @returns The agreement response.
+     * @throws {AnchorError} On API failure.
+     */
+    async acceptCustomerAgreement(presignedUrl: string): Promise<EtherfuseAgreementResponse> {
+        return this.request<EtherfuseAgreementResponse>(
+            'POST',
+            '/ramp/agreements/customer-agreement',
+            { presignedUrl },
+        );
     }
 
     /**
      * Accept all legal agreements via a presigned onboarding URL.
      *
+     * Convenience method that calls all three agreement endpoints in sequence.
+     *
      * @param presignedUrl - The presigned URL from the onboarding response.
-     * @returns The API response.
+     * @returns The final agreement response.
      * @throws {AnchorError} On API failure.
      */
-    async acceptAgreements(presignedUrl: string): Promise<unknown> {
-        console.log(`[Etherfuse] POST ${presignedUrl} (accept agreements)`);
-
-        const response = await fetch(presignedUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: this.config.apiKey,
-            },
-            body: JSON.stringify({ acceptAll: true }),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[Etherfuse] Error ${response.status}:`, errorText);
-            throw new AnchorError(
-                errorText || `Etherfuse API error: ${response.status}`,
-                'AGREEMENT_ERROR',
-                response.status,
-            );
-        }
-
-        return response.json();
+    async acceptAgreements(presignedUrl: string): Promise<EtherfuseAgreementResponse> {
+        await this.acceptElectronicSignature(presignedUrl);
+        await this.acceptTermsAndConditions(presignedUrl);
+        return this.acceptCustomerAgreement(presignedUrl);
     }
 
     /**

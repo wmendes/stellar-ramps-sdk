@@ -1,7 +1,9 @@
+import type { PageLoad } from './$types';
+
 import { createTestAnchorClient } from '$lib/anchors/testanchor';
 import { error } from '@sveltejs/kit';
 
-export async function load({ fetch }) {
+export const load: PageLoad = async ({ fetch }) =>  {
     const client = createTestAnchorClient(undefined, fetch);
 
     try {

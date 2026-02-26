@@ -316,9 +316,11 @@ export async function registerFiatAccount(
     provider: string,
     customerId: string,
     account: { bankName?: string; clabe: string; beneficiary: string },
+    publicKey?: string,
 ): Promise<RegisteredFiatAccount> {
     return postJson<RegisteredFiatAccount>(fetch, `/api/anchor/${provider}/fiat-accounts`, {
         customerId,
+        publicKey,
         ...account,
     });
 }

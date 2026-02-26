@@ -84,6 +84,8 @@ export type FiatAccountInput = SpeiFiatAccountInput;
 export interface RegisterFiatAccountInput {
     customerId: string;
     account: FiatAccountInput;
+    /** Stellar public key — required by providers that use presigned-URL auth (e.g. Etherfuse). */
+    publicKey?: string;
 }
 
 /** Summary of a registered fiat account (returned from the anchor). */

@@ -6,6 +6,7 @@ import { AnchorError } from '../types';
 
 const BASE_URL = 'http://etherfuse.test';
 const API_KEY = 'test-api-key';
+const STELLAR_PUBKEY = 'GASAZERTFNL6EWRFIHKQV53GMYBTUQAHAUE37N4N6D6WXQE34B47Q5HH';
 
 function createClient() {
     return new EtherfuseClient({ apiKey: API_KEY, baseUrl: BASE_URL });
@@ -20,14 +21,21 @@ describe('createCustomer', () => {
         const client = createClient();
 
         server.use(
-            http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+            http.post(`${BASE_URL}/ramp/onboarding-url`, async ({ request }) => {
+                const body = (await request.json()) as Record<string, unknown>;
+                // email should NOT be sent to the onboarding endpoint
+                expect(body).not.toHaveProperty('email');
+                expect(body.publicKey).toBe(STELLAR_PUBKEY);
+                expect(body.blockchain).toBe('stellar');
+                expect(body).toHaveProperty('customerId');
+                expect(body).toHaveProperty('bankAccountId');
                 return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
             }),
         );
 
         const customer = await client.createCustomer({
             email: 'alice@example.com',
-            publicKey: 'GABCDEF',
+            publicKey: STELLAR_PUBKEY,
         });
 
         expect(customer.id).toMatch(
@@ -56,6 +64,21 @@ describe('createCustomer', () => {
             const anchorErr = err as AnchorError;
             expect(anchorErr.code).toBe('MISSING_PUBLIC_KEY');
             expect(anchorErr.statusCode).toBe(400);
+        }
+    });
+
+    it('throws AnchorError with INVALID_PUBLIC_KEY for malformed Stellar keys', async () => {
+        const client = createClient();
+
+        try {
+            await client.createCustomer({ email: 'alice@example.com', publicKey: 'not-a-stellar-key' });
+            expect.unreachable('should have thrown');
+        } catch (err) {
+            expect(err).toBeInstanceOf(AnchorError);
+            const anchorErr = err as AnchorError;
+            expect(anchorErr.code).toBe('INVALID_PUBLIC_KEY');
+            expect(anchorErr.statusCode).toBe(400);
+            expect(anchorErr.message).toContain('not-a-stellar-key');
         }
     });
 
@@ -98,7 +121,7 @@ describe('createCustomer', () => {
 
         const customer = await client.createCustomer({
             email: 'alice@example.com',
-            publicKey: 'GABCDEF',
+            publicKey: STELLAR_PUBKEY,
         });
 
         expect(customer.id).toBe('e1a2b3c4-d5e6-7f89-0abc-def012345678');
@@ -120,8 +143,7 @@ describe('getCustomer', () => {
             http.get(`${BASE_URL}/ramp/customer/cust-1`, () => {
                 return HttpResponse.json({
                     customerId: 'cust-1',
-                    email: 'bob@example.com',
-                    publicKey: 'GXYZ',
+                    displayName: null,
                     createdAt: '2025-06-01T00:00:00Z',
                     updatedAt: '2025-06-02T00:00:00Z',
                 });
@@ -132,7 +154,7 @@ describe('getCustomer', () => {
 
         expect(customer).not.toBeNull();
         expect(customer!.id).toBe('cust-1');
-        expect(customer!.email).toBe('bob@example.com');
+        expect(customer!.email).toBe('');
         expect(customer!.kycStatus).toBe('not_started');
         expect(customer!.createdAt).toBe('2025-06-01T00:00:00Z');
         expect(customer!.updatedAt).toBe('2025-06-02T00:00:00Z');
@@ -214,7 +236,7 @@ describe('getQuote', () => {
             toCurrency: 'CETES',
             fromAmount: '1000',
             customerId: 'cust-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
         });
 
         expect(quote.id).toBe('quote-abc');
@@ -272,7 +294,7 @@ describe('createOnRamp', () => {
         const tx = await client.createOnRamp({
             customerId: 'cust-1',
             quoteId: 'quote-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
             fromCurrency: 'MXN',
             toCurrency: 'CETES',
             amount: '1000',
@@ -285,7 +307,7 @@ describe('createOnRamp', () => {
         expect(tx.fromAmount).toBe('1000');
         expect(tx.fromCurrency).toBe('MXN');
         expect(tx.toCurrency).toBe('CETES');
-        expect(tx.stellarAddress).toBe('GABCDEF');
+        expect(tx.stellarAddress).toBe(STELLAR_PUBKEY);
         expect(tx.paymentInstructions).toEqual({
             type: 'spei',
             clabe: '012345678901234567',
@@ -372,6 +394,9 @@ describe('registerFiatAccount', () => {
         const client = createClient();
 
         server.use(
+            http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+                return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
+            }),
             http.post(`${BASE_URL}/ramp/bank-account`, () => {
                 return HttpResponse.json({
                     bankAccountId: 'bank-new-1',
@@ -384,6 +409,7 @@ describe('registerFiatAccount', () => {
 
         const result = await client.registerFiatAccount({
             customerId: 'cust-1',
+            publicKey: STELLAR_PUBKEY,
             account: {
                 type: 'spei',
                 clabe: '012345678901234567',
@@ -397,6 +423,23 @@ describe('registerFiatAccount', () => {
         expect(result.type).toBe('SPEI');
         expect(result.status).toBe('active');
         expect(result.createdAt).toBe('2025-07-01T00:00:00Z');
+    });
+
+    it('throws MISSING_PUBLIC_KEY when publicKey is not provided', async () => {
+        const client = createClient();
+
+        try {
+            await client.registerFiatAccount({
+                customerId: 'cust-1',
+                account: { type: 'spei', clabe: '012345678901234567', beneficiary: 'Alice' },
+            });
+            expect.unreachable('should have thrown');
+        } catch (err) {
+            expect(err).toBeInstanceOf(AnchorError);
+            const anchorErr = err as AnchorError;
+            expect(anchorErr.code).toBe('MISSING_PUBLIC_KEY');
+            expect(anchorErr.statusCode).toBe(400);
+        }
     });
 });
 
@@ -509,7 +552,7 @@ describe('createOffRamp', () => {
         const tx = await client.createOffRamp({
             customerId: 'cust-1',
             quoteId: 'quote-off-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
             fromCurrency: 'CETES',
             toCurrency: 'MXN',
             amount: '50',
@@ -523,7 +566,7 @@ describe('createOffRamp', () => {
         expect(tx.fromAmount).toBe('50');
         expect(tx.fromCurrency).toBe('CETES');
         expect(tx.toCurrency).toBe('MXN');
-        expect(tx.stellarAddress).toBe('GABCDEF');
+        expect(tx.stellarAddress).toBe(STELLAR_PUBKEY);
         expect(tx.signableTransaction).toBeUndefined();
         expect(tx.fiatAccount).toEqual({
             id: 'bank-off-1',
@@ -627,7 +670,7 @@ describe('getKycUrl', () => {
             }),
         );
 
-        const url = await client.getKycUrl!('cust-1', 'GABCDEF', 'bank-1');
+        const url = await client.getKycUrl!('cust-1', STELLAR_PUBKEY, 'bank-1');
         expect(url).toBe('https://onboard.test/kyc-session-xyz');
     });
 });
@@ -655,22 +698,23 @@ describe('getKycStatus', () => {
         ['not_started', 'not_started'],
         ['proposed', 'pending'],
         ['approved', 'approved'],
+        ['approved_chain_deploying', 'approved'],
         ['rejected', 'rejected'],
     ] as const)('maps Etherfuse status "%s" to "%s"', async (etherfuseStatus, expectedStatus) => {
         const client = createClient();
 
         server.use(
-            http.get(`${BASE_URL}/ramp/customer/cust-1/kyc/GABCDEF`, () => {
+            http.get(`${BASE_URL}/ramp/customer/cust-1/kyc/${STELLAR_PUBKEY}`, () => {
                 return HttpResponse.json({
                     customerId: 'cust-1',
-                    publicKey: 'GABCDEF',
+                    publicKey: STELLAR_PUBKEY,
                     status: etherfuseStatus,
                     updatedAt: '2025-06-01T00:00:00Z',
                 });
             }),
         );
 
-        const status = await client.getKycStatus('cust-1', 'GABCDEF');
+        const status = await client.getKycStatus('cust-1', STELLAR_PUBKEY);
         expect(status).toBe(expectedStatus);
     });
 });
@@ -743,7 +787,7 @@ describe('request() edge cases', () => {
             }),
         );
 
-        const result = await client.getAssets('stellar', 'mxn');
+        const result = await client.getAssets('stellar', 'mxn', STELLAR_PUBKEY);
         expect(result).toBeUndefined();
     });
 
@@ -847,7 +891,7 @@ describe('createCustomer() 409 recovery edge cases', () => {
         try {
             await client.createCustomer({
                 email: 'alice@example.com',
-                publicKey: 'GABCDEF',
+                publicKey: STELLAR_PUBKEY,
             });
             expect.fail('Expected AnchorError');
         } catch (err) {
@@ -883,7 +927,7 @@ describe('createCustomer() 409 recovery edge cases', () => {
 
         const customer = await client.createCustomer({
             email: 'alice@example.com',
-            publicKey: 'GABCDEF',
+            publicKey: STELLAR_PUBKEY,
         });
 
         expect(customer.id).toBe('aaa-bbb-ccc-ddd-eee');
@@ -919,7 +963,7 @@ describe('createCustomer() 409 recovery edge cases', () => {
 
         const customer = await client.createCustomer({
             email: 'alice@example.com',
-            publicKey: 'GABCDEF',
+            publicKey: STELLAR_PUBKEY,
         });
 
         expect(customer.id).toBe('aaa-bbb-ccc-ddd-eee');
@@ -946,7 +990,7 @@ describe('createCustomer() 409 recovery edge cases', () => {
         try {
             await client.createCustomer({
                 email: 'invalid',
-                publicKey: 'GABCDEF',
+                publicKey: STELLAR_PUBKEY,
             });
             expect.fail('Expected AnchorError');
         } catch (err) {
@@ -970,7 +1014,7 @@ describe('createCustomer() 409 recovery edge cases', () => {
         await expect(
             client.createCustomer({
                 email: 'alice@example.com',
-                publicKey: 'GABCDEF',
+                publicKey: STELLAR_PUBKEY,
             }),
         ).rejects.toThrow();
 
@@ -978,7 +1022,7 @@ describe('createCustomer() 409 recovery edge cases', () => {
         try {
             await client.createCustomer({
                 email: 'alice@example.com',
-                publicKey: 'GABCDEF',
+                publicKey: STELLAR_PUBKEY,
             });
         } catch (err) {
             expect(err).not.toBeInstanceOf(AnchorError);
@@ -1027,17 +1071,17 @@ describe('mapKycStatus() unknown status', () => {
         const client = createClient();
 
         server.use(
-            http.get(`${BASE_URL}/ramp/customer/cust-1/kyc/GABCDEF`, () => {
+            http.get(`${BASE_URL}/ramp/customer/cust-1/kyc/${STELLAR_PUBKEY}`, () => {
                 return HttpResponse.json({
                     customerId: 'cust-1',
-                    publicKey: 'GABCDEF',
+                    publicKey: STELLAR_PUBKEY,
                     status: 'some_weird_status',
                     updatedAt: '2025-06-01T00:00:00Z',
                 });
             }),
         );
 
-        const status = await client.getKycStatus('cust-1', 'GABCDEF');
+        const status = await client.getKycStatus('cust-1', STELLAR_PUBKEY);
         expect(status).toBe('not_started');
     });
 });
@@ -1237,7 +1281,7 @@ describe('getQuote() edge cases', () => {
             fromCurrency: 'MXN',
             toCurrency: 'CETES',
             // Both fromAmount and toAmount intentionally omitted
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
         });
 
         expect(capturedBody).toBeDefined();
@@ -1281,7 +1325,7 @@ describe('getQuote() edge cases', () => {
             toCurrency: 'CETES',
             fromAmount: '1000',
             customerId: 'cust-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
         });
 
         expect(quote.toAmount).toBe('50'); // falls back to destinationAmount
@@ -1323,7 +1367,7 @@ describe('getQuote() edge cases', () => {
             toCurrency: 'CETES',
             fromAmount: '1000',
             customerId: 'cust-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
         });
 
         expect(quote.fee).toBe('0');
@@ -1362,7 +1406,7 @@ describe('getQuote() edge cases', () => {
             toCurrency: 'MXN:FIAT',
             fromAmount: '50',
             customerId: 'cust-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
         });
 
         expect(assetsRequested).toBe(false); // should NOT call /ramp/assets
@@ -1406,7 +1450,7 @@ describe('createOnRamp() edge cases', () => {
         const tx = await client.createOnRamp({
             customerId: 'cust-empty-banks',
             quoteId: 'quote-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
             fromCurrency: 'MXN',
             toCurrency: 'CETES',
             amount: '500',
@@ -1440,7 +1484,7 @@ describe('createOnRamp() edge cases', () => {
         const tx = await client.createOnRamp({
             customerId: '',
             quoteId: 'quote-1',
-            stellarAddress: 'GABCDEF',
+            stellarAddress: STELLAR_PUBKEY,
             fromCurrency: 'MXN',
             toCurrency: 'CETES',
             amount: '500',
@@ -1519,7 +1563,7 @@ describe('getKycUrl() edge cases', () => {
             }),
         );
 
-        const url = await client.getKycUrl!('cust-1', 'GABCDEF');
+        const url = await client.getKycUrl!('cust-1', STELLAR_PUBKEY);
         expect(url).toBe('https://onboard.test/kyc-no-bank');
         expect(capturedBody).toBeDefined();
         // bankAccountId should be a valid UUID (auto-generated)
@@ -1527,7 +1571,7 @@ describe('getKycUrl() edge cases', () => {
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
         );
         expect(capturedBody!.customerId).toBe('cust-1');
-        expect(capturedBody!.publicKey).toBe('GABCDEF');
+        expect(capturedBody!.publicKey).toBe(STELLAR_PUBKEY);
     });
 });
 
@@ -1536,27 +1580,36 @@ describe('getKycUrl() edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('acceptAgreements()', () => {
-    it('happy path: posts to presigned URL and returns parsed JSON', async () => {
+    it('happy path: calls all three agreement endpoints and returns last response', async () => {
         const client = createClient();
-        const presignedUrl = `${BASE_URL}/onboarding/presigned-abc`;
+        const presignedUrl = 'https://onboard.test/presigned-abc';
 
         server.use(
-            http.post(presignedUrl, () => {
-                return HttpResponse.json({ success: true, agreements: ['tos', 'privacy'] });
+            http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, () => {
+                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:00Z', agreementType: 'electronic_signature' });
+            }),
+            http.post(`${BASE_URL}/ramp/agreements/terms-and-conditions`, () => {
+                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:01Z', agreementType: 'terms_and_conditions' });
+            }),
+            http.post(`${BASE_URL}/ramp/agreements/customer-agreement`, () => {
+                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:02Z', agreementType: 'customer_agreement' });
             }),
         );
 
         const result = await client.acceptAgreements(presignedUrl);
-        expect(result).toEqual({ success: true, agreements: ['tos', 'privacy'] });
+        expect(result).toEqual({ success: true, acceptedAt: '2025-07-01T00:00:02Z', agreementType: 'customer_agreement' });
     });
 
-    it('throws AnchorError with AGREEMENT_ERROR on failure', async () => {
+    it('throws AnchorError on failure from first agreement endpoint', async () => {
         const client = createClient();
-        const presignedUrl = `${BASE_URL}/onboarding/presigned-fail`;
+        const presignedUrl = 'https://onboard.test/presigned-fail';
 
         server.use(
-            http.post(presignedUrl, () => {
-                return new HttpResponse('Agreement expired', { status: 410 });
+            http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, () => {
+                return HttpResponse.json(
+                    { error: { code: 'AGREEMENT_EXPIRED', message: 'Agreement expired' } },
+                    { status: 410 },
+                );
             }),
         );
 
@@ -1566,18 +1619,18 @@ describe('acceptAgreements()', () => {
         } catch (err) {
             expect(err).toBeInstanceOf(AnchorError);
             const anchorErr = err as AnchorError;
-            expect(anchorErr.code).toBe('AGREEMENT_ERROR');
+            expect(anchorErr.code).toBe('AGREEMENT_EXPIRED');
             expect(anchorErr.statusCode).toBe(410);
             expect(anchorErr.message).toBe('Agreement expired');
         }
     });
 
-    it('falls back to status code message when error body is empty', async () => {
+    it('throws AnchorError with UNKNOWN_ERROR when error body is empty', async () => {
         const client = createClient();
-        const presignedUrl = `${BASE_URL}/onboarding/presigned-empty`;
+        const presignedUrl = 'https://onboard.test/presigned-empty';
 
         server.use(
-            http.post(presignedUrl, () => {
+            http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, () => {
                 return new HttpResponse('', { status: 403 });
             }),
         );
@@ -1588,7 +1641,7 @@ describe('acceptAgreements()', () => {
         } catch (err) {
             expect(err).toBeInstanceOf(AnchorError);
             const anchorErr = err as AnchorError;
-            expect(anchorErr.code).toBe('AGREEMENT_ERROR');
+            expect(anchorErr.code).toBe('UNKNOWN_ERROR');
             expect(anchorErr.statusCode).toBe(403);
             expect(anchorErr.message).toBe('Etherfuse API error: 403');
         }
@@ -1679,7 +1732,7 @@ describe('getAssets()', () => {
             }),
         );
 
-        const result = await client.getAssets('stellar', 'mxn', 'GABCDEF');
+        const result = await client.getAssets('stellar', 'mxn', STELLAR_PUBKEY);
         expect(result.assets).toHaveLength(2);
         expect(result.assets[0].symbol).toBe('CETES');
         expect(result.assets[0].identifier).toBe('CETES:GCRYUGD5ISSUER');
@@ -1697,7 +1750,7 @@ describe('getAssets()', () => {
             }),
         );
 
-        const result = await client.getAssets();
+        const result = await client.getAssets('stellar', 'mxn', STELLAR_PUBKEY);
         expect(result.assets).toEqual([]);
         expect(result.assets).toHaveLength(0);
     });
@@ -1713,14 +1766,14 @@ describe('getAssets()', () => {
             }),
         );
 
-        await client.getAssets('stellar', 'mxn', 'GABCDEF');
+        await client.getAssets('stellar', 'mxn', STELLAR_PUBKEY);
         const url = new URL(capturedUrl);
         expect(url.searchParams.get('blockchain')).toBe('stellar');
         expect(url.searchParams.get('currency')).toBe('mxn');
-        expect(url.searchParams.get('wallet')).toBe('GABCDEF');
+        expect(url.searchParams.get('wallet')).toBe(STELLAR_PUBKEY);
     });
 
-    it('omits query params when no arguments are given', async () => {
+    it('always includes all three query params', async () => {
         const client = createClient();
         let capturedUrl = '';
 
@@ -1731,9 +1784,11 @@ describe('getAssets()', () => {
             }),
         );
 
-        await client.getAssets();
+        await client.getAssets('stellar', 'mxn', STELLAR_PUBKEY);
         const url = new URL(capturedUrl);
-        expect(url.search).toBe('');
+        expect(url.searchParams.get('blockchain')).toBe('stellar');
+        expect(url.searchParams.get('currency')).toBe('mxn');
+        expect(url.searchParams.get('wallet')).toBe(STELLAR_PUBKEY);
     });
 });
 
@@ -1760,7 +1815,7 @@ describe('input validation behavior', () => {
             }
         });
 
-        it('passes email to API without local validation when email is empty string', async () => {
+        it('does not send email to the onboarding endpoint', async () => {
             const client = createClient();
             let capturedBody: Record<string, unknown> | null = null;
 
@@ -1771,35 +1826,29 @@ describe('input validation behavior', () => {
                 }),
             );
 
-            const customer = await client.createCustomer({ email: '', publicKey: 'GABCDEF' });
+            const customer = await client.createCustomer({ email: 'alice@example.com', publicKey: STELLAR_PUBKEY });
 
             expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.email).toBe('');
-            expect(customer.email).toBe('');
+            expect(capturedBody).not.toHaveProperty('email');
+            // email is still returned on the Customer object (client-side only)
+            expect(customer.email).toBe('alice@example.com');
         });
 
-        it('passes email to API without local validation when email is invalid format', async () => {
+        it('throws INVALID_PUBLIC_KEY for non-Stellar public keys', async () => {
             const client = createClient();
-            let capturedBody: Record<string, unknown> | null = null;
 
-            server.use(
-                http.post(`${BASE_URL}/ramp/onboarding-url`, async ({ request }) => {
-                    capturedBody = (await request.json()) as Record<string, unknown>;
-                    return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
-                }),
-            );
-
-            const customer = await client.createCustomer({
-                email: 'not-an-email',
-                publicKey: 'GABCDEF',
-            });
-
-            expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.email).toBe('not-an-email');
-            expect(customer.email).toBe('not-an-email');
+            try {
+                await client.createCustomer({ email: 'alice@example.com', publicKey: 'not-a-stellar-key' });
+                expect.unreachable('should have thrown');
+            } catch (err) {
+                expect(err).toBeInstanceOf(AnchorError);
+                const anchorErr = err as AnchorError;
+                expect(anchorErr.code).toBe('INVALID_PUBLIC_KEY');
+                expect(anchorErr.statusCode).toBe(400);
+            }
         });
 
-        it('passes email to API without validation when email is undefined', async () => {
+        it('stores email on the returned Customer without sending it to API', async () => {
             const client = createClient();
             let capturedBody: Record<string, unknown> | null = null;
 
@@ -1811,7 +1860,7 @@ describe('input validation behavior', () => {
             );
 
             // @ts-expect-error testing undefined email
-            const customer = await client.createCustomer({ publicKey: 'GABCDEF' });
+            const customer = await client.createCustomer({ publicKey: STELLAR_PUBKEY });
 
             expect(capturedBody).not.toBeNull();
             expect(capturedBody!.email).toBeUndefined();
@@ -1832,7 +1881,7 @@ describe('input validation behavior', () => {
                     capturedUrl = request.url;
                     return HttpResponse.json({
                         customerId: '',
-                        email: 'test@example.com',
+                        displayName: null,
                         createdAt: '2025-01-01T00:00:00Z',
                         updatedAt: '2025-01-01T00:00:00Z',
                     });
@@ -1852,7 +1901,7 @@ describe('input validation behavior', () => {
                     capturedUrl = request.url;
                     return HttpResponse.json({
                         customerId: '   ',
-                        email: 'test@example.com',
+                        displayName: null,
                         createdAt: '2025-01-01T00:00:00Z',
                         updatedAt: '2025-01-01T00:00:00Z',
                     });
@@ -1904,7 +1953,7 @@ describe('input validation behavior', () => {
             await client.getQuote({
                 fromCurrency: 'MXN',
                 toCurrency: 'CETES',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
             });
 
             expect(capturedBody).not.toBeNull();
@@ -1947,7 +1996,7 @@ describe('input validation behavior', () => {
                 fromCurrency: 'MXN',
                 toCurrency: 'CETES',
                 fromAmount: 'abc',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
             });
 
             expect(capturedBody).not.toBeNull();
@@ -1990,7 +2039,7 @@ describe('input validation behavior', () => {
                 fromCurrency: 'MXN',
                 toCurrency: 'CETES',
                 fromAmount: '0',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
             });
 
             expect(capturedBody).not.toBeNull();
@@ -2034,7 +2083,7 @@ describe('input validation behavior', () => {
                 fromCurrency: 'MXN',
                 toCurrency: 'CETES',
                 fromAmount: '-100',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
             });
 
             expect(capturedBody).not.toBeNull();
@@ -2100,7 +2149,7 @@ describe('input validation behavior', () => {
             const tx = await client.createOnRamp({
                 customerId: 'cust-1',
                 quoteId: 'quote-1',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
                 fromCurrency: 'MXN',
                 toCurrency: 'CETES',
                 amount: 'not-a-number',
@@ -2132,7 +2181,7 @@ describe('input validation behavior', () => {
             await client.createOnRamp({
                 customerId: 'cust-1',
                 quoteId: '',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
                 fromCurrency: 'MXN',
                 toCurrency: 'CETES',
                 amount: '1000',
@@ -2202,7 +2251,7 @@ describe('input validation behavior', () => {
             await client.createOffRamp({
                 customerId: 'cust-1',
                 quoteId: 'quote-1',
-                stellarAddress: 'GABCDEF',
+                stellarAddress: STELLAR_PUBKEY,
                 fromCurrency: 'CETES',
                 toCurrency: 'MXN',
                 amount: '50',
@@ -2220,11 +2269,31 @@ describe('input validation behavior', () => {
     // registerFiatAccount input validation
     // -----------------------------------------------------------------
     describe('registerFiatAccount input validation', () => {
+        it('throws MISSING_PUBLIC_KEY when publicKey is not provided', async () => {
+            const client = createClient();
+
+            try {
+                await client.registerFiatAccount({
+                    customerId: 'cust-1',
+                    account: { type: 'spei', clabe: '012345678901234567', beneficiary: 'Alice' },
+                });
+                expect.unreachable('should have thrown');
+            } catch (err) {
+                expect(err).toBeInstanceOf(AnchorError);
+                const anchorErr = err as AnchorError;
+                expect(anchorErr.code).toBe('MISSING_PUBLIC_KEY');
+                expect(anchorErr.statusCode).toBe(400);
+            }
+        });
+
         it('passes empty CLABE to API without validation', async () => {
             const client = createClient();
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
+                http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+                    return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
+                }),
                 http.post(`${BASE_URL}/ramp/bank-account`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
@@ -2238,11 +2307,13 @@ describe('input validation behavior', () => {
 
             await client.registerFiatAccount({
                 customerId: 'cust-1',
+                publicKey: STELLAR_PUBKEY,
                 account: { type: 'spei', clabe: '', beneficiary: 'Alice Garcia' },
             });
 
             expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.clabe).toBe('');
+            const account = (capturedBody! as { account: Record<string, unknown> }).account;
+            expect(account.clabe).toBe('');
         });
 
         it('passes short CLABE (not 18 digits) to API without validation', async () => {
@@ -2250,6 +2321,9 @@ describe('input validation behavior', () => {
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
+                http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+                    return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
+                }),
                 http.post(`${BASE_URL}/ramp/bank-account`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
@@ -2263,11 +2337,13 @@ describe('input validation behavior', () => {
 
             await client.registerFiatAccount({
                 customerId: 'cust-1',
+                publicKey: STELLAR_PUBKEY,
                 account: { type: 'spei', clabe: '123', beneficiary: 'Alice Garcia' },
             });
 
             expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.clabe).toBe('123');
+            const account = (capturedBody! as { account: Record<string, unknown> }).account;
+            expect(account.clabe).toBe('123');
         });
 
         it('passes non-numeric CLABE to API without validation', async () => {
@@ -2275,6 +2351,9 @@ describe('input validation behavior', () => {
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
+                http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+                    return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
+                }),
                 http.post(`${BASE_URL}/ramp/bank-account`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
@@ -2288,11 +2367,13 @@ describe('input validation behavior', () => {
 
             await client.registerFiatAccount({
                 customerId: 'cust-1',
+                publicKey: STELLAR_PUBKEY,
                 account: { type: 'spei', clabe: 'abcdefghijklmnopqr', beneficiary: 'Alice Garcia' },
             });
 
             expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.clabe).toBe('abcdefghijklmnopqr');
+            const account = (capturedBody! as { account: Record<string, unknown> }).account;
+            expect(account.clabe).toBe('abcdefghijklmnopqr');
         });
 
         it('passes empty beneficiary without validation', async () => {
@@ -2300,6 +2381,9 @@ describe('input validation behavior', () => {
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
+                http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+                    return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
+                }),
                 http.post(`${BASE_URL}/ramp/bank-account`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
@@ -2313,18 +2397,23 @@ describe('input validation behavior', () => {
 
             await client.registerFiatAccount({
                 customerId: 'cust-1',
+                publicKey: STELLAR_PUBKEY,
                 account: { type: 'spei', clabe: '012345678901234567', beneficiary: '' },
             });
 
             expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.beneficiary).toBe('');
+            const account = (capturedBody! as { account: Record<string, unknown> }).account;
+            expect(account.beneficiary).toBe('');
         });
 
-        it('uses empty string fallback when bankName is undefined', async () => {
+        it('omits bankName from account when bankName is undefined', async () => {
             const client = createClient();
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
+                http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
+                    return HttpResponse.json({ presigned_url: 'https://onboard.test/abc' });
+                }),
                 http.post(`${BASE_URL}/ramp/bank-account`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
@@ -2338,11 +2427,13 @@ describe('input validation behavior', () => {
 
             await client.registerFiatAccount({
                 customerId: 'cust-1',
+                publicKey: STELLAR_PUBKEY,
                 account: { type: 'spei', clabe: '012345678901234567', beneficiary: 'Alice Garcia' },
             });
 
             expect(capturedBody).not.toBeNull();
-            expect(capturedBody!.bankName).toBe('');
+            const account = (capturedBody! as { account: Record<string, unknown> }).account;
+            expect(account.bankName).toBeUndefined();
         });
     });
 
@@ -2389,7 +2480,7 @@ describe('input validation behavior', () => {
                 }),
             );
 
-            await client.getKycUrl('', 'GABCDEF');
+            await client.getKycUrl('', STELLAR_PUBKEY);
             expect(capturedBody).not.toBeNull();
             expect(capturedBody!.customerId).toBe('');
         });
