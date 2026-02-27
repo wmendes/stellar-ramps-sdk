@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getStatusColor } from './status';
+import { getStatusColor } from '$lib/utils/status';
 
 describe('getStatusColor', () => {
     it('returns yellow for pending', () => {

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
-import { BlindPayClient } from './client';
-import { AnchorError } from '../types';
+import { server } from '../../test-setup';
+import { BlindPayClient } from '$lib/anchors/blindpay/client';
+import { AnchorError } from '$lib/anchors/types';
 
 const BASE_URL = 'http://blindpay.test';
 const API_KEY = 'test-key';

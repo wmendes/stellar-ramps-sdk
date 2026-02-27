@@ -15,13 +15,13 @@ import {
     getSep38Endpoint,
     supportsSep,
     getSigningKey,
-} from './sep1';
-import type { StellarTomlRecord } from './sep1';
-import { getChallenge, validateChallenge, submitChallenge, signChallenge } from './sep10';
-import * as sep6 from './sep6';
-import * as sep12 from './sep12';
-import * as sep24 from './sep24';
-import * as sep38 from './sep38';
+} from '$lib/anchors/sep/sep1';
+import type { StellarTomlRecord } from '$lib/anchors/sep/sep1';
+import { getChallenge, validateChallenge, submitChallenge, signChallenge } from '$lib/anchors/sep/sep10';
+import * as sep6 from '$lib/anchors/sep/sep6';
+import * as sep12 from '$lib/anchors/sep/sep12';
+import * as sep24 from '$lib/anchors/sep/sep24';
+import * as sep38 from '$lib/anchors/sep/sep38';
 
 const TEST_ANCHOR_DOMAIN = 'testanchor.stellar.org';
 

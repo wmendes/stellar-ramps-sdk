@@ -26,12 +26,16 @@ export default defineConfig({
                 test: {
                     name: 'unit',
                     environment: 'node',
-                    include: ['src/**/*.{test,spec}.{js,ts}'],
+                    include: [
+                        'src/**/*.{test,spec}.{js,ts}',
+                        'tests/**/*.{test,spec}.{js,ts}',
+                    ],
                     exclude: [
                         'src/**/*.svelte.{test,spec}.{js,ts}',
                         'src/**/*.integration.test.{js,ts}',
+                        'tests/**/*.integration.test.{js,ts}',
                     ],
-                    setupFiles: ['src/test-setup.ts'],
+                    setupFiles: ['tests/test-setup.ts'],
                 },
             },
 
@@ -40,7 +44,10 @@ export default defineConfig({
                 test: {
                     name: 'integration',
                     environment: 'node',
-                    include: ['src/**/*.integration.test.{js,ts}'],
+                    include: [
+                        'src/**/*.integration.test.{js,ts}',
+                        'tests/**/*.integration.test.{js,ts}',
+                    ],
                     testTimeout: 30_000,
                 },
             },

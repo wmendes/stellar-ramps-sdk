@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
+import { server } from '../../test-setup';
 import {
     decodeToken,
     isTokenExpired,
@@ -9,9 +9,9 @@ import {
     getChallenge,
     signChallenge,
     submitChallenge,
-} from './sep10';
-import type { Sep10Config, Sep10SignerFn } from './sep10';
-import { SepApiError } from './types';
+} from '$lib/anchors/sep/sep10';
+import type { Sep10Config, Sep10SignerFn } from '$lib/anchors/sep/sep10';
+import { SepApiError } from '$lib/anchors/sep/types';
 import * as StellarSdk from '@stellar/stellar-sdk';
 
 // Helper to create a fake JWT with a given payload

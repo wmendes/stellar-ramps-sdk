@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
+import { server } from '../../test-setup';
 import {
     fetchStellarToml,
     getSep10Endpoint,
@@ -13,8 +13,8 @@ import {
     getCurrencies,
     getCurrencyByCode,
     supportsSep,
-} from './sep1';
-import type { StellarTomlRecord, TomlCurrency } from './sep1';
+} from '$lib/anchors/sep/sep1';
+import type { StellarTomlRecord, TomlCurrency } from '$lib/anchors/sep/sep1';
 
 // =============================================================================
 // fetchStellarToml (HTTP - uses MSW)

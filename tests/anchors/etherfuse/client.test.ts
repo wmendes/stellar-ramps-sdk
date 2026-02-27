@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
-import { EtherfuseClient } from './client';
-import { AnchorError } from '../types';
-import type { EtherfuseKycIdentityRequest, EtherfuseKycDocumentRequest } from './types';
+import { server } from '../../test-setup';
+import { EtherfuseClient } from '$lib/anchors/etherfuse/client';
+import { AnchorError } from '$lib/anchors/types';
+import type { EtherfuseKycIdentityRequest, EtherfuseKycDocumentRequest } from '$lib/anchors/etherfuse/types';
 
 const BASE_URL = 'http://etherfuse.test';
 const API_KEY = 'test-api-key';

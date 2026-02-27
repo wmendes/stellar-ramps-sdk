@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
+import { server } from '../../test-setup';
 import {
     isComplete,
     isPendingUser,
@@ -15,9 +15,9 @@ import {
     getTransaction,
     getTransactionByStellarId,
     getTransactions,
-} from './sep6';
-import { SepApiError } from './types';
-import type { TransactionStatus } from './types';
+} from '$lib/anchors/sep/sep6';
+import { SepApiError } from '$lib/anchors/sep/types';
+import type { TransactionStatus } from '$lib/anchors/sep/types';
 
 describe('isComplete', () => {
     it('returns true for completed', () => {

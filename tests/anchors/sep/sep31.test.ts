@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
+import { server } from '../../test-setup';
 import {
     getInfo,
     getReceiveAssets,
@@ -18,8 +18,8 @@ import {
     isRefunded,
     isInProgress,
     getStatusDescription,
-} from './sep31';
-import { SepApiError } from './types';
+} from '$lib/anchors/sep/sep31';
+import { SepApiError } from '$lib/anchors/sep/types';
 
 const BASE = 'https://anchor.test/sep31';
 const TOKEN = 'test-jwt-token';

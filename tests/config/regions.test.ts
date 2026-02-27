@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getRegion, getAllRegions, getAnchorsForRegion, getRegionsForAnchor } from './regions';
+import { getRegion, getAllRegions, getAnchorsForRegion, getRegionsForAnchor } from '$lib/config/regions';
 
 describe('getRegion', () => {
     it('returns Mexico region', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
+import { server } from '../../test-setup';
 import {
     getInfo,
     getAssets,
@@ -11,8 +11,8 @@ import {
     stellarAssetId,
     fiatAssetId,
     parseAssetId,
-} from './sep38';
-import { SepApiError } from './types';
+} from '$lib/anchors/sep/sep38';
+import { SepApiError } from '$lib/anchors/sep/types';
 
 const BASE = 'https://anchor.test/sep38';
 const TOKEN = 'test-jwt-token';

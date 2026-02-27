@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getAnchor, getAllAnchors } from './anchors';
+import { getAnchor, getAllAnchors } from '$lib/config/anchors';
 
 describe('getAnchor', () => {
     it('returns Etherfuse profile', () => {

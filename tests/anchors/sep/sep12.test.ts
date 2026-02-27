@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../test-setup';
+import { server } from '../../test-setup';
 import {
     isKycComplete,
     needsMoreInfo,
@@ -9,9 +9,9 @@ import {
     getCustomer,
     putCustomer,
     deleteCustomer,
-} from './sep12';
-import { SepApiError } from './types';
-import type { Sep12Status } from './types';
+} from '$lib/anchors/sep/sep12';
+import { SepApiError } from '$lib/anchors/sep/types';
+import type { Sep12Status } from '$lib/anchors/sep/types';
 
 describe('isKycComplete', () => {
     it('returns true for ACCEPTED', () => {
