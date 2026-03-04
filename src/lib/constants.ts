@@ -8,13 +8,14 @@
 // Each entry maps a country code to its currency and payment rail.
 export const SUPPORTED_COUNTRIES = [
     { code: 'MX', name: 'Mexico', currency: 'MXN', paymentMethod: 'SPEI' },
-    { code: 'AR', name: 'Argentina', currency: 'ARS', paymentMethod: 'COELSA' },
-    { code: 'BR', name: 'Brazil', currency: 'BRL', paymentMethod: 'PIX' },
-    { code: 'CO', name: 'Colombia', currency: 'COP', paymentMethod: 'ACH' },
-    { code: 'CL', name: 'Chile', currency: 'CLP', paymentMethod: 'ACH_CHL' },
-    { code: 'BO', name: 'Bolivia', currency: 'BOB', paymentMethod: 'ACH_BOL' },
-    { code: 'DO', name: 'Dominican Republic', currency: 'DOP', paymentMethod: 'ACH_DOM' },
-    { code: 'US', name: 'United States', currency: 'USD', paymentMethod: 'BANK_USA' },
+    /** TODO: Enable regions as they come online or as activations approach. */
+    // { code: 'AR', name: 'Argentina', currency: 'ARS', paymentMethod: 'COELSA' },
+    // { code: 'BR', name: 'Brazil', currency: 'BRL', paymentMethod: 'PIX' },
+    // { code: 'CO', name: 'Colombia', currency: 'COP', paymentMethod: 'ACH' },
+    // { code: 'CL', name: 'Chile', currency: 'CLP', paymentMethod: 'ACH_CHL' },
+    // { code: 'BO', name: 'Bolivia', currency: 'BOB', paymentMethod: 'ACH_BOL' },
+    // { code: 'DO', name: 'Dominican Republic', currency: 'DOP', paymentMethod: 'ACH_DOM' },
+    // { code: 'US', name: 'United States', currency: 'USD', paymentMethod: 'BANK_USA' },
 ] as const;
 
 // Default country code
