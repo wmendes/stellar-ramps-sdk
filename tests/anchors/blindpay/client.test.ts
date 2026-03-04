@@ -121,10 +121,7 @@ describe('BlindPayClient', () => {
         it('returns null on 404', async () => {
             server.use(
                 http.get(apiUrl('/receivers/re_missing'), () => {
-                    return HttpResponse.json(
-                        { error: { message: 'Not found' } },
-                        { status: 404 },
-                    );
+                    return HttpResponse.json({ error: { message: 'Not found' } }, { status: 404 });
                 }),
             );
 
@@ -449,10 +446,7 @@ describe('BlindPayClient', () => {
         it('returns null on 404', async () => {
             server.use(
                 http.get(apiUrl('/payins/pi_missing'), () => {
-                    return HttpResponse.json(
-                        { error: { message: 'Not found' } },
-                        { status: 404 },
-                    );
+                    return HttpResponse.json({ error: { message: 'Not found' } }, { status: 404 });
                 }),
             );
 
@@ -561,10 +555,7 @@ describe('BlindPayClient', () => {
         it('returns empty array on 404', async () => {
             server.use(
                 http.get(apiUrl('/receivers/re_missing/bank-accounts'), () => {
-                    return HttpResponse.json(
-                        { error: { message: 'Not found' } },
-                        { status: 404 },
-                    );
+                    return HttpResponse.json({ error: { message: 'Not found' } }, { status: 404 });
                 }),
             );
 
@@ -754,10 +745,7 @@ describe('BlindPayClient', () => {
         it('returns null on 404', async () => {
             server.use(
                 http.get(apiUrl('/payouts/po_missing'), () => {
-                    return HttpResponse.json(
-                        { error: { message: 'Not found' } },
-                        { status: 404 },
-                    );
+                    return HttpResponse.json({ error: { message: 'Not found' } }, { status: 404 });
                 }),
             );
 
@@ -816,10 +804,7 @@ describe('BlindPayClient', () => {
         it('returns "not_started" on 404', async () => {
             server.use(
                 http.get(apiUrl('/receivers/re_missing'), () => {
-                    return HttpResponse.json(
-                        { error: { message: 'Not found' } },
-                        { status: 404 },
-                    );
+                    return HttpResponse.json({ error: { message: 'Not found' } }, { status: 404 });
                 }),
             );
 
@@ -1070,10 +1055,7 @@ describe('BlindPayClient', () => {
         it('uses fallback message when error field is null in JSON response', async () => {
             server.use(
                 http.get(apiUrl('/receivers/re_null_error'), () => {
-                    return HttpResponse.json(
-                        { error: null },
-                        { status: 422 },
-                    );
+                    return HttpResponse.json({ error: null }, { status: 422 });
                 }),
             );
 
@@ -1951,27 +1933,20 @@ describe('BlindPayClient', () => {
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
-                http.post(
-                    apiUrl('/receivers/re_abc/blockchain-wallets'),
-                    async ({ request }) => {
-                        capturedBody = (await request.json()) as Record<string, unknown>;
-                        return HttpResponse.json({
-                            id: 'bw_001',
-                            name: 'My Wallet',
-                            network: 'stellar_testnet',
-                            address: 'GABC123',
-                            created_at: '2025-01-01T00:00:00Z',
-                        });
-                    },
-                ),
+                http.post(apiUrl('/receivers/re_abc/blockchain-wallets'), async ({ request }) => {
+                    capturedBody = (await request.json()) as Record<string, unknown>;
+                    return HttpResponse.json({
+                        id: 'bw_001',
+                        name: 'My Wallet',
+                        network: 'stellar_testnet',
+                        address: 'GABC123',
+                        created_at: '2025-01-01T00:00:00Z',
+                    });
+                }),
             );
 
             const client = createClient();
-            const result = await client.registerBlockchainWallet(
-                're_abc',
-                'GABC123',
-                'My Wallet',
-            );
+            const result = await client.registerBlockchainWallet('re_abc', 'GABC123', 'My Wallet');
 
             expect(capturedBody).not.toBeNull();
             expect(capturedBody!.name).toBe('My Wallet');
@@ -1989,19 +1964,16 @@ describe('BlindPayClient', () => {
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
-                http.post(
-                    apiUrl('/receivers/re_abc/blockchain-wallets'),
-                    async ({ request }) => {
-                        capturedBody = (await request.json()) as Record<string, unknown>;
-                        return HttpResponse.json({
-                            id: 'bw_002',
-                            name: 'Stellar Wallet',
-                            network: 'stellar_testnet',
-                            address: 'GABC123',
-                            created_at: '2025-01-01T00:00:00Z',
-                        });
-                    },
-                ),
+                http.post(apiUrl('/receivers/re_abc/blockchain-wallets'), async ({ request }) => {
+                    capturedBody = (await request.json()) as Record<string, unknown>;
+                    return HttpResponse.json({
+                        id: 'bw_002',
+                        name: 'Stellar Wallet',
+                        network: 'stellar_testnet',
+                        address: 'GABC123',
+                        created_at: '2025-01-01T00:00:00Z',
+                    });
+                }),
             );
 
             const client = createClient();
@@ -2014,19 +1986,16 @@ describe('BlindPayClient', () => {
             let capturedBody: Record<string, unknown> | null = null;
 
             server.use(
-                http.post(
-                    apiUrl('/receivers/re_abc/blockchain-wallets'),
-                    async ({ request }) => {
-                        capturedBody = (await request.json()) as Record<string, unknown>;
-                        return HttpResponse.json({
-                            id: 'bw_003',
-                            name: 'Stellar Wallet',
-                            network: 'stellar_testnet',
-                            address: 'GABC123',
-                            created_at: '2025-01-01T00:00:00Z',
-                        });
-                    },
-                ),
+                http.post(apiUrl('/receivers/re_abc/blockchain-wallets'), async ({ request }) => {
+                    capturedBody = (await request.json()) as Record<string, unknown>;
+                    return HttpResponse.json({
+                        id: 'bw_003',
+                        name: 'Stellar Wallet',
+                        network: 'stellar_testnet',
+                        address: 'GABC123',
+                        created_at: '2025-01-01T00:00:00Z',
+                    });
+                }),
             );
 
             const client = createClient();
@@ -2064,11 +2033,7 @@ describe('BlindPayClient', () => {
             );
 
             const client = createClient();
-            const result = await client.submitSignedPayout(
-                'qu_001',
-                'SIGNED_XDR_DATA',
-                'GABC123',
-            );
+            const result = await client.submitSignedPayout('qu_001', 'SIGNED_XDR_DATA', 'GABC123');
 
             expect(capturedBody).not.toBeNull();
             expect(capturedBody!.quote_id).toBe('qu_001');

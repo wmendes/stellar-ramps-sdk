@@ -3,7 +3,7 @@ import type { PageLoad } from './$types';
 import { createTestAnchorClient } from '$lib/anchors/testanchor';
 import { error } from '@sveltejs/kit';
 
-export const load: PageLoad = async ({ fetch }) =>  {
+export const load: PageLoad = async ({ fetch }) => {
     const client = createTestAnchorClient(undefined, fetch);
 
     try {
@@ -38,4 +38,4 @@ export const load: PageLoad = async ({ fetch }) =>  {
     } catch (e: unknown) {
         error(500, { message: e instanceof Error ? e.message : 'Failed to initialize' });
     }
-}
+};

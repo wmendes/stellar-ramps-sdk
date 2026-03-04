@@ -163,7 +163,10 @@ export const ANCHORS: Record<string, AnchorProfile> = {
             },
         },
         devOnboarding: [
-            { text: 'Sandbox API credentials can be used immediately. Use example API credentials from Alfred\'s docs.', link: 'https://alfredpay.readme.io/reference/post_customers-create-1' },
+            {
+                text: "Sandbox API credentials can be used immediately. Use example API credentials from Alfred's docs.",
+                link: 'https://alfredpay.readme.io/reference/post_customers-create-1',
+            },
             { text: 'Staging and Production environments require a fuller onboarding process.' },
         ],
         integrationFlow: {

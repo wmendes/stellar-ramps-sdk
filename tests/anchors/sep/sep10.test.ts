@@ -397,10 +397,7 @@ describe('submitChallenge', () => {
     it('throws SepApiError on error response', async () => {
         server.use(
             http.post(AUTH_ENDPOINT, () => {
-                return HttpResponse.json(
-                    { error: 'Invalid signature' },
-                    { status: 401 },
-                );
+                return HttpResponse.json({ error: 'Invalid signature' }, { status: 401 });
             }),
         );
 
@@ -499,7 +496,9 @@ describe('input validation behavior', () => {
 
     it('isTokenExpired with token containing non-numeric exp returns true as safety fallback', () => {
         const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-        const body = btoa(JSON.stringify({ exp: 'not-a-number', iss: '', sub: '', iat: 0, jti: '' }));
+        const body = btoa(
+            JSON.stringify({ exp: 'not-a-number', iss: '', sub: '', iat: 0, jti: '' }),
+        );
         const token = `${header}.${body}.fakesig`;
         // NaN < (now + buffer) evaluates to false, so isTokenExpired returns false
         // But actually: NaN < number is false, so the try block returns false

@@ -379,9 +379,7 @@ describe('input validation behavior', () => {
     });
 
     it('getCurrencyByCode with empty string code returns undefined (no match)', () => {
-        const currencies: TomlCurrency[] = [
-            { code: 'USDC', issuer: 'GBBD47...' } as TomlCurrency,
-        ];
+        const currencies: TomlCurrency[] = [{ code: 'USDC', issuer: 'GBBD47...' } as TomlCurrency];
         const toml = { CURRENCIES: currencies } as StellarTomlRecord;
         expect(getCurrencyByCode(toml, '')).toBeUndefined();
     });

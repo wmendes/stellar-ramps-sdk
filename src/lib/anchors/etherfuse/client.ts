@@ -789,11 +789,7 @@ export class EtherfuseClient implements Anchor {
         customerId: string,
         identity: EtherfuseKycIdentityRequest,
     ): Promise<unknown> {
-        return this.request(
-            'POST',
-            `/ramp/customer/${customerId}/kyc`,
-            identity,
-        );
+        return this.request('POST', `/ramp/customer/${customerId}/kyc`, identity);
     }
 
     /**
@@ -812,11 +808,7 @@ export class EtherfuseClient implements Anchor {
         customerId: string,
         document: EtherfuseKycDocumentRequest,
     ): Promise<unknown> {
-        return this.request(
-            'POST',
-            `/ramp/customer/${customerId}/kyc/documents`,
-            document,
-        );
+        return this.request('POST', `/ramp/customer/${customerId}/kyc/documents`, document);
     }
 
     /**

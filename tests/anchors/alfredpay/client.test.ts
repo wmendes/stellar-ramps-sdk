@@ -113,7 +113,10 @@ describe('AlfredPayClient', () => {
                 }),
             );
 
-            const customer = await client.getCustomer({ email: 'nobody@example.com', country: 'MX' });
+            const customer = await client.getCustomer({
+                email: 'nobody@example.com',
+                country: 'MX',
+            });
             expect(customer).toBeNull();
         });
 
@@ -1553,27 +1556,18 @@ describe('AlfredPayClient', () => {
             const client = createClient();
 
             server.use(
-                http.post(
-                    `${BASE_URL}/customers/cust-123/kyc/sub-001/files`,
-                    () => {
-                        return HttpResponse.json(
-                            { error: { code: 'FILE_TOO_LARGE', message: 'File exceeds size limit' } },
-                            { status: 413 },
-                        );
-                    },
-                ),
+                http.post(`${BASE_URL}/customers/cust-123/kyc/sub-001/files`, () => {
+                    return HttpResponse.json(
+                        { error: { code: 'FILE_TOO_LARGE', message: 'File exceeds size limit' } },
+                        { status: 413 },
+                    );
+                }),
             );
 
             const file = new Blob(['fake-image-data'], { type: 'image/jpeg' });
 
             try {
-                await client.submitKycFile(
-                    'cust-123',
-                    'sub-001',
-                    'Selfie',
-                    file,
-                    'selfie.jpg',
-                );
+                await client.submitKycFile('cust-123', 'sub-001', 'Selfie', file, 'selfie.jpg');
                 expect.fail('Should have thrown');
             } catch (error) {
                 expect(error).toBeInstanceOf(AnchorError);
@@ -1754,12 +1748,9 @@ describe('AlfredPayClient', () => {
             const client = createClient();
 
             server.use(
-                http.post(
-                    `${BASE_URL}/customers/cust-123/kyc/sub-001/submit`,
-                    () => {
-                        return HttpResponse.json({ message: 'Submission finalized' });
-                    },
-                ),
+                http.post(`${BASE_URL}/customers/cust-123/kyc/sub-001/submit`, () => {
+                    return HttpResponse.json({ message: 'Submission finalized' });
+                }),
             );
 
             // Should complete without throwing
@@ -1814,9 +1805,7 @@ describe('AlfredPayClient', () => {
             );
 
             // Should complete without throwing
-            await expect(
-                client.completeKycSandbox('sub-sandbox-001'),
-            ).resolves.toBeUndefined();
+            await expect(client.completeKycSandbox('sub-sandbox-001')).resolves.toBeUndefined();
         });
     });
 
@@ -1829,13 +1818,17 @@ describe('AlfredPayClient', () => {
             it('throws MISSING_EMAIL when email is empty', async () => {
                 const client = createClient();
 
-                await expect(client.createCustomer({ email: '' })).rejects.toThrow('email is required for AlfredPay');
+                await expect(client.createCustomer({ email: '' })).rejects.toThrow(
+                    'email is required for AlfredPay',
+                );
             });
 
             it('throws MISSING_EMAIL when email is undefined', async () => {
                 const client = createClient();
 
-                await expect(client.createCustomer({})).rejects.toThrow('email is required for AlfredPay');
+                await expect(client.createCustomer({})).rejects.toThrow(
+                    'email is required for AlfredPay',
+                );
             });
 
             it('passes invalid email format to API without validation', async () => {

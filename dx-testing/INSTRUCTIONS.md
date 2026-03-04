@@ -21,6 +21,7 @@ Read `dx-testing/README.md` to see completed rounds, the cross-round issue track
 ### Determine what to test
 
 Each round needs a unique combination of:
+
 - **Framework**: React+Vite, Next.js, Express, plain TypeScript, etc.
 - **Provider**: Etherfuse, AlfredPay, BlindPay, or testanchor (SEP flow)
 - **Bonus feature**: Something that goes beyond basic on/off ramp (AMM pool, multi-provider routing, SEP flow, etc.)
@@ -32,11 +33,13 @@ Each round needs a unique combination of:
 **All test projects use the fixed directory `sample-dx-project/` at the repo root.** This directory is gitignored and gets wiped and recreated each round. The scaffold is disposable — only the reports in `dx-testing/<name>/` are kept.
 
 If `sample-dx-project/` already exists from a prior round, delete it first:
+
 ```bash
 rm -rf sample-dx-project/
 ```
 
 Scaffold with the standard tooling for the framework:
+
 - **Next.js**: `npx create-next-app@latest sample-dx-project --typescript --tailwind --app --src-dir --eslint --use-npm`
 - **Vite + React**: `npm create vite@latest sample-dx-project -- --template react-ts`
 - **Express**: `mkdir sample-dx-project && cd sample-dx-project && npm init -y && npm install express typescript @types/node tsx`
@@ -54,14 +57,18 @@ The prompt is the most important artifact. It defines what the subagent builds a
 The prompt must include:
 
 ### 1. Role and context
+
 Tell the subagent what kind of developer it is and that it found this SvelteKit project with a portable library.
 
 ### 2. Project location
+
 - **Source repo**: the absolute path to this SvelteKit project
 - **Test project**: the absolute path to `sample-dx-project/`
 
 ### 3. What to build
+
 Be specific about the features. Include:
+
 - Wallet connection (Freighter)
 - Customer registration + KYC
 - On-ramp flow (fiat -> crypto)
@@ -70,16 +77,21 @@ Be specific about the features. Include:
 - API route handlers / backend proxy (if the framework supports it)
 
 ### 4. Provider-specific context
+
 Call out anything unique about the provider being tested:
+
 - **Etherfuse**: iframe KYC, deferred off-ramp signing, sandbox simulation, CETES token
 - **BlindPay**: redirect KYC, bank-before-quote, wallet registration, payout submission, USDB token
 - **AlfredPay**: form-based KYC, email customer lookup, USDC token
 
 ### 5. How to get started
+
 Tell the subagent to read docs and source code first. Point at CLAUDE.md, READMEs, types, and client implementations. Tell it NOT to read `dx-testing/`.
 
 ### 6. Build journal requirements
+
 The subagent MUST maintain a `BUILD_JOURNAL.md` in the test project directory. Specify:
+
 - Write frequently, not just at the end
 - Record what files were read and what was learned
 - Record decisions, friction, confusion, and surprises
@@ -87,12 +99,15 @@ The subagent MUST maintain a `BUILD_JOURNAL.md` in the test project directory. S
 - "Lab notebook", not "documentation"
 
 ### 7. Verification
+
 The subagent must run type-checking and build commands and fix any errors.
 
 ### 8. Bash permissions
+
 **Critical**: End the prompt with an explicit statement that the subagent has permission to use Bash for all operations (installing packages, creating directories, running builds). Without this, the subagent may stall asking for permission.
 
 Example closing line:
+
 > IMPORTANT: You have full permission to use Bash for all operations — installing npm packages, creating directories, running builds, etc. Do not ask for permission. Just proceed with the work.
 
 ---
@@ -102,6 +117,7 @@ Example closing line:
 A PreToolUse hook at `.claude/hooks/approve-dx-test-bash.sh` auto-approves non-destructive Bash commands scoped to the `sample-dx-project/` directory. This is wired up in `.claude/settings.local.json`.
 
 **How it works:**
+
 - If the Bash command references `sample-dx-project` in the command string, it's auto-approved
 - If the subagent's working directory is inside `sample-dx-project/`, it's auto-approved
 - Destructive commands (`rm -rf /`, `git push --force`, etc.) are always denied
@@ -128,6 +144,7 @@ This is the core of the supervisor's job. Be thorough.
 ### 4a. Install and build
 
 If the subagent couldn't run Bash, do it yourself:
+
 ```bash
 cd sample-dx-project/
 npm install
@@ -139,6 +156,7 @@ If the build fails, note the errors — they're DX findings. Fix them if straigh
 ### 4b. Read the build journal
 
 Read `BUILD_JOURNAL.md` in full. Look for:
+
 - What the subagent found easy vs. confusing
 - Where it got stuck or made wrong turns
 - What it chose to copy vs. skip and why
@@ -149,6 +167,7 @@ Read `BUILD_JOURNAL.md` in full. Look for:
 ### 4c. Diff copied files
 
 For every file the subagent claimed to copy "verbatim", diff it against the original:
+
 ```bash
 diff src/lib/anchors/types.ts sample-dx-project/src/lib/anchors/types.ts
 ```
@@ -158,6 +177,7 @@ Document any changes — even cosmetic ones (stripped comments, reformatted impo
 ### 4d. Read all created files
 
 Read every file the subagent wrote (components, hooks, API routes, utilities, pages). Evaluate:
+
 - Does it use the `Anchor` interface correctly?
 - Does it handle provider-specific patterns (deferred signing, bank-before-quote, etc.)?
 - Are API routes properly proxying through the server-side client?
@@ -182,37 +202,48 @@ Write `DX_REPORT.md` following the established format. The report structure is:
 # Anchor Library Portability: DX Report
 
 ## Thesis Under Test
+
 > (the thesis, quoted)
 
 ## Methodology
+
 How the test was run. What the subagent did. What the supervisor did.
 Context about which round this is and what prior fixes are being validated.
 
 ## Test Application
+
 Stack, what was built, line count.
 
 ## Verdict: X/10
+
 One-paragraph summary of the overall assessment.
 
 ## What Worked
+
 Numbered sections with specific examples, code snippets, and evidence.
 
 ## What Didn't Work
+
 Numbered issues with severity, problem description, and fix suggestions.
 
 ## Observations (Not Issues)
+
 Things worth noting that aren't problems — scope decisions, patterns that emerged, etc.
 
 ## Recommendations
+
 Prioritized list of suggested improvements.
 
 ## File Manifest
+
 Three tables:
+
 1. Portable library files used (file, copied verbatim?, notes)
 2. Application files created (file, lines, purpose)
 3. Files not copied and why
 
 ## Appendix A: Subagent Prompt
+
 The full prompt given to the subagent, quoted verbatim.
 ```
 

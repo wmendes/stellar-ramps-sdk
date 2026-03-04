@@ -50,11 +50,11 @@ The 1-point deduction is for the subagent needing to create its own token config
 
 The three issues from round 1 (React+Etherfuse) have been resolved:
 
-| Round 1 Issue | Status in Round 4 |
-| --- | --- |
-| `erasableSyntaxOnly` broke builds | **Fixed** — `AnchorError` and `WalletError` use explicit field declarations now. Build passed on first try. |
-| Barrel `index.ts` broke selective copying | **Fixed** — Barrel deleted. Subagent copied `types.ts` + `etherfuse/` + `wallet/` with no dead-import issues. |
-| `wallet/` not advertised as portable | **Fixed** — Subagent found the wallet docs in the README and copied `wallet/` immediately. No discovery friction. |
+| Round 1 Issue                             | Status in Round 4                                                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `erasableSyntaxOnly` broke builds         | **Fixed** — `AnchorError` and `WalletError` use explicit field declarations now. Build passed on first try.       |
+| Barrel `index.ts` broke selective copying | **Fixed** — Barrel deleted. Subagent copied `types.ts` + `etherfuse/` + `wallet/` with no dead-import issues.     |
+| `wallet/` not advertised as portable      | **Fixed** — Subagent found the wallet docs in the README and copied `wallet/` immediately. No discovery friction. |
 
 The round 2 fix (token data on `Anchor` interface instead of `config/tokens.ts`) also worked — the subagent never tried to copy `config/` at all.
 
@@ -62,16 +62,16 @@ The round 2 fix (token data on `Anchor` interface instead of `config/tokens.ts`)
 
 Eight files were copied. Diffing them against originals reveals:
 
-| File | Functional Changes | Notes |
-| --- | :---: | --- |
-| `anchors/types.ts` | None | Copy dropped future-reference comments (non-functional) |
-| `anchors/etherfuse/client.ts` | None | Copy dropped JSDoc `@param`/`@returns` annotations (non-functional) |
-| `anchors/etherfuse/types.ts` | None | Byte-identical |
-| `anchors/etherfuse/index.ts` | None | Byte-identical |
-| `wallet/freighter.ts` | None | Byte-identical |
-| `wallet/stellar.ts` | None | Byte-identical |
-| `wallet/types.ts` | None | Byte-identical |
-| `wallet/index.ts` | Minor | Added `getStellarAsset` and `getNetworkPassphrase` re-exports |
+| File                          | Functional Changes | Notes                                                               |
+| ----------------------------- | :----------------: | ------------------------------------------------------------------- |
+| `anchors/types.ts`            |        None        | Copy dropped future-reference comments (non-functional)             |
+| `anchors/etherfuse/client.ts` |        None        | Copy dropped JSDoc `@param`/`@returns` annotations (non-functional) |
+| `anchors/etherfuse/types.ts`  |        None        | Byte-identical                                                      |
+| `anchors/etherfuse/index.ts`  |        None        | Byte-identical                                                      |
+| `wallet/freighter.ts`         |        None        | Byte-identical                                                      |
+| `wallet/stellar.ts`           |        None        | Byte-identical                                                      |
+| `wallet/types.ts`             |        None        | Byte-identical                                                      |
+| `wallet/index.ts`             |       Minor        | Added `getStellarAsset` and `getNetworkPassphrase` re-exports       |
 
 The only functional change was adding two re-exports to `wallet/index.ts` — the subagent wanted those utilities accessible from the barrel. The library code itself compiled in Next.js 16 with zero source changes.
 
@@ -124,7 +124,7 @@ export const CETES_TOKEN = {
     symbol: 'CETES',
     name: 'Etherfuse CETES',
     issuer: CETES_ISSUER,
-    description: "Mexican Federal Treasury Certificates tokenized on Stellar.",
+    description: 'Mexican Federal Treasury Certificates tokenized on Stellar.',
 };
 ```
 
@@ -142,19 +142,19 @@ This is the same pattern seen in round 1 (React+Etherfuse), where the subagent a
 
 This was the most complete build of any round:
 
-| Feature | Round 1 (React) | Round 2 (Next.js+BlindPay) | Round 4 (This Round) |
-| --- | :---: | :---: | :---: |
-| Wallet connection | Yes | Yes | Yes |
-| Customer registration | Yes | Yes | Yes |
-| KYC flow | Skipped | Redirect | Iframe |
-| On-ramp | Yes | Yes | Yes |
-| Off-ramp | Yes | Yes | Yes |
-| Deferred signing | Yes | N/A (BlindPay) | Yes |
-| Bank account management | Hardcoded | Yes | Yes (inline in off-ramp) |
-| Sandbox simulation | No | No | Yes |
-| AMM / DeFi feature | No | No | Yes |
-| API route handlers | No (mock service) | Yes | Yes |
-| Multi-page routing | No (SPA) | No (SPA) | Yes (4 pages) |
+| Feature                 |  Round 1 (React)  | Round 2 (Next.js+BlindPay) |   Round 4 (This Round)   |
+| ----------------------- | :---------------: | :------------------------: | :----------------------: |
+| Wallet connection       |        Yes        |            Yes             |           Yes            |
+| Customer registration   |        Yes        |            Yes             |           Yes            |
+| KYC flow                |      Skipped      |          Redirect          |          Iframe          |
+| On-ramp                 |        Yes        |            Yes             |           Yes            |
+| Off-ramp                |        Yes        |            Yes             |           Yes            |
+| Deferred signing        |        Yes        |       N/A (BlindPay)       |           Yes            |
+| Bank account management |     Hardcoded     |            Yes             | Yes (inline in off-ramp) |
+| Sandbox simulation      |        No         |             No             |           Yes            |
+| AMM / DeFi feature      |        No         |             No             |           Yes            |
+| API route handlers      | No (mock service) |            Yes             |           Yes            |
+| Multi-page routing      |     No (SPA)      |          No (SPA)          |      Yes (4 pages)       |
 
 The subagent exercised more of the library surface area than any previous round.
 
@@ -221,42 +221,42 @@ The fixes from rounds 1-3 have addressed all previously identified issues. The l
 
 ### Portable library files used (from `src/lib/`)
 
-| File | Copied Verbatim | Notes |
-| --- | :---: | --- |
-| `anchors/types.ts` | Yes | |
-| `anchors/etherfuse/client.ts` | Yes | |
-| `anchors/etherfuse/types.ts` | Yes | |
-| `anchors/etherfuse/index.ts` | Yes | |
-| `wallet/freighter.ts` | Yes | |
-| `wallet/stellar.ts` | Yes | |
-| `wallet/types.ts` | Yes | |
-| `wallet/index.ts` | Minor | Added 2 re-exports |
+| File                          | Copied Verbatim | Notes              |
+| ----------------------------- | :-------------: | ------------------ |
+| `anchors/types.ts`            |       Yes       |                    |
+| `anchors/etherfuse/client.ts` |       Yes       |                    |
+| `anchors/etherfuse/types.ts`  |       Yes       |                    |
+| `anchors/etherfuse/index.ts`  |       Yes       |                    |
+| `wallet/freighter.ts`         |       Yes       |                    |
+| `wallet/stellar.ts`           |       Yes       |                    |
+| `wallet/types.ts`             |       Yes       |                    |
+| `wallet/index.ts`             |      Minor      | Added 2 re-exports |
 
 ### Next.js application files created
 
-| File | Lines | Purpose |
-| --- | ---: | --- |
-| `src/lib/anchor-factory.ts` | 32 | Server-side EtherfuseClient factory using `process.env` |
-| `src/lib/constants.ts` | 13 | CETES token config, network constants |
-| `src/lib/wallet/amm.ts` | 216 | Stellar AMM pool utilities (new, not in source repo) |
-| `src/hooks/useWallet.ts` | 87 | React hook for Freighter wallet state |
-| `src/components/WalletConnect.tsx` | 60 | Wallet connection UI |
-| `src/components/KycIframe.tsx` | 23 | Etherfuse KYC iframe embed |
-| `src/components/QuoteDisplay.tsx` | 66 | Quote summary with countdown timer |
-| `src/components/OnRampFlow.tsx` | 383 | MXN → CETES with SPEI instructions + sandbox sim |
-| `src/components/OffRampFlow.tsx` | 429 | CETES → MXN with deferred signing |
-| `src/components/LiquidityPool.tsx` | 337 | CETES/XLM AMM pool deposit/withdraw |
-| `src/app/page.tsx` | 120 | Home page with dashboard and navigation cards |
-| `src/app/onramp/page.tsx` | 49 | On-ramp page |
-| `src/app/offramp/page.tsx` | 49 | Off-ramp page |
-| `src/app/pool/page.tsx` | 49 | Liquidity pool page |
-| `src/app/api/anchor/etherfuse/customers/route.ts` | 30 | Customer registration |
-| `src/app/api/anchor/etherfuse/kyc/route.ts` | 47 | KYC status and iframe URL |
-| `src/app/api/anchor/etherfuse/quotes/route.ts` | 47 | Quote generation |
-| `src/app/api/anchor/etherfuse/onramp/route.ts` | 83 | On-ramp creation + polling |
-| `src/app/api/anchor/etherfuse/offramp/route.ts` | 116 | Off-ramp creation + polling |
-| `src/app/api/anchor/etherfuse/fiat-accounts/route.ts` | 66 | Bank account management |
-| `src/app/api/anchor/etherfuse/sandbox/route.ts` | 48 | Sandbox simulation |
+| File                                                  | Lines | Purpose                                                 |
+| ----------------------------------------------------- | ----: | ------------------------------------------------------- |
+| `src/lib/anchor-factory.ts`                           |    32 | Server-side EtherfuseClient factory using `process.env` |
+| `src/lib/constants.ts`                                |    13 | CETES token config, network constants                   |
+| `src/lib/wallet/amm.ts`                               |   216 | Stellar AMM pool utilities (new, not in source repo)    |
+| `src/hooks/useWallet.ts`                              |    87 | React hook for Freighter wallet state                   |
+| `src/components/WalletConnect.tsx`                    |    60 | Wallet connection UI                                    |
+| `src/components/KycIframe.tsx`                        |    23 | Etherfuse KYC iframe embed                              |
+| `src/components/QuoteDisplay.tsx`                     |    66 | Quote summary with countdown timer                      |
+| `src/components/OnRampFlow.tsx`                       |   383 | MXN → CETES with SPEI instructions + sandbox sim        |
+| `src/components/OffRampFlow.tsx`                      |   429 | CETES → MXN with deferred signing                       |
+| `src/components/LiquidityPool.tsx`                    |   337 | CETES/XLM AMM pool deposit/withdraw                     |
+| `src/app/page.tsx`                                    |   120 | Home page with dashboard and navigation cards           |
+| `src/app/onramp/page.tsx`                             |    49 | On-ramp page                                            |
+| `src/app/offramp/page.tsx`                            |    49 | Off-ramp page                                           |
+| `src/app/pool/page.tsx`                               |    49 | Liquidity pool page                                     |
+| `src/app/api/anchor/etherfuse/customers/route.ts`     |    30 | Customer registration                                   |
+| `src/app/api/anchor/etherfuse/kyc/route.ts`           |    47 | KYC status and iframe URL                               |
+| `src/app/api/anchor/etherfuse/quotes/route.ts`        |    47 | Quote generation                                        |
+| `src/app/api/anchor/etherfuse/onramp/route.ts`        |    83 | On-ramp creation + polling                              |
+| `src/app/api/anchor/etherfuse/offramp/route.ts`       |   116 | Off-ramp creation + polling                             |
+| `src/app/api/anchor/etherfuse/fiat-accounts/route.ts` |    66 | Bank account management                                 |
+| `src/app/api/anchor/etherfuse/sandbox/route.ts`       |    48 | Sandbox simulation                                      |
 
 ### Not copied (SvelteKit-specific)
 
@@ -292,8 +292,8 @@ The following prompt was given to the subagent verbatim:
 > 3. On-ramp: convert MXN to CETES tokens on Stellar via bank transfer (SPEI)
 > 4. Off-ramp: convert CETES tokens back to MXN and withdraw to a bank account
 > 5. Do something useful with the CETES once they're on-chain — deposit them into
-> a Stellar AMM liquidity pool (e.g. CETES/XLM or CETES/USDC), so users can earn
-> trading fees on their position
+>    a Stellar AMM liquidity pool (e.g. CETES/XLM or CETES/USDC), so users can earn
+>    trading fees on their position
 >
 > The Etherfuse client requires an API key and must run server-side, so you'll
 > need Next.js API route handlers that proxy requests to the anchor.

@@ -79,12 +79,7 @@ describe('deposit', () => {
             }),
         );
 
-        const result = await deposit(
-            BASE,
-            TOKEN,
-            { asset_code: 'USDC', account: 'GTEST' },
-            fetch,
-        );
+        const result = await deposit(BASE, TOKEN, { asset_code: 'USDC', account: 'GTEST' }, fetch);
         expect(result).toEqual(response);
     });
 
@@ -139,12 +134,7 @@ describe('withdraw', () => {
             }),
         );
 
-        const result = await withdraw(
-            BASE,
-            TOKEN,
-            { asset_code: 'USDC', account: 'GTEST' },
-            fetch,
-        );
+        const result = await withdraw(BASE, TOKEN, { asset_code: 'USDC', account: 'GTEST' }, fetch);
         expect(result).toEqual(response);
     });
 
@@ -155,9 +145,9 @@ describe('withdraw', () => {
             ),
         );
 
-        await expect(
-            withdraw(BASE, TOKEN, { asset_code: 'INVALID' }, fetch),
-        ).rejects.toThrow('Invalid asset');
+        await expect(withdraw(BASE, TOKEN, { asset_code: 'INVALID' }, fetch)).rejects.toThrow(
+            'Invalid asset',
+        );
     });
 });
 
@@ -231,9 +221,9 @@ describe('getTransactionByStellarId', () => {
             ),
         );
 
-        await expect(
-            getTransactionByStellarId(BASE, TOKEN, 'unknown', fetch),
-        ).rejects.toThrow(SepApiError);
+        await expect(getTransactionByStellarId(BASE, TOKEN, 'unknown', fetch)).rejects.toThrow(
+            SepApiError,
+        );
     });
 });
 
@@ -290,9 +280,9 @@ describe('getTransactions', () => {
             ),
         );
 
-        await expect(
-            getTransactions(BASE, TOKEN, { asset_code: 'USDC' }, fetch),
-        ).rejects.toThrow(SepApiError);
+        await expect(getTransactions(BASE, TOKEN, { asset_code: 'USDC' }, fetch)).rejects.toThrow(
+            SepApiError,
+        );
     });
 });
 
@@ -303,19 +293,9 @@ describe('pollTransaction', () => {
     it('returns immediately when transaction is already in a terminal state', async () => {
         const transaction = { id: 'txn-123', kind: 'deposit', status: 'completed' };
 
-        server.use(
-            http.get(`${BASE}/transaction`, () =>
-                HttpResponse.json({ transaction }),
-            ),
-        );
+        server.use(http.get(`${BASE}/transaction`, () => HttpResponse.json({ transaction })));
 
-        const result = await pollTransaction(
-            BASE,
-            TOKEN,
-            'txn-123',
-            { interval: 10 },
-            fetch,
-        );
+        const result = await pollTransaction(BASE, TOKEN, 'txn-123', { interval: 10 }, fetch);
         expect(result.status).toBe('completed');
     });
 
@@ -359,13 +339,7 @@ describe('pollTransaction', () => {
         );
 
         await expect(
-            pollTransaction(
-                BASE,
-                TOKEN,
-                'txn-123',
-                { interval: 10, timeout: 50 },
-                fetch,
-            ),
+            pollTransaction(BASE, TOKEN, 'txn-123', { interval: 10, timeout: 50 }, fetch),
         ).rejects.toThrow('Transaction polling timed out');
     });
 
@@ -400,13 +374,7 @@ describe('pollTransaction', () => {
             ),
         );
 
-        const result = await pollTransaction(
-            BASE,
-            TOKEN,
-            'txn-123',
-            { interval: 10 },
-            fetch,
-        );
+        const result = await pollTransaction(BASE, TOKEN, 'txn-123', { interval: 10 }, fetch);
         expect(result.status).toBe('error');
     });
 
@@ -419,13 +387,7 @@ describe('pollTransaction', () => {
             ),
         );
 
-        const result = await pollTransaction(
-            BASE,
-            TOKEN,
-            'txn-123',
-            { interval: 10 },
-            fetch,
-        );
+        const result = await pollTransaction(BASE, TOKEN, 'txn-123', { interval: 10 }, fetch);
         expect(result.status).toBe('expired');
     });
 
@@ -438,13 +400,7 @@ describe('pollTransaction', () => {
             ),
         );
 
-        const result = await pollTransaction(
-            BASE,
-            TOKEN,
-            'txn-123',
-            { interval: 10 },
-            fetch,
-        );
+        const result = await pollTransaction(BASE, TOKEN, 'txn-123', { interval: 10 }, fetch);
         expect(result.status).toBe('refunded');
     });
 });

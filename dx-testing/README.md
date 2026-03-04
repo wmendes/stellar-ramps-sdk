@@ -4,12 +4,12 @@ Developer experience testing for the portable anchor library. Each round has an 
 
 ## Rounds
 
-| Directory                           | Framework              | Provider             | Verdict | Key Issues                                                                                                                                                 |
-| ----------------------------------- | ---------------------- | -------------------- | :-----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [react-etherfuse](react-etherfuse/) | React + Vite           | Etherfuse            |  8/10   | `erasableSyntaxOnly` incompatibility, barrel index conflicts with selective copying, wallet helpers not advertised as portable, no non-SvelteKit guidance  |
-| [nextjs-blindpay](nextjs-blindpay/) | Next.js (App Router)   | BlindPay             |  9/10   | Composite customer ID is a leaky abstraction, `createCustomer()` stub behavior surprising, barrel index (confirmed), token config not portable (confirmed) |
-| [express-backend](express-backend/) | Express 5 + TypeScript | Etherfuse + BlindPay |  10/10  | No library issues. Express 5 param typing (`string \| string[]`) required a helper, but that's an Express issue.                                           |
-| [nextjs-etherfuse](nextjs-etherfuse/) | Next.js (App Router)   | Etherfuse            |  9/10   | Token info only accessible via instantiated client (minor ergonomics). All prior fixes validated — zero friction on copy, build, or API translation.        |
+| Directory                             | Framework              | Provider             | Verdict | Key Issues                                                                                                                                                 |
+| ------------------------------------- | ---------------------- | -------------------- | :-----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [react-etherfuse](react-etherfuse/)   | React + Vite           | Etherfuse            |  8/10   | `erasableSyntaxOnly` incompatibility, barrel index conflicts with selective copying, wallet helpers not advertised as portable, no non-SvelteKit guidance  |
+| [nextjs-blindpay](nextjs-blindpay/)   | Next.js (App Router)   | BlindPay             |  9/10   | Composite customer ID is a leaky abstraction, `createCustomer()` stub behavior surprising, barrel index (confirmed), token config not portable (confirmed) |
+| [express-backend](express-backend/)   | Express 5 + TypeScript | Etherfuse + BlindPay |  10/10  | No library issues. Express 5 param typing (`string \| string[]`) required a helper, but that's an Express issue.                                           |
+| [nextjs-etherfuse](nextjs-etherfuse/) | Next.js (App Router)   | Etherfuse            |  9/10   | Token info only accessible via instantiated client (minor ergonomics). All prior fixes validated — zero friction on copy, build, or API translation.       |
 
 ## Cross-Round Issue Tracker
 

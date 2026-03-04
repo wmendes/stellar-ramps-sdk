@@ -191,9 +191,9 @@ describe('putCustomer', () => {
             }),
         );
 
-        await expect(
-            putCustomer(KYC_SERVER, TOKEN, { first_name: '' }),
-        ).rejects.toThrow('Validation failed');
+        await expect(putCustomer(KYC_SERVER, TOKEN, { first_name: '' })).rejects.toThrow(
+            'Validation failed',
+        );
     });
 });
 
@@ -234,9 +234,7 @@ describe('deleteCustomer', () => {
             }),
         );
 
-        const err = await deleteCustomer(KYC_SERVER, TOKEN, { account: 'GABC123' }).catch(
-            (e) => e,
-        );
+        const err = await deleteCustomer(KYC_SERVER, TOKEN, { account: 'GABC123' }).catch((e) => e);
         expect(err).toBeInstanceOf(SepApiError);
         expect(err.status).toBe(404);
         expect(err.message).toBe('Customer not found');

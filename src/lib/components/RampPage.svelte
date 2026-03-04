@@ -100,10 +100,16 @@
 
         try {
             // Get or create customer — skip email lookup for providers that don't support it
-            const customer = await api.getOrCreateCustomer(fetch, provider, email || undefined, country, {
-                supportsEmailLookup: capabilities.emailLookup,
-                publicKey: walletStore.publicKey,
-            });
+            const customer = await api.getOrCreateCustomer(
+                fetch,
+                provider,
+                email || undefined,
+                country,
+                {
+                    supportsEmailLookup: capabilities.emailLookup,
+                    publicKey: walletStore.publicKey,
+                },
+            );
             customerStore.set(customer);
 
             if (capabilities.kycFlow === 'redirect') {
@@ -371,7 +377,9 @@
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700"
-                        >Email Address {#if !capabilities.emailLookup}<span class="font-normal text-gray-400">(Optional)</span>{/if}</label
+                        >Email Address {#if !capabilities.emailLookup}<span
+                                class="font-normal text-gray-400">(Optional)</span
+                            >{/if}</label
                     >
                     <input
                         type="email"

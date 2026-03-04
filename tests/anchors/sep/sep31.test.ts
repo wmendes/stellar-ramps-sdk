@@ -286,13 +286,7 @@ describe('putTransactionCallback', () => {
             }),
         );
 
-        await putTransactionCallback(
-            BASE,
-            TOKEN,
-            'txn-001',
-            'https://myapp.com/webhook',
-            fetch,
-        );
+        await putTransactionCallback(BASE, TOKEN, 'txn-001', 'https://myapp.com/webhook', fetch);
     });
 
     it('throws SepApiError on failure', async () => {
@@ -320,15 +314,13 @@ describe('status helpers', () => {
     describe('needsTransactionInfo', () => {
         it('returns true for pending_transaction_info_update', () =>
             expect(needsTransactionInfo('pending_transaction_info_update')).toBe(true));
-        it('returns false for others', () =>
-            expect(needsTransactionInfo('completed')).toBe(false));
+        it('returns false for others', () => expect(needsTransactionInfo('completed')).toBe(false));
     });
 
     describe('needsCustomerInfo', () => {
         it('returns true for pending_customer_info_update', () =>
             expect(needsCustomerInfo('pending_customer_info_update')).toBe(true));
-        it('returns false for others', () =>
-            expect(needsCustomerInfo('completed')).toBe(false));
+        it('returns false for others', () => expect(needsCustomerInfo('completed')).toBe(false));
     });
 
     describe('isPendingPayment', () => {
@@ -336,8 +328,7 @@ describe('status helpers', () => {
             expect(isPendingPayment('pending_sender')).toBe(true));
         it('returns true for pending_stellar', () =>
             expect(isPendingPayment('pending_stellar')).toBe(true));
-        it('returns false for others', () =>
-            expect(isPendingPayment('completed')).toBe(false));
+        it('returns false for others', () => expect(isPendingPayment('completed')).toBe(false));
     });
 
     describe('isPendingAnchor', () => {
@@ -345,8 +336,7 @@ describe('status helpers', () => {
             expect(isPendingAnchor('pending_external')).toBe(true));
         it('returns true for pending_receiver', () =>
             expect(isPendingAnchor('pending_receiver')).toBe(true));
-        it('returns false for others', () =>
-            expect(isPendingAnchor('completed')).toBe(false));
+        it('returns false for others', () => expect(isPendingAnchor('completed')).toBe(false));
     });
 
     describe('isFailed', () => {
@@ -367,12 +357,9 @@ describe('status helpers', () => {
             expect(isInProgress('pending_receiver')).toBe(true));
         it('returns true for pending_customer_info_update', () =>
             expect(isInProgress('pending_customer_info_update')).toBe(true));
-        it('returns false for completed', () =>
-            expect(isInProgress('completed')).toBe(false));
-        it('returns false for error', () =>
-            expect(isInProgress('error')).toBe(false));
-        it('returns false for refunded', () =>
-            expect(isInProgress('refunded')).toBe(false));
+        it('returns false for completed', () => expect(isInProgress('completed')).toBe(false));
+        it('returns false for error', () => expect(isInProgress('error')).toBe(false));
+        it('returns false for refunded', () => expect(isInProgress('refunded')).toBe(false));
     });
 
     describe('getStatusDescription', () => {
@@ -416,13 +403,7 @@ describe('pollTransaction', () => {
             ),
         );
 
-        const result = await pollTransaction(
-            BASE,
-            TOKEN,
-            'txn-001',
-            { interval: 10 },
-            fetch,
-        );
+        const result = await pollTransaction(BASE, TOKEN, 'txn-001', { interval: 10 }, fetch);
         expect(result.status).toBe('completed');
     });
 
@@ -477,13 +458,7 @@ describe('pollTransaction', () => {
         );
 
         await expect(
-            pollTransaction(
-                BASE,
-                TOKEN,
-                'txn-001',
-                { interval: 10, timeout: 50 },
-                fetch,
-            ),
+            pollTransaction(BASE, TOKEN, 'txn-001', { interval: 10, timeout: 50 }, fetch),
         ).rejects.toThrow('Transaction polling timed out');
     });
 });

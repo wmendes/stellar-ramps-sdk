@@ -3,7 +3,10 @@ import { http, HttpResponse } from 'msw';
 import { server } from '../../test-setup';
 import { EtherfuseClient } from '$lib/anchors/etherfuse/client';
 import { AnchorError } from '$lib/anchors/types';
-import type { EtherfuseKycIdentityRequest, EtherfuseKycDocumentRequest } from '$lib/anchors/etherfuse/types';
+import type {
+    EtherfuseKycIdentityRequest,
+    EtherfuseKycDocumentRequest,
+} from '$lib/anchors/etherfuse/types';
 
 const BASE_URL = 'http://etherfuse.test';
 const API_KEY = 'test-api-key';
@@ -54,9 +57,9 @@ describe('createCustomer', () => {
     it('throws AnchorError with MISSING_PUBLIC_KEY when publicKey is missing', async () => {
         const client = createClient();
 
-        await expect(
-            client.createCustomer({ email: 'alice@example.com' }),
-        ).rejects.toThrow(AnchorError);
+        await expect(client.createCustomer({ email: 'alice@example.com' })).rejects.toThrow(
+            AnchorError,
+        );
 
         try {
             await client.createCustomer({ email: 'alice@example.com' });
@@ -72,7 +75,10 @@ describe('createCustomer', () => {
         const client = createClient();
 
         try {
-            await client.createCustomer({ email: 'alice@example.com', publicKey: 'not-a-stellar-key' });
+            await client.createCustomer({
+                email: 'alice@example.com',
+                publicKey: 'not-a-stellar-key',
+            });
             expect.unreachable('should have thrown');
         } catch (err) {
             expect(err).toBeInstanceOf(AnchorError);
@@ -92,32 +98,36 @@ describe('createCustomer', () => {
                     {
                         error: {
                             code: 'CONFLICT',
-                            message: 'Customer already exists, see org: e1a2b3c4-d5e6-7f89-0abc-def012345678',
+                            message:
+                                'Customer already exists, see org: e1a2b3c4-d5e6-7f89-0abc-def012345678',
                         },
                     },
                     { status: 409 },
                 );
             }),
-            http.post(`${BASE_URL}/ramp/customer/e1a2b3c4-d5e6-7f89-0abc-def012345678/bank-accounts`, () => {
-                return HttpResponse.json({
-                    items: [
-                        {
-                            bankAccountId: 'bank-acct-456',
-                            customerId: 'e1a2b3c4-d5e6-7f89-0abc-def012345678',
-                            createdAt: '2025-01-01T00:00:00Z',
-                            updatedAt: '2025-01-01T00:00:00Z',
-                            abbrClabe: '1067...8699',
-                            etherfuseDepositClabe: '012345678901234567',
-                            compliant: true,
-                            status: 'active',
-                        },
-                    ],
-                    totalItems: 1,
-                    pageSize: 10,
-                    pageNumber: 0,
-                    totalPages: 1,
-                });
-            }),
+            http.post(
+                `${BASE_URL}/ramp/customer/e1a2b3c4-d5e6-7f89-0abc-def012345678/bank-accounts`,
+                () => {
+                    return HttpResponse.json({
+                        items: [
+                            {
+                                bankAccountId: 'bank-acct-456',
+                                customerId: 'e1a2b3c4-d5e6-7f89-0abc-def012345678',
+                                createdAt: '2025-01-01T00:00:00Z',
+                                updatedAt: '2025-01-01T00:00:00Z',
+                                abbrClabe: '1067...8699',
+                                etherfuseDepositClabe: '012345678901234567',
+                                compliant: true,
+                                status: 'active',
+                            },
+                        ],
+                        totalItems: 1,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 1,
+                    });
+                },
+            ),
         );
 
         const customer = await client.createCustomer({
@@ -797,10 +807,7 @@ describe('request() edge cases', () => {
 
         server.use(
             http.get(`${BASE_URL}/ramp/customer/err-empty-fields`, () => {
-                return HttpResponse.json(
-                    { error: { code: '', message: '' } },
-                    { status: 422 },
-                );
+                return HttpResponse.json({ error: { code: '', message: '' } }, { status: 422 });
             }),
         );
 
@@ -846,10 +853,7 @@ describe('request() edge cases', () => {
 
         server.use(
             http.get(`${BASE_URL}/ramp/customer/err-null-error`, () => {
-                return HttpResponse.json(
-                    { error: null },
-                    { status: 500 },
-                );
+                return HttpResponse.json({ error: null }, { status: 500 });
             }),
         );
 
@@ -1141,7 +1145,7 @@ describe('mapOnRampTransaction() edge cases', () => {
         const tx = await client.getOnRampTransaction('order-no-amounts');
         expect(tx).not.toBeNull();
         expect(tx!.fromAmount).toBe(''); // amountInFiat || ''
-        expect(tx!.toAmount).toBe('');   // amountInTokens || ''
+        expect(tx!.toAmount).toBe(''); // amountInTokens || ''
         expect(tx!.feeBps).toBeUndefined();
         expect(tx!.feeAmount).toBeUndefined();
     });
@@ -1253,18 +1257,36 @@ describe('getQuote() edge cases', () => {
             http.get(`${BASE_URL}/ramp/assets`, () => {
                 return HttpResponse.json({
                     assets: [
-                        { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES Token', currency: null, balance: null, image: null },
-                        { symbol: 'MXN', identifier: 'MXN', name: 'Mexican Peso', currency: 'MXN', balance: null, image: null },
+                        {
+                            symbol: 'CETES',
+                            identifier: 'CETES:GCRYUGD5ISSUER',
+                            name: 'CETES Token',
+                            currency: null,
+                            balance: null,
+                            image: null,
+                        },
+                        {
+                            symbol: 'MXN',
+                            identifier: 'MXN',
+                            name: 'Mexican Peso',
+                            currency: 'MXN',
+                            balance: null,
+                            image: null,
+                        },
                     ],
                 });
             }),
             http.post(`${BASE_URL}/ramp/quote`, async ({ request }) => {
-                capturedBody = await request.json() as Record<string, unknown>;
+                capturedBody = (await request.json()) as Record<string, unknown>;
                 return HttpResponse.json({
                     quoteId: 'quote-empty-amt',
                     customerId: '',
                     blockchain: 'stellar',
-                    quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                    quoteAssets: {
+                        type: 'onramp',
+                        sourceAsset: 'MXN',
+                        targetAsset: 'CETES:GCRYUGD5ISSUER',
+                    },
                     sourceAmount: '0',
                     destinationAmount: '0',
                     destinationAmountAfterFee: null,
@@ -1297,8 +1319,22 @@ describe('getQuote() edge cases', () => {
             http.get(`${BASE_URL}/ramp/assets`, () => {
                 return HttpResponse.json({
                     assets: [
-                        { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES Token', currency: null, balance: null, image: null },
-                        { symbol: 'MXN', identifier: 'MXN', name: 'Mexican Peso', currency: 'MXN', balance: null, image: null },
+                        {
+                            symbol: 'CETES',
+                            identifier: 'CETES:GCRYUGD5ISSUER',
+                            name: 'CETES Token',
+                            currency: null,
+                            balance: null,
+                            image: null,
+                        },
+                        {
+                            symbol: 'MXN',
+                            identifier: 'MXN',
+                            name: 'Mexican Peso',
+                            currency: 'MXN',
+                            balance: null,
+                            image: null,
+                        },
                     ],
                 });
             }),
@@ -1307,7 +1343,11 @@ describe('getQuote() edge cases', () => {
                     quoteId: 'quote-no-after-fee',
                     customerId: 'cust-1',
                     blockchain: 'stellar',
-                    quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                    quoteAssets: {
+                        type: 'onramp',
+                        sourceAsset: 'MXN',
+                        targetAsset: 'CETES:GCRYUGD5ISSUER',
+                    },
                     sourceAmount: '1000',
                     destinationAmount: '50',
                     destinationAmountAfterFee: null,
@@ -1339,8 +1379,22 @@ describe('getQuote() edge cases', () => {
             http.get(`${BASE_URL}/ramp/assets`, () => {
                 return HttpResponse.json({
                     assets: [
-                        { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES Token', currency: null, balance: null, image: null },
-                        { symbol: 'MXN', identifier: 'MXN', name: 'Mexican Peso', currency: 'MXN', balance: null, image: null },
+                        {
+                            symbol: 'CETES',
+                            identifier: 'CETES:GCRYUGD5ISSUER',
+                            name: 'CETES Token',
+                            currency: null,
+                            balance: null,
+                            image: null,
+                        },
+                        {
+                            symbol: 'MXN',
+                            identifier: 'MXN',
+                            name: 'Mexican Peso',
+                            currency: 'MXN',
+                            balance: null,
+                            image: null,
+                        },
                     ],
                 });
             }),
@@ -1349,7 +1403,11 @@ describe('getQuote() edge cases', () => {
                     quoteId: 'quote-no-fee',
                     customerId: 'cust-1',
                     blockchain: 'stellar',
-                    quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                    quoteAssets: {
+                        type: 'onramp',
+                        sourceAsset: 'MXN',
+                        targetAsset: 'CETES:GCRYUGD5ISSUER',
+                    },
                     sourceAmount: '1000',
                     destinationAmount: '50',
                     destinationAmountAfterFee: '50',
@@ -1388,7 +1446,11 @@ describe('getQuote() edge cases', () => {
                     quoteId: 'quote-fast-path',
                     customerId: 'cust-1',
                     blockchain: 'stellar',
-                    quoteAssets: { type: 'offramp', sourceAsset: 'CETES:GCRYUGD5ISSUER', targetAsset: 'MXN:FIAT' },
+                    quoteAssets: {
+                        type: 'offramp',
+                        sourceAsset: 'CETES:GCRYUGD5ISSUER',
+                        targetAsset: 'MXN:FIAT',
+                    },
                     sourceAmount: '50',
                     destinationAmount: '1000',
                     destinationAmountAfterFee: '990',
@@ -1437,7 +1499,7 @@ describe('createOnRamp() edge cases', () => {
                 });
             }),
             http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
-                capturedBody = await request.json() as Record<string, unknown>;
+                capturedBody = (await request.json()) as Record<string, unknown>;
                 return HttpResponse.json({
                     onramp: {
                         orderId: 'order-no-bank-auto',
@@ -1469,7 +1531,13 @@ describe('createOnRamp() edge cases', () => {
         server.use(
             http.post(`${BASE_URL}/ramp/customer/:customerId/bank-accounts`, () => {
                 bankAccountsRequested = true;
-                return HttpResponse.json({ items: [], totalItems: 0, pageSize: 10, pageNumber: 0, totalPages: 0 });
+                return HttpResponse.json({
+                    items: [],
+                    totalItems: 0,
+                    pageSize: 10,
+                    pageNumber: 0,
+                    totalPages: 0,
+                });
             }),
             http.post(`${BASE_URL}/ramp/order`, () => {
                 return HttpResponse.json({
@@ -1557,7 +1625,7 @@ describe('getKycUrl() edge cases', () => {
 
         server.use(
             http.post(`${BASE_URL}/ramp/onboarding-url`, async ({ request }) => {
-                capturedBody = await request.json() as Record<string, unknown>;
+                capturedBody = (await request.json()) as Record<string, unknown>;
                 return HttpResponse.json({
                     presigned_url: 'https://onboard.test/kyc-no-bank',
                 });
@@ -1587,18 +1655,34 @@ describe('acceptAgreements()', () => {
 
         server.use(
             http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, () => {
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:00Z', agreementType: 'electronic_signature' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:00Z',
+                    agreementType: 'electronic_signature',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/terms-and-conditions`, () => {
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:01Z', agreementType: 'terms_and_conditions' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:01Z',
+                    agreementType: 'terms_and_conditions',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/customer-agreement`, () => {
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:02Z', agreementType: 'customer_agreement' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:02Z',
+                    agreementType: 'customer_agreement',
+                });
             }),
         );
 
         const result = await client.acceptAgreements(presignedUrl);
-        expect(result).toEqual({ success: true, acceptedAt: '2025-07-01T00:00:02Z', agreementType: 'customer_agreement' });
+        expect(result).toEqual({
+            success: true,
+            acceptedAt: '2025-07-01T00:00:02Z',
+            agreementType: 'customer_agreement',
+        });
     });
 
     it('throws AnchorError on failure from first agreement endpoint', async () => {
@@ -1827,7 +1911,10 @@ describe('input validation behavior', () => {
                 }),
             );
 
-            const customer = await client.createCustomer({ email: 'alice@example.com', publicKey: STELLAR_PUBKEY });
+            const customer = await client.createCustomer({
+                email: 'alice@example.com',
+                publicKey: STELLAR_PUBKEY,
+            });
 
             expect(capturedBody).not.toBeNull();
             expect(capturedBody).not.toHaveProperty('email');
@@ -1839,7 +1926,10 @@ describe('input validation behavior', () => {
             const client = createClient();
 
             try {
-                await client.createCustomer({ email: 'alice@example.com', publicKey: 'not-a-stellar-key' });
+                await client.createCustomer({
+                    email: 'alice@example.com',
+                    publicKey: 'not-a-stellar-key',
+                });
                 expect.unreachable('should have thrown');
             } catch (err) {
                 expect(err).toBeInstanceOf(AnchorError);
@@ -1913,8 +2003,22 @@ describe('input validation behavior', () => {
                 http.get(`${BASE_URL}/ramp/assets`, () => {
                     return HttpResponse.json({
                         assets: [
-                            { symbol: 'MXN', identifier: 'MXN', name: 'MXN', currency: 'MXN', balance: null, image: null },
-                            { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES', currency: null, balance: null, image: null },
+                            {
+                                symbol: 'MXN',
+                                identifier: 'MXN',
+                                name: 'MXN',
+                                currency: 'MXN',
+                                balance: null,
+                                image: null,
+                            },
+                            {
+                                symbol: 'CETES',
+                                identifier: 'CETES:GCRYUGD5ISSUER',
+                                name: 'CETES',
+                                currency: null,
+                                balance: null,
+                                image: null,
+                            },
                         ],
                     });
                 }),
@@ -1924,7 +2028,11 @@ describe('input validation behavior', () => {
                         quoteId: 'quote-1',
                         customerId: '',
                         blockchain: 'stellar',
-                        quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                        quoteAssets: {
+                            type: 'onramp',
+                            sourceAsset: 'MXN',
+                            targetAsset: 'CETES:GCRYUGD5ISSUER',
+                        },
                         sourceAmount: '',
                         destinationAmount: '0',
                         destinationAmountAfterFee: '0',
@@ -1955,8 +2063,22 @@ describe('input validation behavior', () => {
                 http.get(`${BASE_URL}/ramp/assets`, () => {
                     return HttpResponse.json({
                         assets: [
-                            { symbol: 'MXN', identifier: 'MXN', name: 'MXN', currency: 'MXN', balance: null, image: null },
-                            { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES', currency: null, balance: null, image: null },
+                            {
+                                symbol: 'MXN',
+                                identifier: 'MXN',
+                                name: 'MXN',
+                                currency: 'MXN',
+                                balance: null,
+                                image: null,
+                            },
+                            {
+                                symbol: 'CETES',
+                                identifier: 'CETES:GCRYUGD5ISSUER',
+                                name: 'CETES',
+                                currency: null,
+                                balance: null,
+                                image: null,
+                            },
                         ],
                     });
                 }),
@@ -1966,7 +2088,11 @@ describe('input validation behavior', () => {
                         quoteId: 'quote-1',
                         customerId: '',
                         blockchain: 'stellar',
-                        quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                        quoteAssets: {
+                            type: 'onramp',
+                            sourceAsset: 'MXN',
+                            targetAsset: 'CETES:GCRYUGD5ISSUER',
+                        },
                         sourceAmount: 'abc',
                         destinationAmount: '0',
                         destinationAmountAfterFee: '0',
@@ -1998,8 +2124,22 @@ describe('input validation behavior', () => {
                 http.get(`${BASE_URL}/ramp/assets`, () => {
                     return HttpResponse.json({
                         assets: [
-                            { symbol: 'MXN', identifier: 'MXN', name: 'MXN', currency: 'MXN', balance: null, image: null },
-                            { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES', currency: null, balance: null, image: null },
+                            {
+                                symbol: 'MXN',
+                                identifier: 'MXN',
+                                name: 'MXN',
+                                currency: 'MXN',
+                                balance: null,
+                                image: null,
+                            },
+                            {
+                                symbol: 'CETES',
+                                identifier: 'CETES:GCRYUGD5ISSUER',
+                                name: 'CETES',
+                                currency: null,
+                                balance: null,
+                                image: null,
+                            },
                         ],
                     });
                 }),
@@ -2009,7 +2149,11 @@ describe('input validation behavior', () => {
                         quoteId: 'quote-1',
                         customerId: '',
                         blockchain: 'stellar',
-                        quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                        quoteAssets: {
+                            type: 'onramp',
+                            sourceAsset: 'MXN',
+                            targetAsset: 'CETES:GCRYUGD5ISSUER',
+                        },
                         sourceAmount: '0',
                         destinationAmount: '0',
                         destinationAmountAfterFee: '0',
@@ -2042,8 +2186,22 @@ describe('input validation behavior', () => {
                 http.get(`${BASE_URL}/ramp/assets`, () => {
                     return HttpResponse.json({
                         assets: [
-                            { symbol: 'MXN', identifier: 'MXN', name: 'MXN', currency: 'MXN', balance: null, image: null },
-                            { symbol: 'CETES', identifier: 'CETES:GCRYUGD5ISSUER', name: 'CETES', currency: null, balance: null, image: null },
+                            {
+                                symbol: 'MXN',
+                                identifier: 'MXN',
+                                name: 'MXN',
+                                currency: 'MXN',
+                                balance: null,
+                                image: null,
+                            },
+                            {
+                                symbol: 'CETES',
+                                identifier: 'CETES:GCRYUGD5ISSUER',
+                                name: 'CETES',
+                                currency: null,
+                                balance: null,
+                                image: null,
+                            },
                         ],
                     });
                 }),
@@ -2053,7 +2211,11 @@ describe('input validation behavior', () => {
                         quoteId: 'quote-1',
                         customerId: '',
                         blockchain: 'stellar',
-                        quoteAssets: { type: 'onramp', sourceAsset: 'MXN', targetAsset: 'CETES:GCRYUGD5ISSUER' },
+                        quoteAssets: {
+                            type: 'onramp',
+                            sourceAsset: 'MXN',
+                            targetAsset: 'CETES:GCRYUGD5ISSUER',
+                        },
                         sourceAmount: '-100',
                         destinationAmount: '0',
                         destinationAmountAfterFee: '0',
@@ -2089,14 +2251,32 @@ describe('input validation behavior', () => {
             server.use(
                 http.post(`${BASE_URL}/ramp/customer/cust-1/bank-accounts`, () => {
                     return HttpResponse.json({
-                        items: [{ bankAccountId: 'bank-1', customerId: 'cust-1', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                        totalItems: 1, pageSize: 10, pageNumber: 0, totalPages: 1,
+                        items: [
+                            {
+                                bankAccountId: 'bank-1',
+                                customerId: 'cust-1',
+                                createdAt: '2025-01-01T00:00:00Z',
+                                updatedAt: '2025-01-01T00:00:00Z',
+                                abbrClabe: '1234...5678',
+                                etherfuseDepositClabe: '012345678901234567',
+                                compliant: true,
+                                status: 'active',
+                            },
+                        ],
+                        totalItems: 1,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 1,
                     });
                 }),
                 http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
-                        onramp: { orderId: 'order-1', depositClabe: '012345678901234567', depositAmount: '1000.00' },
+                        onramp: {
+                            orderId: 'order-1',
+                            depositClabe: '012345678901234567',
+                            depositAmount: '1000.00',
+                        },
                     });
                 }),
             );
@@ -2121,14 +2301,32 @@ describe('input validation behavior', () => {
             server.use(
                 http.post(`${BASE_URL}/ramp/customer/cust-1/bank-accounts`, () => {
                     return HttpResponse.json({
-                        items: [{ bankAccountId: 'bank-1', customerId: 'cust-1', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                        totalItems: 1, pageSize: 10, pageNumber: 0, totalPages: 1,
+                        items: [
+                            {
+                                bankAccountId: 'bank-1',
+                                customerId: 'cust-1',
+                                createdAt: '2025-01-01T00:00:00Z',
+                                updatedAt: '2025-01-01T00:00:00Z',
+                                abbrClabe: '1234...5678',
+                                etherfuseDepositClabe: '012345678901234567',
+                                compliant: true,
+                                status: 'active',
+                            },
+                        ],
+                        totalItems: 1,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 1,
                     });
                 }),
                 http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
-                        onramp: { orderId: 'order-1', depositClabe: '012345678901234567', depositAmount: 'not-a-number' },
+                        onramp: {
+                            orderId: 'order-1',
+                            depositClabe: '012345678901234567',
+                            depositAmount: 'not-a-number',
+                        },
                     });
                 }),
             );
@@ -2153,14 +2351,32 @@ describe('input validation behavior', () => {
             server.use(
                 http.post(`${BASE_URL}/ramp/customer/cust-1/bank-accounts`, () => {
                     return HttpResponse.json({
-                        items: [{ bankAccountId: 'bank-1', customerId: 'cust-1', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                        totalItems: 1, pageSize: 10, pageNumber: 0, totalPages: 1,
+                        items: [
+                            {
+                                bankAccountId: 'bank-1',
+                                customerId: 'cust-1',
+                                createdAt: '2025-01-01T00:00:00Z',
+                                updatedAt: '2025-01-01T00:00:00Z',
+                                abbrClabe: '1234...5678',
+                                etherfuseDepositClabe: '012345678901234567',
+                                compliant: true,
+                                status: 'active',
+                            },
+                        ],
+                        totalItems: 1,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 1,
                     });
                 }),
                 http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                     capturedBody = (await request.json()) as Record<string, unknown>;
                     return HttpResponse.json({
-                        onramp: { orderId: 'order-1', depositClabe: '012345678901234567', depositAmount: '1000.00' },
+                        onramp: {
+                            orderId: 'order-1',
+                            depositClabe: '012345678901234567',
+                            depositAmount: '1000.00',
+                        },
                     });
                 }),
             );
@@ -2190,8 +2406,22 @@ describe('input validation behavior', () => {
             server.use(
                 http.post(`${BASE_URL}/ramp/customer/cust-1/bank-accounts`, () => {
                     return HttpResponse.json({
-                        items: [{ bankAccountId: 'bank-1', customerId: 'cust-1', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                        totalItems: 1, pageSize: 10, pageNumber: 0, totalPages: 1,
+                        items: [
+                            {
+                                bankAccountId: 'bank-1',
+                                customerId: 'cust-1',
+                                createdAt: '2025-01-01T00:00:00Z',
+                                updatedAt: '2025-01-01T00:00:00Z',
+                                abbrClabe: '1234...5678',
+                                etherfuseDepositClabe: '012345678901234567',
+                                compliant: true,
+                                status: 'active',
+                            },
+                        ],
+                        totalItems: 1,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 1,
                     });
                 }),
                 http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
@@ -2224,7 +2454,10 @@ describe('input validation behavior', () => {
                 http.post(`${BASE_URL}/ramp/customer/cust-1/bank-accounts`, () => {
                     return HttpResponse.json({
                         items: [],
-                        totalItems: 0, pageSize: 10, pageNumber: 0, totalPages: 0,
+                        totalItems: 0,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 0,
                     });
                 }),
                 http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
@@ -2519,7 +2752,10 @@ describe('input validation behavior', () => {
                     capturedUrl = request.url;
                     return HttpResponse.json({
                         items: [],
-                        totalItems: 0, pageSize: 10, pageNumber: 0, totalPages: 0,
+                        totalItems: 0,
+                        pageSize: 10,
+                        pageNumber: 0,
+                        totalPages: 0,
                     });
                 }),
             );
@@ -2685,7 +2921,10 @@ describe('submitKycIdentity()', () => {
 
         server.use(
             http.post(`${BASE_URL}/ramp/customer/cust-kyc/kyc`, () => {
-                return HttpResponse.json({ status: 'proposed', message: 'KYC submitted successfully' });
+                return HttpResponse.json({
+                    status: 'proposed',
+                    message: 'KYC submitted successfully',
+                });
             }),
         );
 
@@ -2797,9 +3036,7 @@ const DOCUMENT_REQUEST: EtherfuseKycDocumentRequest = {
 const SELFIE_REQUEST: EtherfuseKycDocumentRequest = {
     pubkey: STELLAR_PUBKEY,
     documentType: 'selfie',
-    images: [
-        { label: 'selfie', image: 'data:image/jpeg;base64,/9j/selfiedata' },
-    ],
+    images: [{ label: 'selfie', image: 'data:image/jpeg;base64,/9j/selfiedata' }],
 };
 
 describe('submitKycDocuments()', () => {
@@ -2821,10 +3058,13 @@ describe('submitKycDocuments()', () => {
         let capturedBody: Record<string, unknown> | undefined;
 
         server.use(
-            http.post(`${BASE_URL}/ramp/customer/cust-doc-body/kyc/documents`, async ({ request }) => {
-                capturedBody = (await request.json()) as Record<string, unknown>;
-                return HttpResponse.json({ status: 'proposed', message: 'OK' });
-            }),
+            http.post(
+                `${BASE_URL}/ramp/customer/cust-doc-body/kyc/documents`,
+                async ({ request }) => {
+                    capturedBody = (await request.json()) as Record<string, unknown>;
+                    return HttpResponse.json({ status: 'proposed', message: 'OK' });
+                },
+            ),
         );
 
         await client.submitKycDocuments('cust-doc-body', DOCUMENT_REQUEST);
@@ -2843,10 +3083,13 @@ describe('submitKycDocuments()', () => {
         let capturedBody: Record<string, unknown> | undefined;
 
         server.use(
-            http.post(`${BASE_URL}/ramp/customer/cust-selfie-body/kyc/documents`, async ({ request }) => {
-                capturedBody = (await request.json()) as Record<string, unknown>;
-                return HttpResponse.json({ status: 'proposed', message: 'OK' });
-            }),
+            http.post(
+                `${BASE_URL}/ramp/customer/cust-selfie-body/kyc/documents`,
+                async ({ request }) => {
+                    capturedBody = (await request.json()) as Record<string, unknown>;
+                    return HttpResponse.json({ status: 'proposed', message: 'OK' });
+                },
+            ),
         );
 
         await client.submitKycDocuments('cust-selfie-body', SELFIE_REQUEST);
@@ -3080,7 +3323,11 @@ describe('acceptAgreements() additional paths', () => {
 
         server.use(
             http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, () => {
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:00Z', agreementType: 'electronic_signature' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:00Z',
+                    agreementType: 'electronic_signature',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/terms-and-conditions`, () => {
                 return HttpResponse.json(
@@ -3106,10 +3353,18 @@ describe('acceptAgreements() additional paths', () => {
 
         server.use(
             http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, () => {
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:00Z', agreementType: 'electronic_signature' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:00Z',
+                    agreementType: 'electronic_signature',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/terms-and-conditions`, () => {
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:01Z', agreementType: 'terms_and_conditions' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:01Z',
+                    agreementType: 'terms_and_conditions',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/customer-agreement`, () => {
                 return HttpResponse.json(
@@ -3139,17 +3394,29 @@ describe('acceptAgreements() additional paths', () => {
             http.post(`${BASE_URL}/ramp/agreements/electronic-signature`, async ({ request }) => {
                 const body = (await request.json()) as Record<string, unknown>;
                 capturedPresignedUrls.push(body.presignedUrl as string);
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:00Z', agreementType: 'electronic_signature' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:00Z',
+                    agreementType: 'electronic_signature',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/terms-and-conditions`, async ({ request }) => {
                 const body = (await request.json()) as Record<string, unknown>;
                 capturedPresignedUrls.push(body.presignedUrl as string);
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:01Z', agreementType: 'terms_and_conditions' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:01Z',
+                    agreementType: 'terms_and_conditions',
+                });
             }),
             http.post(`${BASE_URL}/ramp/agreements/customer-agreement`, async ({ request }) => {
                 const body = (await request.json()) as Record<string, unknown>;
                 capturedPresignedUrls.push(body.presignedUrl as string);
-                return HttpResponse.json({ success: true, acceptedAt: '2025-07-01T00:00:02Z', agreementType: 'customer_agreement' });
+                return HttpResponse.json({
+                    success: true,
+                    acceptedAt: '2025-07-01T00:00:02Z',
+                    agreementType: 'customer_agreement',
+                });
             }),
         );
 
@@ -3174,29 +3441,32 @@ describe('mapOrderStatus() all known statuses', () => {
         ['failed', 'failed'],
         ['refunded', 'refunded'],
         ['canceled', 'cancelled'], // Etherfuse uses "canceled" (1 L); shared type uses "cancelled" (2 L)
-    ] as const)('maps Etherfuse order status "%s" to shared status "%s"', async (etherfuseStatus, expectedStatus) => {
-        const client = createClient();
+    ] as const)(
+        'maps Etherfuse order status "%s" to shared status "%s"',
+        async (etherfuseStatus, expectedStatus) => {
+            const client = createClient();
 
-        server.use(
-            http.get(`${BASE_URL}/ramp/order/order-map-${etherfuseStatus}`, () => {
-                return HttpResponse.json({
-                    orderId: `order-map-${etherfuseStatus}`,
-                    customerId: 'cust-1',
-                    createdAt: '2025-06-01T00:00:00Z',
-                    updatedAt: '2025-06-01T00:00:00Z',
-                    amountInFiat: '100',
-                    amountInTokens: '5',
-                    walletId: 'w-1',
-                    bankAccountId: 'b-1',
-                    orderType: 'onramp',
-                    status: etherfuseStatus,
-                });
-            }),
-        );
+            server.use(
+                http.get(`${BASE_URL}/ramp/order/order-map-${etherfuseStatus}`, () => {
+                    return HttpResponse.json({
+                        orderId: `order-map-${etherfuseStatus}`,
+                        customerId: 'cust-1',
+                        createdAt: '2025-06-01T00:00:00Z',
+                        updatedAt: '2025-06-01T00:00:00Z',
+                        amountInFiat: '100',
+                        amountInTokens: '5',
+                        walletId: 'w-1',
+                        bankAccountId: 'b-1',
+                        orderType: 'onramp',
+                        status: etherfuseStatus,
+                    });
+                }),
+            );
 
-        const tx = await client.getOnRampTransaction(`order-map-${etherfuseStatus}`);
-        expect(tx!.status).toBe(expectedStatus);
-    });
+            const tx = await client.getOnRampTransaction(`order-map-${etherfuseStatus}`);
+            expect(tx!.status).toBe(expectedStatus);
+        },
+    );
 });
 
 // ---------------------------------------------------------------------------
@@ -3277,7 +3547,9 @@ describe('registerFiatAccount() request body structure', () => {
 
         server.use(
             http.post(`${BASE_URL}/ramp/onboarding-url`, () => {
-                return HttpResponse.json({ presigned_url: 'https://onboard.test/presigned-for-bank' });
+                return HttpResponse.json({
+                    presigned_url: 'https://onboard.test/presigned-for-bank',
+                });
             }),
             http.post(`${BASE_URL}/ramp/bank-account`, async ({ request }) => {
                 capturedBankBody = (await request.json()) as Record<string, unknown>;
@@ -3294,7 +3566,12 @@ describe('registerFiatAccount() request body structure', () => {
         await client.registerFiatAccount({
             customerId: 'cust-1',
             publicKey: STELLAR_PUBKEY,
-            account: { type: 'spei', clabe: '012345678901234567', beneficiary: 'Alice Garcia', bankName: 'BBVA' },
+            account: {
+                type: 'spei',
+                clabe: '012345678901234567',
+                beneficiary: 'Alice Garcia',
+                bankName: 'BBVA',
+            },
         });
 
         expect(capturedBankBody).toBeDefined();
@@ -3355,14 +3632,32 @@ describe('createOnRamp() unified EtherfuseOrderRequest body', () => {
         server.use(
             http.post(`${BASE_URL}/ramp/customer/cust-unified/bank-accounts`, () => {
                 return HttpResponse.json({
-                    items: [{ bankAccountId: 'bank-unified', customerId: 'cust-unified', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                    totalItems: 1, pageSize: 100, pageNumber: 0, totalPages: 1,
+                    items: [
+                        {
+                            bankAccountId: 'bank-unified',
+                            customerId: 'cust-unified',
+                            createdAt: '2025-01-01T00:00:00Z',
+                            updatedAt: '2025-01-01T00:00:00Z',
+                            abbrClabe: '1234...5678',
+                            etherfuseDepositClabe: '012345678901234567',
+                            compliant: true,
+                            status: 'active',
+                        },
+                    ],
+                    totalItems: 1,
+                    pageSize: 100,
+                    pageNumber: 0,
+                    totalPages: 1,
                 });
             }),
             http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                 capturedBody = (await request.json()) as Record<string, unknown>;
                 return HttpResponse.json({
-                    onramp: { orderId: 'order-unified-1', depositClabe: '012345678901234567', depositAmount: '1000.00' },
+                    onramp: {
+                        orderId: 'order-unified-1',
+                        depositClabe: '012345678901234567',
+                        depositAmount: '1000.00',
+                    },
                 });
             }),
         );
@@ -3378,7 +3673,9 @@ describe('createOnRamp() unified EtherfuseOrderRequest body', () => {
 
         expect(capturedBody).toBeDefined();
         // Fields that MUST be present per EtherfuseOrderRequest
-        expect(capturedBody!.orderId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+        expect(capturedBody!.orderId).toMatch(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        );
         expect(capturedBody!.bankAccountId).toBe('bank-unified');
         expect(capturedBody!.publicKey).toBe(STELLAR_PUBKEY);
         expect(capturedBody!.quoteId).toBe('quote-unified');
@@ -3399,14 +3696,32 @@ describe('createOnRamp() unified EtherfuseOrderRequest body', () => {
         server.use(
             http.post(`${BASE_URL}/ramp/customer/cust-memo/bank-accounts`, () => {
                 return HttpResponse.json({
-                    items: [{ bankAccountId: 'bank-m', customerId: 'cust-memo', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                    totalItems: 1, pageSize: 100, pageNumber: 0, totalPages: 1,
+                    items: [
+                        {
+                            bankAccountId: 'bank-m',
+                            customerId: 'cust-memo',
+                            createdAt: '2025-01-01T00:00:00Z',
+                            updatedAt: '2025-01-01T00:00:00Z',
+                            abbrClabe: '1234...5678',
+                            etherfuseDepositClabe: '012345678901234567',
+                            compliant: true,
+                            status: 'active',
+                        },
+                    ],
+                    totalItems: 1,
+                    pageSize: 100,
+                    pageNumber: 0,
+                    totalPages: 1,
                 });
             }),
             http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                 capturedBody = (await request.json()) as Record<string, unknown>;
                 return HttpResponse.json({
-                    onramp: { orderId: 'order-memo', depositClabe: '012345678901234567', depositAmount: '1000.00' },
+                    onramp: {
+                        orderId: 'order-memo',
+                        depositClabe: '012345678901234567',
+                        depositAmount: '1000.00',
+                    },
                 });
             }),
         );
@@ -3431,14 +3746,32 @@ describe('createOnRamp() unified EtherfuseOrderRequest body', () => {
         server.use(
             http.post(`${BASE_URL}/ramp/customer/cust-no-memo/bank-accounts`, () => {
                 return HttpResponse.json({
-                    items: [{ bankAccountId: 'bank-nm', customerId: 'cust-no-memo', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '1234...5678', etherfuseDepositClabe: '012345678901234567', compliant: true, status: 'active' }],
-                    totalItems: 1, pageSize: 100, pageNumber: 0, totalPages: 1,
+                    items: [
+                        {
+                            bankAccountId: 'bank-nm',
+                            customerId: 'cust-no-memo',
+                            createdAt: '2025-01-01T00:00:00Z',
+                            updatedAt: '2025-01-01T00:00:00Z',
+                            abbrClabe: '1234...5678',
+                            etherfuseDepositClabe: '012345678901234567',
+                            compliant: true,
+                            status: 'active',
+                        },
+                    ],
+                    totalItems: 1,
+                    pageSize: 100,
+                    pageNumber: 0,
+                    totalPages: 1,
                 });
             }),
             http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                 capturedBody = (await request.json()) as Record<string, unknown>;
                 return HttpResponse.json({
-                    onramp: { orderId: 'order-no-memo', depositClabe: '012345678901234567', depositAmount: '1000.00' },
+                    onramp: {
+                        orderId: 'order-no-memo',
+                        depositClabe: '012345678901234567',
+                        depositAmount: '1000.00',
+                    },
                 });
             }),
         );
@@ -3468,8 +3801,22 @@ describe('createOffRamp() unified EtherfuseOrderRequest body', () => {
         server.use(
             http.post(`${BASE_URL}/ramp/customer/cust-off-unified/bank-accounts`, () => {
                 return HttpResponse.json({
-                    items: [{ bankAccountId: 'bank-off-unified', customerId: 'cust-off-unified', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z', abbrClabe: '9876...5432', etherfuseDepositClabe: '987654321098765432', compliant: true, status: 'active' }],
-                    totalItems: 1, pageSize: 100, pageNumber: 0, totalPages: 1,
+                    items: [
+                        {
+                            bankAccountId: 'bank-off-unified',
+                            customerId: 'cust-off-unified',
+                            createdAt: '2025-01-01T00:00:00Z',
+                            updatedAt: '2025-01-01T00:00:00Z',
+                            abbrClabe: '9876...5432',
+                            etherfuseDepositClabe: '987654321098765432',
+                            compliant: true,
+                            status: 'active',
+                        },
+                    ],
+                    totalItems: 1,
+                    pageSize: 100,
+                    pageNumber: 0,
+                    totalPages: 1,
                 });
             }),
             http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
@@ -3489,7 +3836,9 @@ describe('createOffRamp() unified EtherfuseOrderRequest body', () => {
         });
 
         expect(capturedBody).toBeDefined();
-        expect(capturedBody!.orderId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+        expect(capturedBody!.orderId).toMatch(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        );
         expect(capturedBody!.bankAccountId).toBe('bank-off-unified');
         expect(capturedBody!.publicKey).toBe(STELLAR_PUBKEY);
         expect(capturedBody!.quoteId).toBe('quote-off-unified');
@@ -3510,7 +3859,13 @@ describe('createOffRamp() unified EtherfuseOrderRequest body', () => {
         server.use(
             http.post(`${BASE_URL}/ramp/customer/:customerId/bank-accounts`, () => {
                 bankAccountsRequested = true;
-                return HttpResponse.json({ items: [], totalItems: 0, pageSize: 100, pageNumber: 0, totalPages: 0 });
+                return HttpResponse.json({
+                    items: [],
+                    totalItems: 0,
+                    pageSize: 100,
+                    pageNumber: 0,
+                    totalPages: 0,
+                });
             }),
             http.post(`${BASE_URL}/ramp/order`, async ({ request }) => {
                 capturedBody = (await request.json()) as Record<string, unknown>;

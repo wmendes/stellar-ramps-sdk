@@ -54,9 +54,7 @@ describe('getInfo', () => {
     });
 
     it('uses status text fallback when error body is not JSON', async () => {
-        server.use(
-            http.get(`${BASE}/info`, () => new HttpResponse('bad', { status: 500 })),
-        );
+        server.use(http.get(`${BASE}/info`, () => new HttpResponse('bad', { status: 500 })));
 
         await expect(getInfo(BASE, fetch)).rejects.toThrow('Failed to get SEP-38 info: 500');
     });
@@ -67,10 +65,7 @@ describe('getInfo', () => {
 // ---------------------------------------------------------------------------
 describe('getAssets', () => {
     it('returns assets array from info', async () => {
-        const assets = [
-            { asset: 'stellar:USDC:GBBD47' },
-            { asset: 'iso4217:MXN' },
-        ];
+        const assets = [{ asset: 'stellar:USDC:GBBD47' }, { asset: 'iso4217:MXN' }];
 
         server.use(http.get(`${BASE}/info`, () => HttpResponse.json({ assets })));
 
@@ -257,9 +252,7 @@ describe('getPrices', () => {
             ),
         );
 
-        await expect(
-            getPrices(BASE, { sell_asset: 'bad' }, fetch),
-        ).rejects.toThrow(SepApiError);
+        await expect(getPrices(BASE, { sell_asset: 'bad' }, fetch)).rejects.toThrow(SepApiError);
     });
 });
 

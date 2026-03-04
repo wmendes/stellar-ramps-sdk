@@ -347,9 +347,9 @@ describe('getTransactionByStellarId', () => {
             }),
         );
 
-        await expect(
-            getTransactionByStellarId(TRANSFER_SERVER, TOKEN, 'bad-id'),
-        ).rejects.toThrow(SepApiError);
+        await expect(getTransactionByStellarId(TRANSFER_SERVER, TOKEN, 'bad-id')).rejects.toThrow(
+            SepApiError,
+        );
     });
 });
 
