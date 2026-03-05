@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellar-ramps.org/catalog.schema.json",
+  "title": "Stellar Ramps Provider Catalog",
+  "type": "object",
+  "required": ["version", "generatedAt", "providers"],
+  "properties": {
+    "version": { "type": "string" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "package",
+          "version",
+          "status",
+          "sandbox",
+          "maintainer",
+          "capabilities"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "package": { "type": "string" },
+          "version": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["active", "sandbox_only", "deprecated", "community_preview"]
+          },
+          "sandbox": { "type": "boolean" },
+          "maintainer": { "type": "string" },
+          "onboarding": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "portalUrl": { "type": "string" },
+              "contact": { "type": "string" }
+            },
+            "additionalProperties": true
+          },
+          "capabilities": {
+            "type": "object",
+            "required": ["name", "displayName", "kycFlow", "corridors"],
+            "properties": {
+              "name": { "type": "string" },
+              "displayName": { "type": "string" },
+              "kycFlow": { "type": "string" },
+              "corridors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["country", "currency", "rail", "tokens", "directions"],
+                  "properties": {
+                    "country": { "type": "string", "pattern": "^[A-Z]{2}$" },
+                    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+                    "rail": { "type": "string" },
+                    "tokens": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["symbol", "name", "description"],
+                        "properties": {
+                          "symbol": { "type": "string" },
+                          "name": { "type": "string" },
+                          "issuer": { "type": "string" },
+                          "description": { "type": "string" }
+                        }
+                      }
+                    },
+                    "directions": {
+                      "type": "array",
+                      "items": { "type": "string", "enum": ["on_ramp", "off_ramp"] }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

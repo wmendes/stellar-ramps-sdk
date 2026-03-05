@@ -1,0 +1,105 @@
+{
+  "version": "0.1.0",
+  "generatedAt": "2026-03-05T23:00:00Z",
+  "providers": [
+    {
+      "name": "etherfuse",
+      "package": "@stellar-ramps/etherfuse",
+      "version": "0.1.0",
+      "status": "active",
+      "sandbox": true,
+      "maintainer": "NearX + Community",
+      "onboarding": {
+        "type": "self_service",
+        "portalUrl": "https://devnet.etherfuse.com/ramp"
+      },
+      "capabilities": {
+        "name": "etherfuse",
+        "displayName": "Etherfuse",
+        "kycFlow": "iframe",
+        "corridors": [
+          {
+            "country": "MX",
+            "currency": "MXN",
+            "rail": "spei",
+            "tokens": [
+              {
+                "symbol": "CETES",
+                "name": "Etherfuse CETES",
+                "issuer": "GC3CW7EDYRTWQ635VDIGY6S4ZUF5L6TQ7AA4MWS7LEQDBLUSZXV7UPS4",
+                "description": "Tokenized Mexican treasury certificates."
+              }
+            ],
+            "directions": ["on_ramp", "off_ramp"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "alfredpay",
+      "package": "@stellar-ramps/alfredpay",
+      "version": "0.1.0",
+      "status": "active",
+      "sandbox": true,
+      "maintainer": "NearX + Community",
+      "onboarding": {
+        "type": "self_service",
+        "portalUrl": "https://alfredpay.readme.io"
+      },
+      "capabilities": {
+        "name": "alfredpay",
+        "displayName": "Alfred Pay",
+        "kycFlow": "form",
+        "corridors": [
+          {
+            "country": "MX",
+            "currency": "MXN",
+            "rail": "spei",
+            "tokens": [
+              {
+                "symbol": "USDC",
+                "name": "USD Coin",
+                "issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                "description": "A fully-reserved stablecoin pegged 1:1 to the US Dollar."
+              }
+            ],
+            "directions": ["on_ramp", "off_ramp"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "blindpay",
+      "package": "@stellar-ramps/blindpay",
+      "version": "0.1.0",
+      "status": "active",
+      "sandbox": true,
+      "maintainer": "NearX + Community",
+      "onboarding": {
+        "type": "self_service",
+        "portalUrl": "https://app.blindpay.com"
+      },
+      "capabilities": {
+        "name": "blindpay",
+        "displayName": "BlindPay",
+        "kycFlow": "redirect",
+        "corridors": [
+          {
+            "country": "MX",
+            "currency": "MXN",
+            "rail": "spei",
+            "tokens": [
+              {
+                "symbol": "USDB",
+                "name": "BlindPay USD",
+                "issuer": "GBWXJPZL5ADAH7T5BP3DBW2V2DFT3URN2VXN2MG26OM4CTOJSDDSPYAN",
+                "description": "BlindPay development stablecoin for simulated payouts."
+              }
+            ],
+            "directions": ["on_ramp", "off_ramp"]
+          }
+        ]
+      }
+    }
+  ]
+}

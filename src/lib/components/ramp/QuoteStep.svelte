@@ -17,7 +17,7 @@ Usage:
 ```
 -->
 <script lang="ts">
-    import type { Quote } from '$lib/anchors/types';
+    import type { Quote } from '@stellar-ramps/core';
     import QuoteDisplay from '$lib/components/QuoteDisplay.svelte';
 
     interface Props {

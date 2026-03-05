@@ -16,7 +16,7 @@ import type {
     OffRampTransaction,
     SavedFiatAccount,
     RegisteredFiatAccount,
-} from '$lib/anchors/types';
+} from '@stellar-ramps/core';
 import type {
     AlfredPayKycRequirementsResponse,
     AlfredPayKycSubmissionResponse,

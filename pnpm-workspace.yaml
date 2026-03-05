@@ -1,2 +1,8 @@
+packages:
+    - '.'
+    - 'apps/*'
+    - 'packages/*'
+    - 'providers/*'
+
 onlyBuiltDependencies:
     - esbuild

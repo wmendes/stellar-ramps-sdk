@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { getAnchorsForRegion, getRegion } from '$lib/config/regions';
 import { getAnchor as getAnchorInstance, isValidProvider } from '$lib/server/anchorFactory';
 import { error } from '@sveltejs/kit';
-import type { TokenInfo } from '$lib/anchors/types';
+import type { TokenInfo } from '@stellar-ramps/core';
 
 /**
  * Server-side page load for the per-region page.

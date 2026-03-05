@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Quote } from '$lib/anchors/types';
+    import type { Quote } from '@stellar-ramps/core';
     import { onMount } from 'svelte';
     import { displayCurrency, formatAmount, formatCurrency } from '$lib/utils/currency';
     import { calculateExpiresIn } from '$lib/utils/quote';

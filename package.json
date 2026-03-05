@@ -15,7 +15,9 @@
         "test": "vitest",
         "test:unit": "vitest --project unit",
         "test:integration": "vitest --project integration",
-        "test:run": "vitest run"
+        "test:run": "vitest run",
+        "test:core": "vitest run --config vitest.core.config.ts",
+        "test:packages": "vitest run --config vitest.core.config.ts"
     },
     "devDependencies": {
         "@eslint/compat": "^2.0.1",
@@ -47,7 +49,9 @@
         "vitest-browser-svelte": "^2.0.2"
     },
     "dependencies": {
+        "@stellar-ramps/core": "workspace:*",
         "@stellar/freighter-api": "^6.0.1",
         "@stellar/stellar-sdk": "^14.5.0"
-    }
+    },
+    "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
 }

@@ -7,7 +7,7 @@
     import KycStatusDisplay from '$lib/components/KycStatusDisplay.svelte';
     import BlindPayReceiverForm from '$lib/components/BlindPayReceiverForm.svelte';
     import { KYC_STATUS, SUPPORTED_COUNTRIES, DEFAULT_COUNTRY } from '$lib/constants';
-    import type { AnchorCapabilities, KycStatus } from '$lib/anchors/types';
+    import type { AnchorCapabilities, KycStatus } from '@stellar-ramps/core';
     import * as api from '$lib/api/anchor';
 
     interface Props {

@@ -35,7 +35,7 @@ Usage:
         OffRampTransaction,
         SavedFiatAccount,
         TokenInfo,
-    } from '$lib/anchors/types';
+    } from '@stellar-ramps/core';
     import { getStatusColor } from '$lib/utils/status';
     import { TX_STATUS } from '$lib/constants';
     import * as api from '$lib/api/anchor';

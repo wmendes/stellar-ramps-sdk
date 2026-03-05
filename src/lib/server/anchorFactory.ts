@@ -9,7 +9,7 @@
  * framework-agnostic and can be copied into any TypeScript project.
  */
 
-import type { Anchor } from '$lib/anchors/types';
+import type { Anchor } from '@stellar-ramps/core';
 import { EtherfuseClient } from '$lib/anchors/etherfuse';
 import { AlfredPayClient } from '$lib/anchors/alfredpay';
 import { BlindPayClient } from '$lib/anchors/blindpay';

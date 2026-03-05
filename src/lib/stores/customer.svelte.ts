@@ -10,7 +10,7 @@
  */
 
 import { browser } from '$app/environment';
-import type { Customer, KycStatus } from '$lib/anchors/types';
+import type { Customer, KycStatus } from '@stellar-ramps/core';
 
 const STORAGE_PREFIX = 'stellar:customer:';
 

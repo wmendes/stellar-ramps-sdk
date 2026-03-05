@@ -24,7 +24,7 @@ Usage:
 ```
 -->
 <script lang="ts">
-    import type { SavedFiatAccount } from '$lib/anchors/types';
+    import type { SavedFiatAccount } from '@stellar-ramps/core';
 
     interface Props {
         savedAccounts: SavedFiatAccount[];

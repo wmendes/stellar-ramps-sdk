@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../../test-setup';
 import { AlfredPayClient } from '$lib/anchors/alfredpay/client';
-import { AnchorError } from '$lib/anchors/types';
+import { AnchorError } from '@stellar-ramps/core';
 
 const BASE_URL = 'http://alfredpay.test';
 const API_KEY = 'test-key';

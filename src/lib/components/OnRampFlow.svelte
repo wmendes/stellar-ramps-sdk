@@ -28,7 +28,7 @@ Usage:
     import { getStatusColor } from '$lib/utils/status';
     import { TX_STATUS } from '$lib/constants';
     import * as api from '$lib/api/anchor';
-    import type { Quote, OnRampTransaction, TokenInfo } from '$lib/anchors/types';
+    import type { Quote, OnRampTransaction, TokenInfo } from '@stellar-ramps/core';
 
     const provider = $derived(page.data.anchor.id);
     const toCurrency = $derived(page.data.primaryToken);

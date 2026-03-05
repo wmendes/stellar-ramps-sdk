@@ -17,7 +17,7 @@ Usage:
 ```
 -->
 <script lang="ts">
-    import type { OnRampTransaction, OffRampTransaction, Quote } from '$lib/anchors/types';
+    import type { OnRampTransaction, OffRampTransaction, Quote } from '@stellar-ramps/core';
     import type { StellarNetwork } from '$lib/wallet/types';
     import { displayCurrency } from '$lib/utils/currency';
 
