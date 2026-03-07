@@ -17,12 +17,14 @@
         "test:integration": "vitest --project integration",
         "test:run": "vitest run",
         "test:core": "vitest run --config vitest.core.config.ts",
-        "test:packages": "vitest run --config vitest.core.config.ts"
+        "test:packages": "vitest run --config vitest.core.config.ts",
+        "cli": "pnpm --filter @stellar-ramps/cli run build && node packages/cli/dist/bin.js"
     },
     "devDependencies": {
         "@eslint/compat": "^2.0.1",
         "@eslint/js": "^9.39.2",
         "@sveltejs/adapter-auto": "^7.0.0",
+        "@sveltejs/adapter-vercel": "^6.3.3",
         "@sveltejs/kit": "^2.50.1",
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
         "@tailwindcss/forms": "^0.5.11",
