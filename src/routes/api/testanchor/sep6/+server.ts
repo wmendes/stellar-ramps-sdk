@@ -6,8 +6,34 @@
 
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { getTransaction } from '$lib/anchors/sep/sep6';
 
 const SEP6_SERVER = 'https://testanchor.stellar.org/sep6';
+
+export const GET: RequestHandler = async ({ url, request }) => {
+    try {
+        const transactionId = url.searchParams.get('transactionId');
+        const token = request.headers.get('authorization')?.replace('Bearer ', '');
+
+        if (!token) {
+            throw error(401, { message: 'Authentication token is required' });
+        }
+
+        if (!transactionId) {
+            throw error(400, { message: 'Transaction ID is required' });
+        }
+
+        const transaction = await getTransaction(SEP6_SERVER, token, transactionId);
+
+        return json(transaction);
+    } catch (err) {
+        console.error('SEP-6 transaction status error:', err);
+        return json(
+            { error: err instanceof Error ? err.message : String(err) },
+            { status: 500 },
+        );
+    }
+};
 
 export const POST: RequestHandler = async ({ request }) => {
     try {
@@ -22,23 +48,27 @@ export const POST: RequestHandler = async ({ request }) => {
 
         switch (action) {
             case 'deposit': {
+                console.log('SEP-6 deposit params received:', params);
                 const searchParams = new URLSearchParams();
                 Object.entries(params).forEach(([key, value]) => {
                     if (value !== undefined && value !== null) {
                         searchParams.set(key, String(value));
                     }
                 });
+                console.log('SEP-6 deposit URL params:', searchParams.toString());
                 url = `${SEP6_SERVER}/deposit?${searchParams.toString()}`;
                 break;
             }
 
             case 'withdraw': {
+                console.log('SEP-6 withdraw params received:', params);
                 const searchParams = new URLSearchParams();
                 Object.entries(params).forEach(([key, value]) => {
                     if (value !== undefined && value !== null) {
                         searchParams.set(key, String(value));
                     }
                 });
+                console.log('SEP-6 withdraw URL params:', searchParams.toString());
                 url = `${SEP6_SERVER}/withdraw?${searchParams.toString()}`;
                 break;
             }

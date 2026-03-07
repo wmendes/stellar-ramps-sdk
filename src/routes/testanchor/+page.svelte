@@ -9,6 +9,7 @@
     import type {
         Sep6DepositResponse,
         Sep6WithdrawResponse,
+        Sep6Transaction,
         Sep24InteractiveResponse,
         Sep24Transaction,
         TransactionStatus,
@@ -58,6 +59,11 @@
     let sep6Result = $state<Sep6DepositResponse | Sep6WithdrawResponse | null>(null);
     let sep24Result = $state<Sep24InteractiveResponse | null>(null);
     let operationLoading = $state<'sep6' | 'sep24' | null>(null);
+
+    // SEP-6 transaction tracking
+    let sep6Transaction = $state<Sep6Transaction | null>(null);
+    let isPolling = $state(false);
+    let sep6PollingInterval: ReturnType<typeof setInterval> | null = null;
 
     // SEP-24 interactive transaction tracking
     let sep24Transaction = $state<Sep24Transaction | null>(null);
@@ -118,7 +124,10 @@
         }
     }
 
-    onDestroy(stopListening);
+    onDestroy(() => {
+        stopListening();
+        stopSep6Polling();
+    });
 
     // Authenticate with the anchor
     async function authenticate() {
@@ -195,7 +204,7 @@
                     asset_code: selectedAsset,
                     account: walletStore.publicKey,
                     amount: transferAmount,
-                    type: transferType === 'withdraw' ? 'bank_account' : undefined,
+                    type: 'bank_account',
                 }),
             });
 
@@ -206,6 +215,11 @@
             }
 
             sep6Result = data;
+
+            // Start polling if we have a transaction ID
+            if (data.id) {
+                startSep6Polling();
+            }
         } catch (e) {
             error = e instanceof Error ? e.message : `SEP-6 ${transferType} failed`;
         } finally {
@@ -345,12 +359,91 @@
     // Clear results
     function clearResults() {
         stopListening();
+        stopSep6Polling();
         sep6Result = null;
+        sep6Transaction = null;
         sep24Result = null;
         sep24Transaction = null;
         sep24PopupRef = null;
         paymentResult = null;
         error = null;
+    }
+
+    // SEP-6 polling functions
+    // Fetch transaction status from API
+    async function fetchSep6Status() {
+        try {
+            const token = client.getToken();
+            if (!token || !sep6Result?.id) return;
+
+            const response = await fetch(
+                `/api/testanchor/sep6?transactionId=${encodeURIComponent(sep6Result.id)}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+
+            // Handle auth expiration
+            if (response.status === 401) {
+                stopSep6Polling();
+                error = 'Authentication expired. Please re-authenticate.';
+                return;
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('Failed to fetch SEP-6 status:', data);
+                // Stop polling on 4xx errors (except 401 which we handled)
+                if (response.status >= 400 && response.status < 500) {
+                    stopSep6Polling();
+                }
+                return;
+            }
+
+            sep6Transaction = data;
+
+            // Stop polling if transaction reached terminal status
+            const isTerminal = (status: TransactionStatus) =>
+                status === 'completed' ||
+                status === 'error' ||
+                status === 'expired' ||
+                status === 'refunded';
+
+            if (isTerminal(data.status)) {
+                stopSep6Polling();
+            }
+        } catch (err) {
+            console.error('SEP-6 polling error:', err);
+            // Don't stop polling on network errors - they might be temporary
+        }
+    }
+
+    // Start automatic polling
+    function startSep6Polling() {
+        if (sep6PollingInterval) clearInterval(sep6PollingInterval);
+
+        isPolling = true;
+
+        // Fetch immediately
+        fetchSep6Status();
+
+        // Then poll every 5 seconds
+        sep6PollingInterval = setInterval(fetchSep6Status, 5000);
+    }
+
+    // Stop polling
+    function stopSep6Polling() {
+        if (sep6PollingInterval) {
+            clearInterval(sep6PollingInterval);
+            sep6PollingInterval = null;
+        }
+        isPolling = false;
+    }
+
+    // Manual refresh
+    async function refreshSep6Status() {
+        await fetchSep6Status();
     }
 
     // Human-readable status labels
@@ -385,7 +478,7 @@
 </script>
 
 <svelte:head>
-    <title>Test Anchor - Regional Starter Pack</title>
+    <title>Test Anchor - Stellar Ramps SDK</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl space-y-6">
@@ -652,7 +745,7 @@
 
                     {#if sep6Result}
                         <div class="mt-4 rounded-lg bg-white p-3">
-                            <h4 class="mb-2 text-sm font-medium text-gray-900">Result:</h4>
+                            <h4 class="mb-2 text-sm font-medium text-gray-900">Initial Response:</h4>
                             {#if 'how' in sep6Result && sep6Result.how}
                                 <p class="mb-2 text-sm text-gray-700">
                                     <span class="font-medium">Instructions:</span>
@@ -660,7 +753,7 @@
                                 </p>
                             {/if}
                             {#if sep6Result.id}
-                                <p class="text-sm text-gray-700">
+                                <p class="mb-2 text-sm text-gray-700">
                                     <span class="font-medium">Transaction ID:</span>
                                     <code class="ml-1 rounded bg-gray-100 px-1"
                                         >{sep6Result.id}</code
@@ -673,9 +766,126 @@
                                     {sep6Result.eta} seconds
                                 </p>
                             {/if}
-                            <details class="mt-2">
+
+                            <!-- Transaction Status (appears after first poll) -->
+                            {#if sep6Transaction}
+                                <div class="mt-4 rounded-md border border-gray-200 bg-gray-50 p-3">
+                                    <h4 class="mb-2 text-sm font-medium text-gray-900">
+                                        Transaction Status:
+                                    </h4>
+
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Status:</span>
+                                        <span
+                                            class="ml-1 font-medium {statusColor(
+                                                sep6Transaction.status,
+                                            )}"
+                                        >
+                                            {formatStatus(sep6Transaction.status)}
+                                        </span>
+                                    </p>
+
+                                    {#if sep6Transaction.message}
+                                        <p class="mt-1 text-xs text-gray-600">
+                                            {sep6Transaction.message}
+                                        </p>
+                                    {/if}
+
+                                    {#if sep6Transaction.amount_in}
+                                        <p class="mt-1 text-xs text-gray-600">
+                                            Amount in: {sep6Transaction.amount_in}
+                                            {sep6Transaction.amount_in_asset ?? ''}
+                                        </p>
+                                    {/if}
+
+                                    {#if sep6Transaction.amount_out}
+                                        <p class="text-xs text-gray-600">
+                                            Amount out: {sep6Transaction.amount_out}
+                                            {sep6Transaction.amount_out_asset ?? ''}
+                                        </p>
+                                    {/if}
+
+                                    {#if sep6Transaction.amount_fee}
+                                        <p class="text-xs text-gray-600">
+                                            Fee: {sep6Transaction.amount_fee}
+                                            {sep6Transaction.amount_fee_asset ?? ''}
+                                        </p>
+                                    {/if}
+
+                                    <!-- Deposit instructions -->
+                                    {#if sep6Transaction.deposit_memo}
+                                        <p class="mt-2 text-xs text-gray-600">
+                                            <span class="font-medium"
+                                                >Deposit Memo ({sep6Transaction.deposit_memo_type ??
+                                                    'text'}):</span
+                                            >
+                                            <code class="ml-1 rounded bg-gray-100 px-1">
+                                                {sep6Transaction.deposit_memo}
+                                            </code>
+                                        </p>
+                                    {/if}
+
+                                    <!-- Withdrawal instructions -->
+                                    {#if sep6Transaction.withdraw_anchor_account}
+                                        <p class="mt-2 text-xs text-gray-600">
+                                            <span class="font-medium">Send to:</span>
+                                            <code class="ml-1 rounded bg-gray-100 px-1">
+                                                {sep6Transaction.withdraw_anchor_account}
+                                            </code>
+                                        </p>
+                                    {/if}
+
+                                    {#if sep6Transaction.withdraw_memo}
+                                        <p class="text-xs text-gray-600">
+                                            <span class="font-medium"
+                                                >Memo ({sep6Transaction.withdraw_memo_type ??
+                                                    'text'}):</span
+                                            >
+                                            <code class="ml-1 rounded bg-gray-100 px-1">
+                                                {sep6Transaction.withdraw_memo}
+                                            </code>
+                                        </p>
+                                    {/if}
+
+                                    {#if sep6Transaction.more_info_url}
+                                        <p class="mt-2 text-xs text-gray-600">
+                                            <a
+                                                href={sep6Transaction.more_info_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="text-blue-600 hover:underline"
+                                            >
+                                                More information →
+                                            </a>
+                                        </p>
+                                    {/if}
+
+                                    <details class="mt-2">
+                                        <summary class="cursor-pointer text-xs text-gray-500"
+                                            >Full transaction</summary
+                                        >
+                                        <pre class="mt-1 overflow-x-auto text-xs">{JSON.stringify(
+                                                sep6Transaction,
+                                                null,
+                                                2,
+                                            )}</pre>
+                                    </details>
+                                </div>
+
+                                <!-- Manual Refresh Button -->
+                                <button
+                                    onclick={refreshSep6Status}
+                                    disabled={isPolling}
+                                    class="mt-3 w-full rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                                >
+                                    {isPolling ? '🔄 Auto-refreshing...' : 'Refresh Status'}
+                                </button>
+                            {/if}
+
+                            <!-- Full initial response details (collapsible) -->
+                            <details class="mt-3">
                                 <summary class="cursor-pointer text-xs text-gray-500"
-                                    >Full response</summary
+                                    >Full initial response</summary
                                 >
                                 <pre class="mt-2 overflow-x-auto text-xs">{JSON.stringify(
                                         sep6Result,
