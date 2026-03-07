@@ -3,21 +3,26 @@ import { error, text } from '@sveltejs/kit';
 import { SEP1_SIGNING_KEY_SECRET } from '$env/static/private';
 import { Keypair } from '@stellar/stellar-sdk';
 
-const signingKeyPublicKey = Keypair.fromSecret(SEP1_SIGNING_KEY_SECRET).publicKey();
+// Lazy initialization - only compute when route is accessed
+function getTomlContents(): string {
+    // Use a placeholder if the signing key is not configured
+    const signingKeyPublicKey = SEP1_SIGNING_KEY_SECRET
+        ? Keypair.fromSecret(SEP1_SIGNING_KEY_SECRET).publicKey()
+        : 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
 
-const TOML_CONTENTS: string = `VERSION="2.7.0"
+    return `VERSION="2.7.0"
 
 NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 
 SIGNING_KEY="${signingKeyPublicKey}"
 
 [DOCUMENTATION]
-ORG_NAME="Regional Starter Pack"
-ORG_URL="https://regional-starter-pack.vercel.app"
-ORG_DESCRIPTION="An anchor library and demo for the Stellar network."
-ORG_KEYBASE="elliotfriend"
-ORG_TWITTER="elliotfriend"
-ORG_GITHUB="elliotfriend"
+ ORG_NAME="Stellar Ramps SDK"
+ ORG_URL="https://stellar-ramps-sdk.vercel.app"
+ ORG_DESCRIPTION="An anchor library and demo for the Stellar network."
+ ORG_KEYBASE="elliotfriend"
+ ORG_TWITTER="elliotfriend"
+ ORG_GITHUB="elliotfriend"
 
 [[PRINCIPALS]]
 name="Elliot Voris"
@@ -27,6 +32,7 @@ github="elliotfriend"
 keybase="elliotfriend"
 telegram="ElliotVoris"
 `;
+}
 
 export const GET: RequestHandler = async ({ params, setHeaders }) => {
     if (params.file !== 'stellar.toml') {
@@ -38,5 +44,5 @@ export const GET: RequestHandler = async ({ params, setHeaders }) => {
         'Content-Type': 'text/plain',
     });
 
-    return text(TOML_CONTENTS);
+    return text(getTomlContents());
 };
