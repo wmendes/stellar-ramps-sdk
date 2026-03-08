@@ -24,7 +24,8 @@ vite.config.ts.timestamp-*
 
 # AI tooling
 .agents/
-.claude/
+.claude/*
+!.claude/mcp.json
 
 # DX test projects (temporary, recreated each round)
 sample-dx-project/
