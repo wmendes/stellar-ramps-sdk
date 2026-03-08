@@ -28,10 +28,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate catalog artifacts
-        run: pnpm vitest run --config vitest.core.config.ts packages/cli/src/index.test.ts -t "validates repository catalog against repository schema"
+        run: pnpm ramps:validate-catalog
 
       - name: Run package tests
         run: pnpm test:packages
+
+      - name: Run script tests
+        run: pnpm test:scripts
 
       - name: Run app checks
         run: pnpm check

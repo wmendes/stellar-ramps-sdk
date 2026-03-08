@@ -1,25 +1,62 @@
-# CLI Reference
+# Scripts Reference
 
-Last verified: **March 5, 2026**.
+Last verified: **March 7, 2026**.
 
-Implementation source: `packages/cli/src/index.ts`.
+Implementation source: `/scripts/*.ts`.
 
-## Command Surface
+## Usage
 
-`runCli(argv, io?)` supports the following top-level commands:
-- `validate-manifest`
-- `validate-catalog`
-- `test`
-- `scaffold`
+Run any development script using the `ramps:` npm script prefix:
+
+```bash
+pnpm ramps:<command> -- [arguments]
+```
+
+Available scripts:
+- `ramps:test` - Run conformance tests against providers
+- `ramps:validate-manifest` - Validate provider capability manifest
+- `ramps:validate-catalog` - Validate catalog schema
+- `ramps:scaffold` - Generate provider boilerplate
+
+### Examples
+
+```bash
+# Test a built-in provider
+pnpm ramps:test -- --provider etherfuse
+
+# Test a custom provider module
+pnpm ramps:test -- --module ./providers/etherfuse/src/index.ts
+
+# Validate a manifest
+pnpm ramps:validate-manifest -- --file providers/etherfuse/manifest.json
+
+# Validate catalog
+pnpm ramps:validate-catalog
+
+# Scaffold a new provider
+pnpm ramps:scaffold -- provider --name my-provider --display-name "My Provider"
+```
+
+**Note:** The `--` separator is required when passing arguments to npm scripts.
+
+## Script Surface
+
+The following scripts are available in the `/scripts` directory:
+- `validate-manifest.ts`
+- `validate-catalog.ts`
+- `test-conformance.ts`
+- `scaffold-provider.ts`
 
 ## `validate-manifest`
 
 Validate a provider capability manifest using `@stellar-ramps/core` validation rules.
 
+**Script:** `scripts/validate-manifest.ts`
+
 Usage:
 
 ```bash
-runCli(['validate-manifest', '--file', './manifest.json'])
+pnpm ramps:validate-manifest -- --file ./manifest.json
 ```
 
 Behavior:
@@ -31,10 +68,12 @@ Behavior:
 
 Validate catalog data against a JSON schema.
 
+**Script:** `scripts/validate-catalog.ts`
+
 Usage:
 
 ```bash
-runCli(['validate-catalog', '--schema', 'catalog/schema.json', '--catalog', 'catalog/catalog.json'])
+pnpm ramps:validate-catalog -- --schema catalog/schema.json --catalog catalog/catalog.json
 ```
 
 Defaults when flags omitted:
@@ -49,18 +88,20 @@ Behavior:
 
 Run provider conformance checks using `@stellar-ramps/testing` command runner.
 
+**Script:** `scripts/test-conformance.ts`
+
 ### Built-in provider mode
 
 ```bash
-runCli(['test', '--provider', 'etherfuse'])
-runCli(['test', '--provider', 'alfredpay'])
-runCli(['test', '--provider', 'blindpay'])
+pnpm ramps:test -- --provider etherfuse
+pnpm ramps:test -- --provider alfredpay
+pnpm ramps:test -- --provider blindpay
 ```
 
 ### Dynamic module mode
 
 ```bash
-runCli(['test', '--module', './my-provider.mjs'])
+pnpm ramps:test -- --module ./my-provider.mjs
 ```
 
 Optional dynamic module flags:
@@ -71,15 +112,7 @@ Optional dynamic module flags:
 Examples:
 
 ```bash
-runCli([
-  'test',
-  '--module',
-  './my-provider.mjs',
-  '--adapter-export',
-  'adapterImpl',
-  '--manifest-export',
-  'manifestImpl'
-])
+pnpm ramps:test -- --module ./my-provider.mjs --adapter-export adapterImpl --manifest-export manifestImpl
 ```
 
 Behavior:
@@ -91,10 +124,12 @@ Behavior:
 
 Generate a provider package skeleton.
 
+**Script:** `scripts/scaffold-provider.ts`
+
 Usage:
 
 ```bash
-runCli(['scaffold', 'provider', '--name', 'demo-provider'])
+pnpm ramps:scaffold -- provider --name demo-provider
 ```
 
 Optional flags:
@@ -116,7 +151,7 @@ Generated files include:
 
 ## Test Coverage
 
-CLI behavior is covered in `packages/cli/src/index.test.ts`, including:
+Script behavior is covered in `/tests/scripts/*.test.ts`, including:
 - manifest validation
 - catalog validation
 - built-in provider conformance

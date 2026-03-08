@@ -12,13 +12,13 @@ Status verified on **March 5, 2026**.
 | Provider packages (`etherfuse`, `alfredpay`, `blindpay`) | Implemented | `providers/*/src/index.ts` |
 | SEP adapter package (`@stellar-ramps/sep`) | Implemented with known limits | `packages/sep/src/index.ts`, `packages/sep/src/adapter.ts` |
 | Conformance framework (`@stellar-ramps/testing`) | Implemented | `packages/testing/src/conformance.ts`, `packages/testing/src/command.ts` |
-| CLI command surface (`validate-manifest`, `validate-catalog`, `test`, `scaffold`) | Implemented | `packages/cli/src/index.ts` |
+| Development scripts (`validate-manifest`, `validate-catalog`, `test`, `scaffold`) | Implemented | `scripts/*.ts` |
 | Catalog schema + catalog artifact | Implemented | `catalog/schema.json`, `catalog/catalog.json` |
 | CI baseline checks (`catalog`, package tests, app checks) | Implemented | `.github/workflows/ci.yml` |
 
 Detailed evidence map: `docs/assertions.md`.
 Current phase status: `docs/platform-status.md`.
-CLI deep reference: `docs/cli-reference.md`.
+Scripts deep reference: `docs/cli-reference.md`.
 
 ## What This Repository Contains
 
@@ -28,11 +28,11 @@ stellar-ramps-sdk/
     core/                # @stellar-ramps/core
     sep/                 # @stellar-ramps/sep
     testing/             # @stellar-ramps/testing
-    cli/                 # @stellar-ramps/cli
   providers/
     etherfuse/           # @stellar-ramps/etherfuse
     alfredpay/           # @stellar-ramps/alfredpay
     blindpay/            # @stellar-ramps/blindpay
+  scripts/               # Development scripts (validate, test, scaffold)
   catalog/
     schema.json
     catalog.json
@@ -50,7 +50,6 @@ stellar-ramps-sdk/
 | `@stellar-ramps/core` | Common interface, domain types, status helpers, capability validation, typed errors | `packages/core/src/index.ts` |
 | `@stellar-ramps/sep` | SEP-1/6/10/12/24/31/38 modules + `SepAnchor` adapter | `packages/sep/src/index.ts` |
 | `@stellar-ramps/testing` | Provider conformance suite and reusable conformance command runner | `packages/testing/src/index.ts` |
-| `@stellar-ramps/cli` | Manifest/catalog validation, conformance execution, provider scaffolding | `packages/cli/src/index.ts` |
 | `@stellar-ramps/etherfuse` | Etherfuse adapter + manifest | `providers/etherfuse/src/index.ts` |
 | `@stellar-ramps/alfredpay` | AlfredPay adapter + manifest | `providers/alfredpay/src/index.ts` |
 | `@stellar-ramps/blindpay` | BlindPay adapter + manifest | `providers/blindpay/src/index.ts` |
@@ -100,16 +99,29 @@ import { SepAnchor } from '@stellar-ramps/sep';
 import { EtherfuseClient } from '@stellar-ramps/etherfuse';
 ```
 
-## CLI Overview
+## Development Scripts
 
-Implemented commands:
-- `validate-manifest --file <manifest.json>`
-- `validate-catalog --schema <schema.json> --catalog <catalog.json>`
-- `test --provider <etherfuse|alfredpay|blindpay>`
-- `test --module <path-to-module> [--factory <name>] [--adapter-export <name>] [--manifest-export <name>]`
-- `scaffold provider --name <provider-name> [--display-name <name>] [--dir <path>]`
+Run development scripts using the `ramps:` npm script prefix:
 
-Full command contract and examples: `docs/cli-reference.md`.
+```bash
+pnpm ramps:<command> -- [args]
+```
+
+Available scripts:
+- `ramps:test` - Run conformance tests against providers
+- `ramps:validate-manifest` - Validate provider capability manifest
+- `ramps:validate-catalog` - Validate catalog against schema
+- `ramps:scaffold` - Generate provider boilerplate
+
+Examples:
+
+```bash
+pnpm ramps:test -- --provider etherfuse
+pnpm ramps:validate-manifest -- --file manifest.json
+pnpm ramps:scaffold -- provider --name my-provider
+```
+
+Full script reference: `docs/cli-reference.md`.
 
 ## Catalog
 
@@ -124,7 +136,6 @@ Catalog usage and lifecycle guidance: `catalog/README.md`.
 - `SepAnchor` does not implement a universal fiat account flow and returns `UNSUPPORTED_OPERATION` (HTTP 501) for:
   - `registerFiatAccount`
   - `getFiatAccounts`
-- CLI functionality exists as package API (`runCli`) and source entrypoint; distribution-grade executable packaging is not yet finalized.
 - Migration phases 5-7 remain open for deeper conformance coverage and additional documentation hardening.
 
 ## Environment Variables

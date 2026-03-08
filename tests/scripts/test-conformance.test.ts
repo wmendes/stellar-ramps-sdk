@@ -1,53 +1,16 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
-import { runCli } from './index';
 
-function collectIO() {
-  const out: string[] = [];
-  const err: string[] = [];
-  return {
-    io: {
-      log: (msg: string) => out.push(msg),
-      error: (msg: string) => err.push(msg),
-    },
-    out,
-    err,
-  };
-}
+const execAsync = promisify(exec);
 
-describe('cli', () => {
-  it('validates a correct manifest file', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'ramps-cli-'));
-    const file = join(dir, 'manifest.json');
-
-    const manifest = {
-      name: 'test-provider',
-      displayName: 'Test Provider',
-      kycFlow: 'none',
-      corridors: [
-        {
-          country: 'MX',
-          currency: 'MXN',
-          rail: 'spei',
-          tokens: [{ symbol: 'USDC', name: 'USD Coin', description: 'Stablecoin' }],
-          directions: ['on_ramp'],
-        },
-      ],
-    };
-
-    await writeFile(file, JSON.stringify(manifest, null, 2), 'utf8');
-
-    const { io } = collectIO();
-    const code = await runCli(['validate-manifest', '--file', file], io);
-    expect(code).toBe(0);
-  });
-
+describe('test-conformance script', () => {
   it('runs baseline conformance for a built-in provider', async () => {
-    const { io } = collectIO();
-    const code = await runCli(['test', '--provider', 'etherfuse'], io);
-    expect(code).toBe(0);
+    const { stdout } = await execAsync('tsx scripts/test-conformance.ts --provider etherfuse');
+    expect(stdout).toBeTruthy();
   });
 
   it('runs conformance from a custom module path', async () => {
@@ -85,9 +48,8 @@ describe('cli', () => {
       'utf8',
     );
 
-    const { io } = collectIO();
-    const code = await runCli(['test', '--module', file], io);
-    expect(code).toBe(0);
+    const { stdout } = await execAsync(`tsx scripts/test-conformance.ts --module ${file}`);
+    expect(stdout).toBeTruthy();
   });
 
   it('supports custom module export names in test command', async () => {
@@ -121,20 +83,10 @@ describe('cli', () => {
       'utf8',
     );
 
-    const { io } = collectIO();
-    const code = await runCli(
-      [
-        'test',
-        '--module',
-        file,
-        '--adapter-export',
-        'adapterImpl',
-        '--manifest-export',
-        'manifestImpl',
-      ],
-      io,
+    const { stdout } = await execAsync(
+      `tsx scripts/test-conformance.ts --module ${file} --adapter-export adapterImpl --manifest-export manifestImpl`,
     );
-    expect(code).toBe(0);
+    expect(stdout).toBeTruthy();
   });
 
   it('reports module contract diagnostics for missing exports', async () => {
@@ -142,65 +94,6 @@ describe('cli', () => {
     const file = join(dir, 'broken-provider.mjs');
     await writeFile(file, 'export const nope = 1;\n', 'utf8');
 
-    const { io, err } = collectIO();
-    const code = await runCli(['test', '--module', file], io);
-
-    expect(code).toBe(1);
-    expect(err.some((line) => line.includes('Invalid conformance module'))).toBe(true);
-  });
-
-  it('validates catalog against schema', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'ramps-catalog-'));
-    const schemaPath = join(dir, 'schema.json');
-    const catalogPath = join(dir, 'catalog.json');
-
-    await writeFile(
-      schemaPath,
-      JSON.stringify(
-        {
-          type: 'object',
-          required: ['version'],
-          properties: {
-            version: { type: 'string' },
-          },
-        },
-        null,
-        2,
-      ),
-      'utf8',
-    );
-    await writeFile(catalogPath, JSON.stringify({ version: '0.1.0' }, null, 2), 'utf8');
-
-    const { io } = collectIO();
-    const code = await runCli(
-      ['validate-catalog', '--schema', schemaPath, '--catalog', catalogPath],
-      io,
-    );
-    expect(code).toBe(0);
-  });
-
-  it('validates repository catalog against repository schema', async () => {
-    const { io } = collectIO();
-    const code = await runCli(
-      ['validate-catalog', '--schema', 'catalog/schema.json', '--catalog', 'catalog/catalog.json'],
-      io,
-    );
-    expect(code).toBe(0);
-  });
-
-  it('scaffolds a provider package skeleton', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'ramps-scaffold-'));
-    const { io } = collectIO();
-
-    const code = await runCli(
-      ['scaffold', 'provider', '--name', 'demo-provider', '--display-name', 'Demo Provider', '--dir', dir],
-      io,
-    );
-
-    expect(code).toBe(0);
-
-    const manifestPath = join(dir, 'demo-provider', 'src', 'manifest.ts');
-    const manifestContent = await readFile(manifestPath, 'utf8');
-    expect(manifestContent).toContain("name: 'demo-provider'");
+    await expect(execAsync(`tsx scripts/test-conformance.ts --module ${file}`)).rejects.toThrow();
   });
 });

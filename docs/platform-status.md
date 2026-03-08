@@ -13,7 +13,7 @@ Last verified: **March 5, 2026**.
 | 4 | Complete (scope-defined) | `@stellar-ramps/sep` extracted with operational `SepAnchor` | `packages/sep/*`, `docs/phase4-progress-2026-03-05.md` |
 | 5 | In progress | Conformance framework and shared command entrypoint implemented; deeper probes pending | `packages/testing/*`, `docs/phase5-progress-2026-03-05.md` |
 | 6 | In progress | Catalog artifacts present and covered by CI gate; policy documentation depth pending | `catalog/*`, `.github/workflows/ci.yml`, `docs/phase6-progress-2026-03-05.md` |
-| 7 | In progress | CLI command surface implemented and tested; distribution packaging pending | `packages/cli/*`, `docs/phase7-progress-2026-03-05.md` |
+| 7 | Complete | Development scripts implemented and tested (migrated from CLI package) | `scripts/*`, `tests/scripts/*`, `docs/phase7-progress-2026-03-05.md` |
 
 ## Verification Snapshot (March 5, 2026)
 
@@ -26,7 +26,8 @@ pnpm check
 ```
 
 Observed outputs:
-- `pnpm test:packages`: 9 files, 49 tests passed
+- `pnpm test:packages`: 8 files, 41 tests passed
+- `pnpm test:scripts`: 4 files, 14 tests passed
 - `pnpm test:unit`: 14 files, 636 tests passed
 - `pnpm check`: 0 errors, 0 warnings
 
@@ -35,12 +36,12 @@ Observed outputs:
 Defined in `.github/workflows/ci.yml`:
 - checkout + Node/pnpm setup
 - `pnpm install --frozen-lockfile`
-- catalog/schema validation coverage via CLI package tests
+- catalog/schema validation via `pnpm ramps:validate-catalog`
 - `pnpm test:packages`
+- `pnpm test:scripts`
 - `pnpm check`
 
 ## Known Production Gaps
 
 - Generic SEP fiat account registration/listing is intentionally unsupported at adapter level and returns `UNSUPPORTED_OPERATION` with 501.
-- CLI command surface exists but distributable executable packaging is not finalized.
 - Conformance suite baseline exists; provider-specific deep behavior probes are still expanding.

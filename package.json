@@ -18,7 +18,11 @@
         "test:run": "vitest run",
         "test:core": "vitest run --config vitest.core.config.ts",
         "test:packages": "vitest run --config vitest.core.config.ts",
-        "cli": "pnpm --filter @stellar-ramps/cli run build && node packages/cli/dist/bin.js"
+        "test:scripts": "vitest run tests/scripts",
+        "ramps:validate-manifest": "tsx scripts/validate-manifest.ts",
+        "ramps:validate-catalog": "tsx scripts/validate-catalog.ts",
+        "ramps:test": "tsx scripts/test-conformance.ts",
+        "ramps:scaffold": "tsx scripts/scaffold-provider.ts"
     },
     "devDependencies": {
         "@eslint/compat": "^2.0.1",
@@ -32,6 +36,8 @@
         "@tailwindcss/vite": "^4.1.18",
         "@types/node": "^24",
         "@vitest/browser-playwright": "^4.0.18",
+        "ajv": "^8.17.1",
+        "ajv-formats": "^3.0.1",
         "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-svelte": "^3.14.0",
@@ -44,6 +50,7 @@
         "svelte": "^5.48.2",
         "svelte-check": "^4.3.5",
         "tailwindcss": "^4.1.18",
+        "tsx": "^4.19.2",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.53.1",
         "vite": "^7.3.1",

@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@stellar-ramps/core": ["../packages/core/src/index.ts"],
+      "@stellar-ramps/testing": ["../packages/testing/src/index.ts"],
+      "@stellar-ramps/etherfuse": ["../providers/etherfuse/src/index.ts"],
+      "@stellar-ramps/alfredpay": ["../providers/alfredpay/src/index.ts"],
+      "@stellar-ramps/blindpay": ["../providers/blindpay/src/index.ts"]
+    }
+  },
+  "include": ["**/*.ts"]
+}
