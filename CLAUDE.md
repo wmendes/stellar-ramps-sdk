@@ -1,4 +1,4 @@
-# Stellar Regional Starter Pack - LLM Guide
+# Stellar Ramps SDK - LLM Guide
 
 This is a SvelteKit application for building fiat on/off ramps on the Stellar network. It includes a portable anchor integration library supporting three anchor providers (Etherfuse, AlfredPay, BlindPay) and a composable SEP protocol library for building against any SEP-compliant anchor.
 

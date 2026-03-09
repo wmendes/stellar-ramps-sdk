@@ -181,7 +181,7 @@ The following prompt was given to the subagent verbatim:
 
 > **Task: Build an Express Backend Using the Portable Anchor Library**
 >
-> You are a backend Node.js developer who has discovered the Stellar Regional Starter Pack — a SvelteKit application with a portable anchor integration library. You want to build a standalone Express + TypeScript API server that acts as a backend proxy for anchor integrations — the kind of server a React or mobile app would call.
+> You are a backend Node.js developer who has discovered the Stellar Ramps SDK — a SvelteKit application with a portable anchor integration library. You want to build a standalone Express + TypeScript API server that acts as a backend proxy for anchor integrations — the kind of server a React or mobile app would call.
 >
 > **Your Goal**
 >

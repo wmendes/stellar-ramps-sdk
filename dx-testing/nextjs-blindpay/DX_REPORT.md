@@ -241,7 +241,7 @@ The following prompt was given to the subagent verbatim:
 
 > **Task: Build a Next.js Application Using the Portable Anchor Library (BlindPay)**
 >
-> You are a Next.js developer who has discovered the Stellar Regional Starter Pack — a SvelteKit application with a portable anchor integration library. You want to build a Next.js application that integrates with BlindPay, one of the three supported anchor providers.
+> You are a Next.js developer who has discovered the Stellar Ramps SDK — a SvelteKit application with a portable anchor integration library. You want to build a Next.js application that integrates with BlindPay, one of the three supported anchor providers.
 >
 > **Your Goal**
 >

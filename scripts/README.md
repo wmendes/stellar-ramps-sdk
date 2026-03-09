@@ -54,6 +54,7 @@ pnpm ramps:test -- --module <path-to-module.mjs>
 ```bash
 pnpm ramps:test -- --provider etherfuse
 pnpm ramps:test -- --provider alfredpay
+pnpm ramps:test -- --provider transfero
 pnpm ramps:test -- --module ./custom-provider.mjs
 ```
 

@@ -13,6 +13,8 @@ import type { Anchor } from '@stellar-ramps/core';
 import { EtherfuseClient } from '$lib/anchors/etherfuse';
 import { AlfredPayClient } from '$lib/anchors/alfredpay';
 import { BlindPayClient } from '$lib/anchors/blindpay';
+import { TransferoClient } from '$lib/anchors/transfero';
+import { env as dynamicEnv } from '$env/dynamic/private';
 import {
     ETHERFUSE_API_KEY,
     ETHERFUSE_BASE_URL,
@@ -24,7 +26,7 @@ import {
     BLINDPAY_BASE_URL,
 } from '$env/static/private';
 
-export type AnchorProvider = 'etherfuse' | 'alfredpay' | 'blindpay';
+export type AnchorProvider = 'etherfuse' | 'alfredpay' | 'blindpay' | 'transfero';
 
 const anchorInstances = new Map<AnchorProvider, Anchor>();
 
@@ -61,6 +63,19 @@ export function getAnchor(provider: AnchorProvider): Anchor {
                     baseUrl: BLINDPAY_BASE_URL,
                 });
                 break;
+            case 'transfero':
+                anchor = new TransferoClient({
+                    clientId: dynamicEnv.TRANSFERO_CLIENT_ID ?? '',
+                    clientSecret: dynamicEnv.TRANSFERO_CLIENT_SECRET ?? '',
+                    scope: dynamicEnv.TRANSFERO_SCOPE ?? '',
+                    baseUrl: dynamicEnv.TRANSFERO_API_URL ?? '',
+                    apiVersion: dynamicEnv.TRANSFERO_API_VERSION || undefined,
+                    defaultTaxId: dynamicEnv.TRANSFERO_DEFAULT_TAX_ID || undefined,
+                    defaultTaxIdCountry: dynamicEnv.TRANSFERO_DEFAULT_TAX_ID_COUNTRY || undefined,
+                    defaultName: dynamicEnv.TRANSFERO_DEFAULT_NAME || undefined,
+                    defaultEmail: dynamicEnv.TRANSFERO_DEFAULT_EMAIL || undefined,
+                });
+                break;
             default:
                 throw new Error(`Unknown anchor provider: ${provider}`);
         }
@@ -77,5 +92,5 @@ export function getAnchor(provider: AnchorProvider): Anchor {
  * @returns `true` if the string is a known {@link AnchorProvider}.
  */
 export function isValidProvider(provider: string): provider is AnchorProvider {
-    return ['etherfuse', 'alfredpay', 'blindpay'].includes(provider);
+    return ['etherfuse', 'alfredpay', 'blindpay', 'transfero'].includes(provider);
 }

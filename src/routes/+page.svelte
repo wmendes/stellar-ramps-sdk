@@ -4,12 +4,12 @@
 
 <div class="text-center">
     <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-        Stellar Regional Starter Pack
+        Stellar Ramps SDK
     </h1>
     <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
-        A toolkit and reference implementation for building fiat on/off ramps on the Stellar
-        network. Includes a portable anchor library, three pre-built integrations, and a composable
-        SEP protocol library.
+        A complete toolkit for building fiat on/off ramps on the Stellar network. Includes a
+        portable anchor integration library, three production-ready anchor clients, and a
+        composable SEP protocol implementation.
     </p>
     <div class="mt-8 flex justify-center gap-4">
         <a

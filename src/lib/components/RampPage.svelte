@@ -22,6 +22,9 @@
 
     // Local UI state
     let email = $state('');
+    let fullName = $state('');
+    let taxId = $state('');
+    let taxIdCountry = $state('BRA');
     let country = $state(DEFAULT_COUNTRY);
     let isRegistering = $state(false);
     let registrationError = $state<string | null>(null);
@@ -108,6 +111,9 @@
                 {
                     supportsEmailLookup: capabilities.emailLookup,
                     publicKey: walletStore.publicKey,
+                    name: fullName || undefined,
+                    taxId: taxId || undefined,
+                    taxIdCountry: taxIdCountry || undefined,
                 },
             );
             customerStore.set(customer);
@@ -373,6 +379,47 @@
                         readonly
                         class="mt-1 block w-full truncate rounded-md border-gray-300 bg-gray-50 font-mono text-xs text-gray-500 shadow-sm sm:text-sm"
                     />
+                </div>
+
+                <div>
+                    <label for="full-name" class="block text-sm font-medium text-gray-700"
+                        >Legal Name <span class="font-normal text-gray-400">(Optional)</span></label
+                    >
+                    <input
+                        type="text"
+                        id="full-name"
+                        bind:value={fullName}
+                        placeholder="Your full legal name"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="tax-id" class="block text-sm font-medium text-gray-700"
+                            >Tax ID <span class="font-normal text-gray-400">(Optional)</span></label
+                        >
+                        <input
+                            type="text"
+                            id="tax-id"
+                            bind:value={taxId}
+                            placeholder="CPF/CNPJ/Tax ID"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label for="tax-id-country" class="block text-sm font-medium text-gray-700"
+                            >Tax ID Country</label
+                        >
+                        <input
+                            type="text"
+                            id="tax-id-country"
+                            bind:value={taxIdCountry}
+                            maxlength="3"
+                            placeholder="BRA"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                    </div>
                 </div>
 
                 <div>

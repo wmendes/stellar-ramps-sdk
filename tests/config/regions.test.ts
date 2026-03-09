@@ -25,7 +25,8 @@ describe('getAllRegions', () => {
     it('returns all regions', () => {
         const regions = getAllRegions();
         expect(regions.length).toBeGreaterThan(0);
-        expect(regions[0].id).toBe('mexico');
+        expect(regions.some((r) => r.id === 'mexico')).toBe(true);
+        expect(regions.some((r) => r.id === 'brazil')).toBe(true);
     });
 });
 
@@ -41,6 +42,12 @@ describe('getAnchorsForRegion', () => {
 
     it('returns empty array for nonexistent region', () => {
         expect(getAnchorsForRegion('nonexistent')).toEqual([]);
+    });
+
+    it('returns Transfero for Brazil', () => {
+        const anchors = getAnchorsForRegion('brazil');
+        expect(anchors).toHaveLength(1);
+        expect(anchors[0].id).toBe('transfero');
     });
 });
 
@@ -61,6 +68,12 @@ describe('getRegionsForAnchor', () => {
         const regions = getRegionsForAnchor('blindpay');
         expect(regions).toHaveLength(1);
         expect(regions[0].id).toBe('mexico');
+    });
+
+    it('returns Brazil for transfero', () => {
+        const regions = getRegionsForAnchor('transfero');
+        expect(regions).toHaveLength(1);
+        expect(regions[0].id).toBe('brazil');
     });
 
     it('returns empty array for nonexistent anchor', () => {

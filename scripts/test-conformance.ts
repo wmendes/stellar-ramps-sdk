@@ -2,6 +2,7 @@ import { runConformanceCommand } from '../packages/testing/src/index.js';
 import { EtherfuseClient, etherfuseManifest } from '../providers/etherfuse/src/index.js';
 import { AlfredPayClient, alfredpayManifest } from '../providers/alfredpay/src/index.js';
 import { BlindPayClient, blindpayManifest } from '../providers/blindpay/src/index.js';
+import { TransferoClient, transferoManifest } from '../providers/transfero/src/index.js';
 import { defaultIO } from './lib/index.js';
 
 async function main(): Promise<number> {
@@ -37,6 +38,21 @@ async function main(): Promise<number> {
             baseUrl: 'https://api.example.org',
           }),
           manifest: blindpayManifest,
+        };
+      }
+      if (provider === 'transfero') {
+        return {
+          adapter: new TransferoClient({
+            clientId: 'test-client',
+            clientSecret: 'test-secret',
+            scope: 'api',
+            baseUrl: 'https://api.example.org',
+            defaultTaxId: '00000000000',
+            defaultTaxIdCountry: 'BRA',
+            defaultName: 'Test User',
+            defaultEmail: 'test@example.org',
+          }),
+          manifest: transferoManifest,
         };
       }
       return null;

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a standalone Express + TypeScript API server that validates the portability of the Stellar Regional Starter Pack's anchor integration library. The server acts as a backend proxy for anchor integrations -- the kind of server a React or mobile app would call.
+Build a standalone Express + TypeScript API server that validates the portability of the Stellar Ramps SDK's anchor integration library. The server acts as a backend proxy for anchor integrations -- the kind of server a React or mobile app would call.
 
 ## Step 1: Reading the Source
 
@@ -211,7 +211,7 @@ curl -X POST http://localhost:3001/api/anchor/etherfuse/customers \
 
 ## Conclusion
 
-The portable anchor library from the Stellar Regional Starter Pack works perfectly as a standalone Node.js dependency. Zero modifications were needed to the library source files. The main engineering work was:
+The portable anchor library from the Stellar Ramps SDK works perfectly as a standalone Node.js dependency. Zero modifications were needed to the library source files. The main engineering work was:
 
 1. Replacing SvelteKit's `$env/static/private` with `process.env` in the factory
 2. Building Express route handlers that map HTTP requests to the `Anchor` interface methods

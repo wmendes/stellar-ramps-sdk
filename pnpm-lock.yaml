@@ -159,6 +159,12 @@ importers:
         specifier: ^14.5.0
         version: 14.5.0
 
+  providers/transfero:
+    dependencies:
+      '@stellar-ramps/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+
 packages:
 
   '@esbuild/aix-ppc64@0.25.12':

@@ -123,6 +123,10 @@ Usage:
                 fromCurrency: quote.fromCurrency,
                 toCurrency: quote.toCurrency,
                 amount: quote.fromAmount,
+                email: customer.email,
+                name: customer.name,
+                taxId: customer.taxId,
+                taxIdCountry: customer.taxIdCountry,
             });
             step = 'payment';
             startPolling();

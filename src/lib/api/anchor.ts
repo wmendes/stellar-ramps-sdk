@@ -101,11 +101,13 @@ export async function createCustomer(
     email: string | undefined,
     country: string = 'MX',
     publicKey?: string,
+    identity?: { name?: string; taxId?: string; taxIdCountry?: string },
 ): Promise<Customer> {
     return postJson<Customer>(fetch, `/api/anchor/${provider}/customers`, {
         email,
         country,
         publicKey,
+        ...identity,
     });
 }
 
@@ -118,7 +120,13 @@ export async function getOrCreateCustomer(
     provider: string,
     email: string | undefined,
     country: string = 'MX',
-    options?: { supportsEmailLookup?: boolean; publicKey?: string },
+    options?: {
+        supportsEmailLookup?: boolean;
+        publicKey?: string;
+        name?: string;
+        taxId?: string;
+        taxIdCountry?: string;
+    },
 ): Promise<Customer> {
     const supportsEmailLookup = options?.supportsEmailLookup ?? false;
 
@@ -128,7 +136,11 @@ export async function getOrCreateCustomer(
             return existing;
         }
     }
-    return createCustomer(fetch, provider, email, country, options?.publicKey);
+    return createCustomer(fetch, provider, email, country, options?.publicKey, {
+        name: options?.name,
+        taxId: options?.taxId,
+        taxIdCountry: options?.taxIdCountry,
+    });
 }
 
 // =============================================================================
@@ -195,6 +207,10 @@ export interface CreateOnRampOptions {
     amount: string;
     memo?: string;
     bankAccountId?: string;
+    email?: string;
+    name?: string;
+    taxId?: string;
+    taxIdCountry?: string;
 }
 
 /**
@@ -242,6 +258,10 @@ export interface CreateOffRampOptions {
     toCurrency: string;
     amount: string;
     memo?: string;
+    email?: string;
+    name?: string;
+    taxId?: string;
+    taxIdCountry?: string;
     // For new bank account registration
     bankAccount?: {
         bankName?: string;

@@ -35,6 +35,18 @@ export const REGIONS: Record<string, Region> = {
         paymentRails: [PAYMENT_RAILS.spei],
         anchors: ['etherfuse', 'alfredpay', 'blindpay'],
     },
+    brazil: {
+        id: 'brazil',
+        name: 'Brazil',
+        code: 'BR',
+        currency: 'BRL',
+        currencySymbol: 'R$',
+        flag: '',
+        description:
+            'Brazil has broad instant-payment coverage via PIX. Transfero supports BRL settlement against USDC on Stellar.',
+        paymentRails: [PAYMENT_RAILS.pix],
+        anchors: ['transfero'],
+    },
 };
 
 // =============================================================================

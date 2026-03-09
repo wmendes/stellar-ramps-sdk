@@ -10,6 +10,7 @@ Current providers:
 - `@stellar-ramps/etherfuse`
 - `@stellar-ramps/alfredpay`
 - `@stellar-ramps/blindpay`
+- `@stellar-ramps/transfero`
 
 Status values:
 - `active`

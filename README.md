@@ -9,7 +9,7 @@ Status verified on **March 5, 2026**.
 | Capability | Status | Evidence |
 | --- | --- | --- |
 | Core SDK contract (`Anchor`, shared types, status/capability helpers) | Implemented | `packages/core/src/index.ts`, `packages/core/src/types.ts` |
-| Provider packages (`etherfuse`, `alfredpay`, `blindpay`) | Implemented | `providers/*/src/index.ts` |
+| Provider packages (`etherfuse`, `alfredpay`, `blindpay`, `transfero`) | Implemented | `providers/*/src/index.ts` |
 | SEP adapter package (`@stellar-ramps/sep`) | Implemented with known limits | `packages/sep/src/index.ts`, `packages/sep/src/adapter.ts` |
 | Conformance framework (`@stellar-ramps/testing`) | Implemented | `packages/testing/src/conformance.ts`, `packages/testing/src/command.ts` |
 | Development scripts (`validate-manifest`, `validate-catalog`, `test`, `scaffold`) | Implemented | `scripts/*.ts` |
@@ -32,6 +32,7 @@ stellar-ramps-sdk/
     etherfuse/           # @stellar-ramps/etherfuse
     alfredpay/           # @stellar-ramps/alfredpay
     blindpay/            # @stellar-ramps/blindpay
+    transfero/           # @stellar-ramps/transfero
   scripts/               # Development scripts (validate, test, scaffold)
   catalog/
     schema.json
@@ -53,6 +54,7 @@ stellar-ramps-sdk/
 | `@stellar-ramps/etherfuse` | Etherfuse adapter + manifest | `providers/etherfuse/src/index.ts` |
 | `@stellar-ramps/alfredpay` | AlfredPay adapter + manifest | `providers/alfredpay/src/index.ts` |
 | `@stellar-ramps/blindpay` | BlindPay adapter + manifest | `providers/blindpay/src/index.ts` |
+| `@stellar-ramps/transfero` | Transfero adapter + manifest | `providers/transfero/src/index.ts` |
 
 ## Verified Quality Gates
 
@@ -154,6 +156,17 @@ ETHERFUSE_BASE_URL="https://api.sand.etherfuse.com"
 BLINDPAY_API_KEY=""
 BLINDPAY_INSTANCE_ID=""
 BLINDPAY_BASE_URL="https://api.blindpay.com"
+
+# Transfero
+TRANSFERO_CLIENT_ID=""
+TRANSFERO_CLIENT_SECRET=""
+TRANSFERO_SCOPE=""
+TRANSFERO_API_URL="https://sandbox-api-baasic.transfero.com"
+TRANSFERO_API_VERSION=""
+TRANSFERO_DEFAULT_TAX_ID=""
+TRANSFERO_DEFAULT_TAX_ID_COUNTRY="BRA"
+TRANSFERO_DEFAULT_NAME=""
+TRANSFERO_DEFAULT_EMAIL=""
 
 # Webhooks
 ALFREDPAY_WEBHOOK_SECRET=""

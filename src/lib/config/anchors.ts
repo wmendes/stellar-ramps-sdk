@@ -317,6 +317,78 @@ export const ANCHORS: Record<string, AnchorProfile> = {
             ],
         },
     },
+    transfero: {
+        id: 'transfero',
+        name: 'Transfero',
+        description:
+            'Transfero provides regulated BRL settlement infrastructure and PIX payouts for stablecoin corridors in Brazil.',
+        links: {
+            website: 'https://transfero.com',
+            documentation: 'https://docs.transfero.com',
+        },
+        regions: {
+            brazil: {
+                onRamp: true,
+                offRamp: true,
+                paymentRails: ['pix'],
+                tokens: ['USDC'],
+                kycRequired: false,
+            },
+        },
+        devOnboarding: [
+            {
+                text: 'Request sandbox API credentials and scope from Transfero.',
+                link: 'https://docs.transfero.com',
+            },
+            {
+                text: 'Configure OAuth client credentials and settlement identity defaults on your backend.',
+            },
+        ],
+        integrationFlow: {
+            onRamp: [
+                {
+                    title: 'Get Quote',
+                    description: 'Request BRL to USDC quote from Transfero.',
+                },
+                {
+                    title: 'Create Swap Order',
+                    description: 'Create a ramp swap order with crypto withdrawal destination.',
+                },
+                {
+                    title: 'Fund BRL Side',
+                    description: 'Fund the fiat side according to Transfero settlement instructions.',
+                },
+                {
+                    title: 'Receive USDC',
+                    description: "Transfero settles and sends USDC to the user's Stellar wallet.",
+                },
+            ],
+            offRamp: [
+                {
+                    title: 'Get Quote',
+                    description: 'Request USDC to BRL quote for PIX payout.',
+                },
+                {
+                    title: 'Preview Swap (V2)',
+                    description:
+                        'Create V2 preview with PIX QR payload and obtain deposit instructions.',
+                },
+                {
+                    title: 'Accept Swap (V2)',
+                    description: 'Accept preview to finalize order and lock payout terms.',
+                },
+                {
+                    title: 'Send USDC Deposit',
+                    description:
+                        "User sends USDC to Transfero's Stellar deposit address using memo details.",
+                },
+                {
+                    title: 'Poll Settlement Status',
+                    description: 'Track order until Transfero completes BRL PIX disbursement.',
+                },
+            ],
+        },
+    },
 };
 
 export function getAnchor(id: string): AnchorProfile | undefined {

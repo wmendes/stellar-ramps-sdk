@@ -12,7 +12,7 @@
 
 <svelte:head>
     <link rel="icon" href={favicon} />
-    <title>Regional Starter Pack</title>
+    <title>Stellar Ramps SDK</title>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col bg-gray-50">

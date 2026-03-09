@@ -8,6 +8,9 @@ export type { TokenInfo } from './capabilities';
 export interface Customer {
   id: string;
   email?: string;
+  name?: string;
+  taxId?: string;
+  taxIdCountry?: string;
   kycStatus: KycStatus;
   bankAccountId?: string;
   blockchainWalletId?: string;
@@ -111,6 +114,9 @@ export interface OffRampTransaction {
 
 export interface CreateCustomerInput {
   email?: string;
+  name?: string;
+  taxId?: string;
+  taxIdCountry?: string;
   country?: string;
   publicKey?: string;
 }
@@ -140,6 +146,10 @@ export interface CreateOnRampInput {
   amount: string;
   memo?: string;
   bankAccountId?: string;
+  email?: string;
+  name?: string;
+  taxId?: string;
+  taxIdCountry?: string;
 }
 
 export interface CreateOffRampInput {
@@ -151,6 +161,10 @@ export interface CreateOffRampInput {
   amount: string;
   fiatAccountId: string;
   memo?: string;
+  email?: string;
+  name?: string;
+  taxId?: string;
+  taxIdCountry?: string;
 }
 
 export interface Anchor {

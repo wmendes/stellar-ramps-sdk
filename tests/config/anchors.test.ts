@@ -21,18 +21,25 @@ describe('getAnchor', () => {
         expect(anchor!.id).toBe('blindpay');
     });
 
+    it('returns Transfero profile', () => {
+        const anchor = getAnchor('transfero');
+        expect(anchor).toBeDefined();
+        expect(anchor!.id).toBe('transfero');
+    });
+
     it('returns undefined for nonexistent anchor', () => {
         expect(getAnchor('nonexistent')).toBeUndefined();
     });
 });
 
 describe('getAllAnchors', () => {
-    it('returns all 3 anchors', () => {
+    it('returns all 4 anchors', () => {
         const anchors = getAllAnchors();
-        expect(anchors).toHaveLength(3);
+        expect(anchors).toHaveLength(4);
         const ids = anchors.map((a) => a.id);
         expect(ids).toContain('etherfuse');
         expect(ids).toContain('alfredpay');
         expect(ids).toContain('blindpay');
+        expect(ids).toContain('transfero');
     });
 });

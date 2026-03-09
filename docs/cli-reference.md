@@ -96,6 +96,7 @@ Run provider conformance checks using `@stellar-ramps/testing` command runner.
 pnpm ramps:test -- --provider etherfuse
 pnpm ramps:test -- --provider alfredpay
 pnpm ramps:test -- --provider blindpay
+pnpm ramps:test -- --provider transfero
 ```
 
 ### Dynamic module mode

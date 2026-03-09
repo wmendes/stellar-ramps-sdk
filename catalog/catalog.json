@@ -100,6 +100,39 @@
           }
         ]
       }
+    },
+    {
+      "name": "transfero",
+      "package": "@stellar-ramps/transfero",
+      "version": "0.1.0",
+      "status": "community_preview",
+      "sandbox": true,
+      "maintainer": "NearX + Community",
+      "onboarding": {
+        "type": "partnership",
+        "portalUrl": "https://docs.transfero.com"
+      },
+      "capabilities": {
+        "name": "transfero",
+        "displayName": "Transfero",
+        "kycFlow": "none",
+        "corridors": [
+          {
+            "country": "BR",
+            "currency": "BRL",
+            "rail": "pix",
+            "tokens": [
+              {
+                "symbol": "USDC",
+                "name": "USD Coin",
+                "issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                "description": "A fully-reserved stablecoin pegged 1:1 to the US Dollar."
+              }
+            ],
+            "directions": ["on_ramp", "off_ramp"]
+          }
+        ]
+      }
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Building a Next.js + TypeScript application that integrates with BlindPay using the portable anchor library from the Stellar Regional Starter Pack (SvelteKit project).
+Building a Next.js + TypeScript application that integrates with BlindPay using the portable anchor library from the Stellar Ramps SDK (SvelteKit project).
 
 ---
 

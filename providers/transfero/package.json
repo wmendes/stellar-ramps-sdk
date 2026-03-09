@@ -1,0 +1,12 @@
+{
+  "name": "@stellar-ramps/transfero",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@stellar-ramps/core": "workspace:*"
+  }
+}

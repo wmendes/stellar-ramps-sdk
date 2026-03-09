@@ -9,7 +9,8 @@
       "@stellar-ramps/testing": ["../packages/testing/src/index.ts"],
       "@stellar-ramps/etherfuse": ["../providers/etherfuse/src/index.ts"],
       "@stellar-ramps/alfredpay": ["../providers/alfredpay/src/index.ts"],
-      "@stellar-ramps/blindpay": ["../providers/blindpay/src/index.ts"]
+      "@stellar-ramps/blindpay": ["../providers/blindpay/src/index.ts"],
+      "@stellar-ramps/transfero": ["../providers/transfero/src/index.ts"]
     }
   },
   "include": ["**/*.ts"]
