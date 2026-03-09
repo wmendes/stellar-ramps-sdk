@@ -17,7 +17,7 @@ Status verified on **March 5, 2026**.
 | CI baseline checks (`catalog`, package tests, app checks) | Implemented | `.github/workflows/ci.yml` |
 
 Detailed evidence map: `docs/assertions.md`.
-Current phase status: `docs/platform-status.md`.
+Architecture source of truth: `docs/architecture.md`.
 Scripts deep reference: `docs/cli-reference.md`.
 
 ## What This Repository Contains
@@ -179,16 +179,17 @@ SEP1_SIGNING_KEY_SECRET=""
 
 ## Additional Documentation
 
-- `docs/platform-status.md`
+- `docs/architecture.md` (canonical architecture and integration direction)
 - `docs/assertions.md`
 - `docs/cli-reference.md`
-- `docs/refactor-plan.md`
-- `docs/phase2-progress-2026-03-05.md`
-- `docs/phase3-progress-2026-03-05.md`
-- `docs/phase4-progress-2026-03-05.md`
-- `docs/phase5-progress-2026-03-05.md`
-- `docs/phase6-progress-2026-03-05.md`
-- `docs/phase7-progress-2026-03-05.md`
+- `docs/platform-status.md` (historical migration snapshot)
+- `docs/refactor-plan.md` (historical planning record)
+- `docs/phase2-progress-2026-03-05.md` (historical migration log)
+- `docs/phase3-progress-2026-03-05.md` (historical migration log)
+- `docs/phase4-progress-2026-03-05.md` (historical migration log)
+- `docs/phase5-progress-2026-03-05.md` (historical migration log)
+- `docs/phase6-progress-2026-03-05.md` (historical migration log)
+- `docs/phase7-progress-2026-03-05.md` (historical migration log)
 - `Stellar Ramp Whitepaper.md`
 
 ## License

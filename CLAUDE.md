@@ -1,6 +1,8 @@
 # Stellar Ramps SDK - LLM Guide
 
-This is a SvelteKit application for building fiat on/off ramps on the Stellar network. It includes a portable anchor integration library supporting three anchor providers (Etherfuse, AlfredPay, BlindPay) and a composable SEP protocol library for building against any SEP-compliant anchor.
+This repository is a package-first TypeScript platform for building fiat on/off ramps on Stellar. Source-of-truth modules live in `packages/*` and `providers/*`, while the SvelteKit app in `src/*` acts as a demo and compatibility bridge.
+
+The canonical architecture overview is documented in `docs/architecture.md`.
 
 ## Project Structure
 
@@ -20,6 +22,10 @@ src/
 │   │   ├── blindpay/         # BlindPay integration (global)
 │   │   │   ├── client.ts     # BlindPayClient implements Anchor
 │   │   │   ├── types.ts      # BlindPay API types
+│   │   │   └── README.md     # Integration documentation
+│   │   ├── transfero/        # Transfero integration (Brazil)
+│   │   │   ├── client.ts     # TransferoClient implements Anchor
+│   │   │   ├── types.ts      # Transfero API types
 │   │   │   └── README.md     # Integration documentation
 │   │   ├── sep/              # SEP protocol implementations
 │   │   │   ├── sep1.ts       # stellar.toml discovery
@@ -101,7 +107,7 @@ The SvelteKit-specific anchor factory lives at `/src/lib/server/anchorFactory.ts
 
 ### The Anchor Interface (`/anchors/types.ts`)
 
-All three anchor clients implement the shared `Anchor` interface:
+Provider clients implement the shared `Anchor` interface:
 
 ```typescript
 interface Anchor {

@@ -659,11 +659,11 @@ Usage:
         items={[
             {
                 text: 'View OffRampFlow component source',
-                link: 'https://github.com/ElliotFriend/regional-starter-pack/blob/main/src/lib/components/OffRampFlow.svelte',
+                link: 'https://github.com/wmendes/stellar-ramps-sdk/blob/main/src/lib/components/OffRampFlow.svelte',
             },
             {
                 text: 'View anchor API proxy routes',
-                link: 'https://github.com/ElliotFriend/regional-starter-pack/tree/main/src/routes/api/anchor',
+                link: 'https://github.com/wmendes/stellar-ramps-sdk/tree/main/src/routes/api/anchor',
             },
         ]}
     />

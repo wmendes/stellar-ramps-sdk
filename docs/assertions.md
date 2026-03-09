@@ -11,7 +11,7 @@ This document maps platform assertions to concrete repository evidence and verif
 | Core package exports shared SDK contract/types | `packages/core/src/index.ts`, `packages/core/src/types.ts`, `packages/core/src/status.ts` | `pnpm test:packages` |
 | SEP package exports SEP modules and `SepAnchor` | `packages/sep/src/index.ts` | `pnpm test:packages` |
 | SEP adapter intentionally rejects generic fiat-account operations with typed 501 errors | `packages/sep/src/adapter.ts` (`registerFiatAccount`, `getFiatAccounts`) | `pnpm test:packages` (`packages/sep/src/adapter.test.ts`) |
-| Provider packages are independently exposed with client + manifest exports | `providers/etherfuse/src/index.ts`, `providers/alfredpay/src/index.ts`, `providers/blindpay/src/index.ts` | `pnpm test:packages` (provider conformance tests) |
+| Provider packages are independently exposed with client + manifest exports | `providers/etherfuse/src/index.ts`, `providers/alfredpay/src/index.ts`, `providers/blindpay/src/index.ts`, `providers/transfero/src/index.ts` | `pnpm test:packages` (provider conformance tests) |
 | Conformance framework exists and is reusable from testing package | `packages/testing/src/conformance.ts`, `packages/testing/src/command.ts`, `packages/testing/src/index.ts` | `pnpm test:packages` (`packages/testing/src/*.test.ts`) |
 | Development scripts support manifest/catalog validation, conformance execution, and provider scaffolding | `scripts/*.ts` | `pnpm test:scripts` (`tests/scripts/*.test.ts`) |
 | Catalog schema and catalog artifact exist and are validated in tests/CI | `catalog/schema.json`, `catalog/catalog.json`, `.github/workflows/ci.yml` | `pnpm test:packages` and CI workflow |

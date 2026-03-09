@@ -15,7 +15,7 @@
         const items: { text: string; link?: string }[] = [
             {
                 text: `View ${anchor.name} client source code`,
-                link: `https://github.com/ElliotFriend/regional-starter-pack/blob/main/src/lib/anchors/${anchor.id}`,
+                link: `https://github.com/wmendes/stellar-ramps-sdk/tree/main/providers/${anchor.id}/src`,
             },
             { text: `${anchor.name} API documentation`, link: anchor.links.documentation },
         ];
@@ -68,7 +68,7 @@
             Try Off-Ramp
         </a>
         <a
-            href={`https://github.com/ElliotFriend/regional-starter-pack/blob/main/src/lib/anchors/${anchor.id}`}
+            href={`https://github.com/wmendes/stellar-ramps-sdk/tree/main/providers/${anchor.id}/src`}
             target="_blank"
             class="rounded-md bg-white px-4 py-2 text-sm font-medium text-green-600 ring-1 ring-green-600 hover:bg-green-50"
         >

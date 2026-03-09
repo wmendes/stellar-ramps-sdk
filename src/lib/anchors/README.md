@@ -1,11 +1,13 @@
 # Stellar Anchor Integration Library
 
-A portable, framework-agnostic TypeScript library for integrating fiat on/off ramps on the Stellar network. Includes three anchor provider clients and a composable SEP protocol library.
+A portable, framework-agnostic compatibility layer for integrating fiat on/off ramps on the Stellar network.
+
+Canonical source-of-truth packages live under `providers/*` and `packages/*`. The `src/lib/anchors/*` modules re-export and support the demo app and copy/paste workflows.
 
 ## What's in This Library
 
 1. A shared "Anchor Interface" can be found in `anchors/types.ts`. Any anchor clients that are implemented adhere to this predictable set of functions.
-2. Pre-written anchor clients for some common anchor providers: Etherfuse, Alfred Pay, and BlindPay (for now). These can be found in `anchors/<provider-name>` directories.
+2. Pre-written provider clients for multiple anchor partners (currently Etherfuse, AlfredPay, BlindPay, and Transfero). These can be found in `anchors/<provider-name>` directories.
 3. A SEP library can be found in the `anchors/sep` directory. This library can be used to interact with SEP-compatible anchors (this is the preferred method, and should be used when possible).
 4. A Testanchor client that implements the SEP library to interact with the [testnet anchor](https://testanchor.stellar.org).
 
@@ -13,7 +15,7 @@ A portable, framework-agnostic TypeScript library for integrating fiat on/off ra
 
 ### 1. Custom Anchor APIs (Use the `Anchor` Interface)
 
-For anchors with their own APIs (Etherfuse, AlfredPay, BlindPay), each client implements the shared `Anchor` interface. This gives you a consistent API across all providers.
+For anchors with their own APIs, each client implements the shared `Anchor` interface. This gives you a consistent API across all providers.
 
 ### 2. SEP-Compliant Anchors (Use `/sep/`)
 
@@ -23,7 +25,7 @@ For anchors that follow Stellar SEP protocols (SEP-1, 6, 10, 12, 24, 31, 38), us
 
 ## The Anchor Interface
 
-All three provider clients implement this interface from `types.ts`:
+Provider clients implement this interface from `types.ts`:
 
 ```typescript
 interface Anchor {

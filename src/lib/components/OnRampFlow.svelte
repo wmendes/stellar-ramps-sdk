@@ -396,11 +396,11 @@ Usage:
         items={[
             {
                 text: 'View OnRampFlow component source',
-                link: 'https://github.com/ElliotFriend/regional-starter-pack/blob/main/src/lib/components/OnRampFlow.svelte',
+                link: 'https://github.com/wmendes/stellar-ramps-sdk/blob/main/src/lib/components/OnRampFlow.svelte',
             },
             {
                 text: 'View anchor API proxy routes',
-                link: 'https://github.com/ElliotFriend/regional-starter-pack/tree/main/src/routes/api/anchor',
+                link: 'https://github.com/wmendes/stellar-ramps-sdk/tree/main/src/routes/api/anchor',
             },
         ]}
     />

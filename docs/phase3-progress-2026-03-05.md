@@ -1,5 +1,7 @@
 # Phase 3 Progress (2026-03-05)
 
+> Historical snapshot from March 5, 2026. This document reflects migration status at that time and is not the current architecture source of truth. See `docs/architecture.md`.
+
 ## Completed
 
 - Extracted provider package: `@stellar-ramps/etherfuse` under `providers/etherfuse`.

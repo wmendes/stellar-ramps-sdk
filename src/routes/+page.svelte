@@ -8,8 +8,8 @@
     </h1>
     <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
         A complete toolkit for building fiat on/off ramps on the Stellar network. Includes a
-        portable anchor integration library, three production-ready anchor clients, and a
-        composable SEP protocol implementation.
+        portable anchor integration library, pre-built provider packages, and a composable SEP
+        protocol implementation.
     </p>
     <div class="mt-8 flex justify-center gap-4">
         <a
@@ -41,11 +41,11 @@
                 </p>
             </div>
             <div class="rounded-lg bg-gray-50 p-4">
-                <h3 class="font-semibold text-gray-900">Three Pre-Built Integrations</h3>
+                <h3 class="font-semibold text-gray-900">Pre-Built Provider Integrations</h3>
                 <p class="mt-2 text-sm text-gray-600">
-                    Etherfuse, AlfredPay, and BlindPay — each implementing the shared <code
-                        class="rounded bg-gray-200 px-1">Anchor</code
-                    > interface with different capabilities.
+                    Provider packages implement the shared <code class="rounded bg-gray-200 px-1"
+                        >Anchor</code
+                    > interface while exposing provider-specific capabilities.
                 </p>
             </div>
             <div class="rounded-lg bg-gray-50 p-4">
@@ -132,7 +132,7 @@
         items={[
             {
                 text: 'View source on GitHub',
-                link: 'https://github.com/ElliotFriend/regional-starter-pack',
+                link: 'https://github.com/wmendes/stellar-ramps-sdk',
             },
             {
                 text: 'Portable anchor library — copy src/lib/anchors/ into any TypeScript project',

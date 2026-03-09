@@ -31,7 +31,7 @@ describe('getAllRegions', () => {
 });
 
 describe('getAnchorsForRegion', () => {
-    it('returns all 3 anchors for Mexico', () => {
+    it('returns expected anchors for Mexico', () => {
         const anchors = getAnchorsForRegion('mexico');
         expect(anchors).toHaveLength(3);
         const ids = anchors.map((a) => a.id);

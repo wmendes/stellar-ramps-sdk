@@ -1,5 +1,7 @@
 # Platform Status
 
+> Historical snapshot from March 5, 2026. This document reflects migration status at that time and is not the current architecture source of truth. See `docs/architecture.md`.
+
 Last verified: **March 5, 2026**.
 
 ## Migration Phase Status

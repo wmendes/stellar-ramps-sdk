@@ -1,5 +1,7 @@
 # Refactor Plan (Whitepaper-Aligned)
 
+> Historical snapshot from March 5, 2026. This document reflects migration status at that time and is not the current architecture source of truth. See `docs/architecture.md`.
+
 Source of truth: `Stellar Ramp Whitepaper.md` (Version 1.0, February 2026).
 
 ## Decision: Refactor, Not Rewrite
